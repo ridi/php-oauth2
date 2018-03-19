@@ -1,5 +1,5 @@
 <?php
-namespace Ridibooks\OAuth2Resource\RidiOAuth2\Clinet\Grant;
+namespace Ridibooks\OAuth2Resource\RidiOAuth2\Client\Grant;
 
 use Ridibooks\OAuth2Resource\RidiOAuth2\Client\DataTransferObject\AuthorizationServerInfo;
 use Ridibooks\OAuth2Resource\RidiOAuth2\Client\DataTransferObject\ClientInfo;
