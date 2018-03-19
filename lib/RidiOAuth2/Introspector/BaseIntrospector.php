@@ -12,7 +12,7 @@ abstract class BaseIntrospector
     /**
      * @var string
      */
-    protected  $token_type_hint;
+    protected $token_type_hint;
 
     /**
      * @param string $access_token
@@ -37,7 +37,7 @@ abstract class BaseIntrospector
      */
     public function getTokenTypeHint(): string
     {
-        return $this->access_token;
+        return $this->token_type_hint;
     }
 
     /**
