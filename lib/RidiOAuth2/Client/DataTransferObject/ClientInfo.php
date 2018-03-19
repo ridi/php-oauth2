@@ -1,12 +1,8 @@
 <?php
 namespace Ridibooks\OAuth2Resource\RidiOAuth2\Client\DataTransferObject;
 
-use Ridibooks\OAuth2Resource\RidiOAuth2\Common\Util\StringUtil;
-
 class ClientInfo
 {
-    const DEFAULT_STATE_PARAM_LENGTH = 5;
-
     /**
      * @var string
      */
@@ -66,22 +62,6 @@ class ClientInfo
     public function getScope(): string
     {
         return $this->scope;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isExistScope(): bool
-    {
-        return $this->scope !== null;
-    }
-
-    /**
-     * @return string
-     */
-    public static function generateState(): string
-    {
-        return StringUtil::getRandomString(ClientInfo::DEFAULT_STATE_PARAM_LENGTH);
     }
 
     /**
