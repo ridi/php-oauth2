@@ -25,7 +25,7 @@ class RefreshTokenGrant extends BaseGrant
     public function getRequestDataForAccessToken(): array
     {
         return [
-            'refresh_Token' => $this->refresh_token,
+            'refresh_token' => $this->refresh_token,
         ];
     }
 
