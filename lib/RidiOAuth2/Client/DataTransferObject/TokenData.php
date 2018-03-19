@@ -2,6 +2,8 @@
 namespace Ridibooks\OAuth2Resource\RidiOAuth2\Client\DataTransferObject;
 
 
+use InvalidArgumentException;
+
 class TokenData {
     /**
      * @var Token
@@ -25,12 +27,12 @@ class TokenData {
 
     /**
      * TokenData constructor.
-     * @param string $access_token
+     * @param Token $access_token
      * @param string $token_type
      * @param string $scope
-     * @param string $refresh_token
+     * @param Token $refresh_token
      */
-    public function __construct(string $access_token, string $token_type, string $scope, string $refresh_token)
+    public function __construct(Token $access_token, string $token_type, string $scope, Token $refresh_token)
     {
         $this->access_token = $access_token;
         $this->token_type = $token_type;
@@ -72,6 +74,19 @@ class TokenData {
 
     public static function fromDict(array $dict)
     {
+        if (in_array(
+            null,
+            array(
+                $dict['access_token'],
+                $dict['expires_in'],
+                $dict['token_type'],
+                $dict['scope'],
+                $dict['refresh_token'],
+                $dict['refresh_token_expires_in']
+            ))) {
+            throw new InvalidArgumentException();
+        }
+
         $access_token = null;
         if (isset($dict['access_token'])) {
             $access_token = new Token($dict['access_token'], $dict['expires_in']);
