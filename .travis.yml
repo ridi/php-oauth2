@@ -12,4 +12,4 @@ job:
   include:
   - stage: test
     script:
-      - ./vendor/bin/phpunit --bootstrap ./vendor/autoload.php --testdox ./lib/Test
+      - vendor/bin/phpunit --bootstrap vendor/autoload.php --testdox lib/Test
