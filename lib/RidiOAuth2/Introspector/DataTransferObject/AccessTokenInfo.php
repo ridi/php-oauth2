@@ -111,6 +111,16 @@ class AccessTokenInfo
      */
     public static function fromObject(\stdClass $object): AccessTokenInfo
     {
+        if(
+            !isset($object->sub)
+            || !isset($object->u_idx)
+            || !isset($object->exp)
+            || !isset($object->client_id)
+            || !isset($object->scope)
+        ) {
+            throw new InvalidArgumentException();
+        }
+
         try {
             return new AccessTokenInfo($object->sub, $object->u_idx, $object->exp, $object->client_id, $object->scope);
         } catch (TypeError $e) {
