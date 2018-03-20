@@ -1,5 +1,5 @@
 <?php
-namespace Ridibooks\OAuth2Resource\RidiOAuth2\Client\Grant;
+namespace Ridibooks\OAuth2Resource\RidiOAuth2\Client;
 
 use InvalidArgumentException;
 use Ridibooks\OAuth2Resource\RidiOAuth2\Client\Constant\OAuth2GrantType;
@@ -160,12 +160,12 @@ class Grant
 
         $error_res = json_decode($body, true);
         if ($error_res === null) {
-            throw new InvalidResponseException();
+            throw new InvalidResponseException($body);
         }
 
-        $error = $error_res['error'];
-        $error_description = $error_res['error_description'];
-        $error_uri = $error_res['error_uri'];
+        $error = $error_res['error'] !== null ? $error_res['error'] : 'status code: ' . $http_status;
+        $error_description = $error_res['error_description'] !== null ? $error_res['error_description'] : '';
+        $error_uri = $error_res['error_uri'] !== null ? $error_res['error_uri'] : '';
 
         throw new OAuthFailureException($error, $error_description, $error_uri);
     }
