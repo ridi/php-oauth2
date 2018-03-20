@@ -1,4 +1,4 @@
-# RIDI-Django-OAuth2-Resource
+# RIDI-PHP-OAuth2-Resource
 [![Build Status](https://travis-ci.org/ridi/ridi-php-oauth2-resource.svg?branch=master)](https://travis-ci.org/ridi/ridi-php-oauth2-resource)
 
 
