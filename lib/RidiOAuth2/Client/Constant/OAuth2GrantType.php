@@ -1,5 +1,5 @@
 <?php
-namespace Ridibooks\OAuth2Resource\RidiOAuth2\Common\Constant;
+namespace Ridibooks\OAuth2Resource\RidiOAuth2\Client\Constant;
 
 class OAuth2GrantType
 {

@@ -2,7 +2,8 @@
 namespace Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\DataTransferObject;
 
 
-class JwtInfo {
+class JwtInfo
+{
     const DEFAULT_EXPIRE_TERM = 60 * 5; // second
 
     /**
