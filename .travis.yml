@@ -9,4 +9,4 @@ before_script:
   - make update
 
 script:
-  - vendor/bin/phpunit --bootstrap vendor/autoload.php --testdox lib/Test
+  - make test
