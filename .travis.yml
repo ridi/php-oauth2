@@ -1,0 +1,14 @@
+language: php
+php:
+  - 7.0.0
+
+install:
+  - make install
+
+before_script:
+  - make update
+
+job:
+  include:
+  - stage: test
+    script: make test
