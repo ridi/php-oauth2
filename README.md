@@ -7,12 +7,9 @@
     - 해당 라이브러리는 리디의 OAuth2 Resource 서버 규칙에 따라 작성 되었습니다.
 
 ## Requirement
-- `PHP 7.0.0` or higher
+- `PHP 7.1.0` or higher
 
 
 ## TODO
 
 - Write Docs
-
-
-
