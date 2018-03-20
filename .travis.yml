@@ -11,4 +11,5 @@ before_script:
 job:
   include:
   - stage: test
-    script: ./vendor/bin/phpunit --bootstrap ./vendor/autoload.php --testdox ./lib/Test
+    script:
+      - ./vendor/bin/phpunit --bootstrap ./vendor/autoload.php --testdox ./lib/Test
