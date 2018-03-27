@@ -17,7 +17,7 @@ final class IntrospectorTest extends TestCase
     private $secret = 'secret';
     private $algorithm = 'HS256';
 
-    public function testCanIntrospec(): void
+    public function testCanIntrospect(): void
     {
         $access_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWRpb2F1dGgydGVzdCIsInVfaWR4IjoyODAzMDUwLCJleHAiOjE5MzExMDM0ODUsImNsaWVudF9pZCI6ImlheDdPY0N1WUo4U3U1cDlzd2pzN1JOb3NMN3pZWjR6ZFY1eHlIVngiLCJzY29wZSI6ImFsbCJ9.Eh_kyD7VS5hbveUfWryK_uST2wMpWeESnCrfoJvLCbQ';
 
@@ -28,7 +28,7 @@ final class IntrospectorTest extends TestCase
         $this->assertNotNull($token);
     }
 
-    public function testCanIntrospecByHelper(): void
+    public function testCanIntrospectByHelper(): void
     {
         $access_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWRpb2F1dGgydGVzdCIsInVfaWR4IjoyODAzMDUwLCJleHAiOjE5MzExMDM0ODUsImNsaWVudF9pZCI6ImlheDdPY0N1WUo4U3U1cDlzd2pzN1JOb3NMN3pZWjR6ZFY1eHlIVngiLCJzY29wZSI6ImFsbCJ9.Eh_kyD7VS5hbveUfWryK_uST2wMpWeESnCrfoJvLCbQ';
 
@@ -38,7 +38,7 @@ final class IntrospectorTest extends TestCase
         $this->assertInstanceOf(AccessTokenInfo::class, $access_token_info);
     }
 
-    public function testCannotIntrospecExpiredToken(): void
+    public function testCannotIntrospectExpiredToken(): void
     {
         $access_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWRpb2F1dGgydGVzdCIsInVfaWR4IjoyODAzMDUwLCJleHAiOjE1MjExMDM0ODUsImNsaWVudF9pZCI6ImlheDdPY0N1WUo4U3U1cDlzd2pzN1JOb3NMN3pZWjR6ZFY1eHlIVngiLCJzY29wZSI6ImFsbCJ9.0IkMVrnHc6Z6HznxjURS3vvKd-4aF58pbmqgP8rTyYs';
 
@@ -48,7 +48,7 @@ final class IntrospectorTest extends TestCase
         JwtIntrospectHelper::introspect($jwt_info, $access_token);
     }
 
-    public function testCannotIntrospecWrongFormatToken(): void
+    public function testCannotIntrospectWrongFormatToken(): void
     {
         $access_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIyIjoicmlkaW9hdXRoMnRlc3QiLCJ1X2lkeCI6MjgwMzA1MCwiZXhwIjoxOTMxMTAzNDg1LCJjbGllbnRfaWQiOiJpYXg3T2NDdVlKOFN1NXA5c3dqczdSTm9zTDd6WVo0emRWNXh5SFZ4Iiwic2NvcGUiOiJhbGwifQ.zqq8a_T2eViu8kNZ0jBuPITx-hnVt9NsTj-nwdWUhR4';
 
@@ -58,7 +58,7 @@ final class IntrospectorTest extends TestCase
         JwtIntrospectHelper::introspect($jwt_info, $access_token);
     }
 
-    public function testCannotIntrospecInvalidSignToken(): void
+    public function testCannotIntrospectInvalidSignToken(): void
     {
         $access_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIyIjoicmlkaW9hdXRoMnRlc3QiLCJ1X2lkeCI6MjgwMzA1MCwiZXhwIjoxOTMxMTAzNDg1LCJjbGllbnRfaWQiOiJpYXg3T2NDdVlKOFN1NXA5c3dqczdSTm9zTDd6WVo0emRWNXh5SFZ4Iiwic2NvcGUiOiJhbGwifQ.dK7B8_kdwdq0IUyre3vwXa0swmDD_mKed-3W2Zp4HtE';
 
@@ -68,7 +68,7 @@ final class IntrospectorTest extends TestCase
         JwtIntrospectHelper::introspect($jwt_info, $access_token);
     }
 
-    public function testCannotIntrospecEmptyToken(): void
+    public function testCannotIntrospectEmptyToken(): void
     {
         $access_token = '';
 
