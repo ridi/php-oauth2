@@ -6,10 +6,11 @@ namespace Ridibooks\OAuth2Resource\RidiOAuth2;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\DataTransferObject\AccessTokenInfo;
 use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\DataTransferObject\JwtInfo;
+use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\Exception\AccessTokenDoesNotExistException;
+use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\Exception\InvalidScopeException;
 use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\MiddlewareFactory;
 use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\ResourceConstants;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 
 final class SymfonyMiddlewareTest extends TestCase
@@ -38,7 +39,7 @@ final class SymfonyMiddlewareTest extends TestCase
         $jwt_info = new JwtInfo($this->secret, $this->algorithm);
         $request = new Request();
 
-        $this->expectException(HttpException::class);
+        $this->expectException(AccessTokenDoesNotExistException::class);
 
         $introspect_func = MiddlewareFactory::introspect($jwt_info, true);
         $introspect_func($request);
@@ -59,7 +60,7 @@ final class SymfonyMiddlewareTest extends TestCase
     {
         $request = new Request();
 
-        $this->expectException(HttpException::class);
+        $this->expectException(AccessTokenDoesNotExistException::class);
 
         $check_scope_func = MiddlewareFactory::checkScope(['write', 'read', ['write_profile', 'write_pay']]);
         $check_scope_func($request);
@@ -96,7 +97,7 @@ final class SymfonyMiddlewareTest extends TestCase
         $introspect_func = MiddlewareFactory::introspect($jwt_info);
         $introspect_func($request);
 
-        $this->expectException(HttpException::class);
+        $this->expectException(InvalidScopeException::class);
 
         $check_scope_func = MiddlewareFactory::checkScope(['write', 'read', ['write_profile', 'write_pay']]);
         $check_scope_func($request);

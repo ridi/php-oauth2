@@ -7,21 +7,25 @@ use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\Exception\ExpireTokenExcept
 use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\Exception\InvalidJwtSignatureException;
 use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\Helper\JwtIntrospectHelper;
 use Ridibooks\OAuth2Resource\RidiOAuth2\Resource\ScopeChecker;
+use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\Exception\AccessTokenDoesNotExistException;
+use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\Exception\InvalidScopeException;
+use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\Exception\WrongInstanceException;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class MiddlewareFactory
 {
     /**
      * @param bool $is_required
+     * @param AccessTokenDoesNotExistException|ExpireTokenException|InvalidJwtSignatureException $e
      * @return null
-     * @throws HttpException
+     * @throws AccessTokenDoesNotExistException
+     * @throws ExpireTokenException
+     * @throws InvalidJwtSignatureException
      */
-    private static function assertAuthorizeRequired(bool $is_required)
+    private static function assertAuthorizeRequired(bool $is_required, $e)
     {
         if ($is_required) {
-            throw new HttpException(Response::HTTP_UNAUTHORIZED);
+            throw $e;
         } else {
             return null;
         }
@@ -37,21 +41,22 @@ class MiddlewareFactory
         /**
          * @param Request $request
          * @return null
-         * @throws HttpException
+         * @throws ExpireTokenException
+         * @throws InvalidJwtSignatureException
+         * @throws AccessTokenDoesNotExistException
          */
         return function (Request $request) use ($jwt_info, $is_required) {
             $access_token = $request->cookies->get(ResourceConstants::ACCESS_TOKEN_KEY);
-
             if ($access_token === null) {
-                return MiddlewareFactory::assertAuthorizeRequired($is_required);
+                return MiddlewareFactory::assertAuthorizeRequired($is_required, new AccessTokenDoesNotExistException());
             }
 
             try {
                 $access_token_info = JwtIntrospectHelper::introspect($jwt_info, $access_token);
             } catch (InvalidJwtSignatureException $e) {
-                return MiddlewareFactory::assertAuthorizeRequired($is_required);
+                return MiddlewareFactory::assertAuthorizeRequired($is_required, $e);
             } catch (ExpireTokenException $e) {
-                return MiddlewareFactory::assertAuthorizeRequired($is_required);
+                return MiddlewareFactory::assertAuthorizeRequired($is_required, $e);
             }
 
             $request->attributes->set(ResourceConstants::ACCESS_TOKEN_INFO_KEY, $access_token_info);
@@ -68,21 +73,23 @@ class MiddlewareFactory
         /**
          * @param Request $request
          * @return null
-         * @throws HttpException
+         * @throws AccessTokenDoesNotExistException
+         * @throws InvalidScopeException
+         * @throws WrongInstanceException
          */
         return function (Request $request) use ($require_scopes) {
             $access_token_info = $request->attributes->get(ResourceConstants::ACCESS_TOKEN_INFO_KEY);
             if ($access_token_info === null) {
-                throw new HttpException(Response::HTTP_UNAUTHORIZED);
+                throw new AccessTokenDoesNotExistException();
             }
 
             if (!($access_token_info instanceof AccessTokenInfo)) {
-                throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR);
+                throw new WrongInstanceException();
             }
 
             $user_scope = $access_token_info->getScope();
             if (!ScopeChecker::check($require_scopes, $user_scope)) {
-                throw new HttpException(Response::HTTP_FORBIDDEN);
+                throw new InvalidScopeException();
             }
 
             return null;
