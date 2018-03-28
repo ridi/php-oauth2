@@ -1,11 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace Ridibooks\OAuth2Resource\RidiOAuth2;
+namespace Ridibooks\OAuth2Resource;
 
 use PHPUnit\Framework\TestCase;
-use Ridibooks\OAuth2Resource\RidiOAuth2\Resource\Constant\Scope;
-use Ridibooks\OAuth2Resource\RidiOAuth2\Resource\ScopeChecker;
+use Ridibooks\OAuth2Resource\Resource\Constant\Scope;
+use Ridibooks\OAuth2Resource\Resource\ScopeChecker;
 
 
 final class ResourceTest extends TestCase

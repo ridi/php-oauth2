@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Ridibooks\OAuth2Resource\RidiOAuth2;
+namespace Ridibooks\OAuth2Resource;
 
 use PHPUnit\Framework\TestCase;
-use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\DataTransferObject\AccessTokenInfo;
-use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\DataTransferObject\JwtInfo;
-use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\Exception\AccessTokenDoesNotExistException;
-use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\Exception\InvalidScopeException;
-use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\MiddlewareFactory;
-use Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\ResourceConstants;
+use Ridibooks\OAuth2Resource\Introspector\DataTransferObject\AccessTokenInfo;
+use Ridibooks\OAuth2Resource\Introspector\DataTransferObject\JwtInfo;
+use Ridibooks\OAuth2Resource\Symfony\Exception\AccessTokenDoesNotExistException;
+use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidScopeException;
+use Ridibooks\OAuth2Resource\Symfony\MiddlewareFactory;
+use Ridibooks\OAuth2Resource\Symfony\ResourceConstants;
 use Symfony\Component\HttpFoundation\Request;
 
 

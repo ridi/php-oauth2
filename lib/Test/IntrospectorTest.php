@@ -1,15 +1,15 @@
 <?php
 declare(strict_types=1);
 
-namespace Ridibooks\OAuth2Resource\RidiOAuth2;
+namespace Ridibooks\OAuth2Resource;
 
 use PHPUnit\Framework\TestCase;
-use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\DataTransferObject\AccessTokenInfo;
-use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\DataTransferObject\JwtInfo;
-use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\Exception\ExpireTokenException;
-use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\Exception\InvalidJwtSignatureException;
-use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\Helper\JwtIntrospectHelper;
-use Ridibooks\OAuth2Resource\RidiOAuth2\Introspector\JwtIntrospector;
+use Ridibooks\OAuth2Resource\Introspector\DataTransferObject\AccessTokenInfo;
+use Ridibooks\OAuth2Resource\Introspector\DataTransferObject\JwtInfo;
+use Ridibooks\OAuth2Resource\Introspector\Exception\ExpireTokenException;
+use Ridibooks\OAuth2Resource\Introspector\Exception\InvalidJwtSignatureException;
+use Ridibooks\OAuth2Resource\Introspector\Helper\JwtIntrospectHelper;
+use Ridibooks\OAuth2Resource\Introspector\JwtIntrospector;
 
 
 final class IntrospectorTest extends TestCase
