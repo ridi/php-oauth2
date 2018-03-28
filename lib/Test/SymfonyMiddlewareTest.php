@@ -41,19 +41,8 @@ final class SymfonyMiddlewareTest extends TestCase
 
         $this->expectException(AccessTokenDoesNotExistException::class);
 
-        $introspect_func = MiddlewareFactory::introspect($jwt_info, true);
-        $introspect_func($request);
-    }
-
-    public function testCanPassIntrospectWhenTokenDoesNotExist(): void
-    {
-        $jwt_info = new JwtInfo($this->secret, $this->algorithm);
-        $request = new Request();
-
         $introspect_func = MiddlewareFactory::introspect($jwt_info);
-        $result = $introspect_func($request);
-
-        $this->assertNull($result);
+        $introspect_func($request);
     }
 
     public function testCannotPassCheckScopeWhenTokenDoesNotExist(): void
