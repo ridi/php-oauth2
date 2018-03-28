@@ -4,7 +4,7 @@ namespace Ridibooks\OAuth2Resource\RidiSymfonyOAuth2Resource\Exception;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
-class AccessTokenDoesNotExistException extends HttpException
+class ExpireTokenException extends HttpException
 {
     public function __construct()
     {
