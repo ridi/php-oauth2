@@ -1,20 +1,23 @@
 {
-    "name": "ridibooks/oauth2-resource",
-    "description": "Ridibooks OAuth2 Resource",
-    "version": "0.0.2",
-    "type": "library",
-    "license": "MIT",
-    "require": {
-        "firebase/php-jwt": "^4.0",
-        "symfony/http-foundation": ">=2.1",
-        "symfony/http-kernel": "3.0.*"
-    },
-    "require-dev": {
-      "phpunit/phpunit": "^7"
-    },
-    "autoload": {
-        "psr-4": {
-            "Ridibooks\\OAuth2Resource\\": "lib"
-        }
+  "name": "ridibooks/oauth2-resource",
+  "description": "Ridibooks OAuth2 Resource",
+  "version": "0.0.2",
+  "type": "library",
+  "license": "MIT",
+  "require": {
+    "firebase/php-jwt": "^4.0",
+    "symfony/http-foundation": "^2.1",
+    "symfony/http-kernel": "~3.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^7"
+  },
+  "autoload": {
+    "psr-4": {
+      "Ridibooks\\OAuth2Resource\\": "lib"
     }
+  },
+  "scripts": {
+    "test": "phpunit tests"
+  }
 }
