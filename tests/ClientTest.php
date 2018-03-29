@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Ridibooks\OAuth2Resource;
+namespace Ridibooks\Test\OAuth2Resource;
 
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2Resource\Client\DataTransferObject\AuthorizationServerInfo;
 use Ridibooks\OAuth2Resource\Client\DataTransferObject\ClientInfo;
 use Ridibooks\OAuth2Resource\Client\Grant;
-use Ridibooks\OAuth2Resource\Common\Util\StringUtil;
 use Ridibooks\OAuth2Resource\Resource\Constant\Scope;
+use Ridibooks\Test\OAuth2Resource\Util\StringUtil;
 
 
 final class ClientTest extends TestCase

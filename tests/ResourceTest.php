@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ridibooks\OAuth2Resource;
+namespace Ridibooks\Test\OAuth2Resource;
 
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2Resource\Resource\Constant\Scope;

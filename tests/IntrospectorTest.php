@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace Ridibooks\OAuth2Resource;
+namespace Ridibooks\Test\OAuth2Resource;
 
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2Resource\Introspector\DataTransferObject\AccessTokenInfo;
@@ -22,9 +22,9 @@ final class IntrospectorTest extends TestCase
         $access_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWRpb2F1dGgydGVzdCIsInVfaWR4IjoyODAzMDUwLCJleHAiOjE5MzExMDM0ODUsImNsaWVudF9pZCI6ImlheDdPY0N1WUo4U3U1cDlzd2pzN1JOb3NMN3pZWjR6ZFY1eHlIVngiLCJzY29wZSI6ImFsbCJ9.Eh_kyD7VS5hbveUfWryK_uST2wMpWeESnCrfoJvLCbQ';
 
         $jwt_info = new JwtInfo($this->secret, $this->algorithm);
-        $jwt_instrospector = new JwtIntrospector($jwt_info, $access_token);
+        $jwt_introspector = new JwtIntrospector($jwt_info, $access_token);
 
-        $token = $jwt_instrospector->introspect();
+        $token = $jwt_introspector->introspect();
         $this->assertNotNull($token);
     }
 

@@ -17,6 +17,11 @@
       "Ridibooks\\OAuth2Resource\\": "lib"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Ridibooks\\Test\\OAuth2Resource\\": "tests"
+    }
+  },
   "scripts": {
     "test": "phpunit tests"
   }
