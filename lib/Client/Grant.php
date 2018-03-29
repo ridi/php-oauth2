@@ -82,7 +82,8 @@ class Grant
      * @param string $grant_type
      * @return array
      */
-    private function getDefaultTokenData(string $grant_type): array {
+    private function getDefaultTokenData(string $grant_type): array
+    {
         return [
             'client_id' => $this->client_info->getClientId(),
             'client_secret' => $this->client_info->getClientSecret(),
@@ -96,10 +97,11 @@ class Grant
      * @throws InvalidResponseException
      * @throws OAuthFailureException
      */
-    private function requestToken(array $data): TokenData {
+    private function requestToken(array $data): TokenData
+    {
         try {
             return TokenData::fromDict($this->request($this->auth_server_info->getTokenUrl(), $data));
-        }catch (InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             throw new InvalidResponseException();
         }
     }
@@ -129,8 +131,7 @@ class Grant
 
         $body = curl_exec($ch);
 
-        if(curl_errno($ch))
-        {
+        if (curl_errno($ch)) {
             throw new InvalidResponseException('EN: ' . curl_errno($ch) . 'EM: ' . curl_error($ch));
         }
 
@@ -153,7 +154,8 @@ class Grant
      * @throws InvalidResponseException
      * @throws OAuthFailureException
      */
-    private function processException(int $http_status, string $body) {
+    private function processException(int $http_status, string $body)
+    {
         if ($http_status === 200) {
             return;
         }
@@ -169,5 +171,4 @@ class Grant
 
         throw new OAuthFailureException($error, $error_description, $error_uri);
     }
-
 }

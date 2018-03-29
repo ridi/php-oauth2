@@ -3,7 +3,8 @@ namespace Ridibooks\OAuth2Resource\Resource;
 
 use Ridibooks\OAuth2Resource\Resource\Constant\Scope;
 
-class ScopeChecker {
+class ScopeChecker
+{
     /**
      * @param array $require_scopes
      * @param array $user_scope
@@ -19,7 +20,7 @@ class ScopeChecker {
         foreach ($require_scopes as $require_scope) {
             if (is_array($require_scope) && ScopeChecker::and($require_scope, $user_scope)) {
                 return true;
-            } else if (in_array($require_scope, $user_scope)) {
+            } elseif (in_array($require_scope, $user_scope)) {
                 return true;
             }
         }

@@ -18,7 +18,7 @@ class MiddlewareFactory
      * @param JwtInfo $jwt_info
      * @return Callable
      */
-    public static function introspect(JwtInfo $jwt_info): Callable
+    public static function introspect(JwtInfo $jwt_info): callable
     {
         /**
          * @param Request $request
@@ -50,7 +50,7 @@ class MiddlewareFactory
      * @param array $require_scopes
      * @return Callable
      */
-    public static function checkScope(array $require_scopes): Callable
+    public static function checkScope(array $require_scopes): callable
     {
         /**
          * @param Request $request

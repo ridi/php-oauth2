@@ -31,9 +31,11 @@ class ClientInfo
      * @param string $redirect_uri
      */
     public function __construct(
-        string $client_id, string $client_secret, string $scope = null, string $redirect_uri = null
-    )
-    {
+        string $client_id,
+        string $client_secret,
+        string $scope = null,
+        string $redirect_uri = null
+    ) {
         $this->client_id = $client_id;
         $this->client_secret = $client_secret;
         $this->scope = $scope;

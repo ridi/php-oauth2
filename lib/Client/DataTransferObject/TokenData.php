@@ -1,10 +1,10 @@
 <?php
 namespace Ridibooks\OAuth2Resource\Client\DataTransferObject;
 
-
 use InvalidArgumentException;
 
-class TokenData {
+class TokenData
+{
     /**
      * @var Token
      */
@@ -83,7 +83,8 @@ class TokenData {
                 $dict['scope'],
                 $dict['refresh_token'],
                 $dict['refresh_token_expires_in']
-            ))) {
+            )
+        )) {
             throw new InvalidArgumentException();
         }
 

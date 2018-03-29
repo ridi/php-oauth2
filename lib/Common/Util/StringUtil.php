@@ -1,7 +1,6 @@
 <?php
 namespace Ridibooks\OAuth2Resource\Common\Util;
 
-
 class StringUtil
 {
     const RANDOM_STRING = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ~!@#$%^&*()_+{}[]';

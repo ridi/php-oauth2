@@ -1,8 +1,8 @@
 <?php
 namespace Ridibooks\OAuth2Resource\Client\DataTransferObject;
 
-
-class Token {
+class Token
+{
     /**
      * @var string
      */

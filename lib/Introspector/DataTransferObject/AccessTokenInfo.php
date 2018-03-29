@@ -2,7 +2,6 @@
 
 namespace Ridibooks\OAuth2Resource\Introspector\DataTransferObject;
 
-
 use DateTime;
 use InvalidArgumentException;
 use TypeError;
@@ -111,7 +110,7 @@ class AccessTokenInfo
      */
     public static function fromObject(\stdClass $object): AccessTokenInfo
     {
-        if(
+        if (
             !isset($object->sub)
             || !isset($object->u_idx)
             || !isset($object->exp)
