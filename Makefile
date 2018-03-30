@@ -10,4 +10,4 @@ update:
 	@composer update
 
 test:
-	@./vendor/bin/phpunit --bootstrap vendor/autoload.php --testdox lib/Test
+	@./vendor/bin/phpunit tests
