@@ -9,7 +9,7 @@ use Ridibooks\OAuth2Resource\Authorization\Token\RidiTokenInfo;
 use Ridibooks\OAuth2Resource\Authorization\Validator\JwtInfo;
 use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2Resource\Symfony\Exception\AccessTokenDoesNotExistException;
-use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidScopeException;
+use Ridibooks\OAuth2Resource\Symfony\Exception\InsufficientScopeException;
 use Ridibooks\OAuth2Resource\Symfony\Middleware\RidiOAuth2MiddlewareFactory;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -78,7 +78,7 @@ final class SymfonyMiddlewareTest extends TestCase
         $request = new Request();
         $this->introspect($access_token, $request);
 
-        $this->expectException(InvalidScopeException::class);
+        $this->expectException(InsufficientScopeException::class);
 
         $check_scope_func = RidiOAuth2MiddlewareFactory::checkScope(['write', 'read', ['write_profile', 'write_pay']]);
         $check_scope_func($request);

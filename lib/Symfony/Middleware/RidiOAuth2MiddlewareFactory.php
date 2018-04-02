@@ -7,9 +7,10 @@ use Ridibooks\OAuth2Resource\Authorization\Validator\JwtInfo;
 use Ridibooks\OAuth2Resource\Authorization\Validator\RidiTokenValidator;
 use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2Resource\Symfony\Exception\AccessTokenDoesNotExistException;
-use Ridibooks\OAuth2Resource\Symfony\Exception\ExpireTokenException;
-use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidJwtSignatureException;
-use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidScopeException;
+use Ridibooks\OAuth2Resource\Symfony\Exception\ExpiredTokenException;
+use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidRequestException;
+use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidTokenException;
+use Ridibooks\OAuth2Resource\Symfony\Exception\InsufficientScopeException;
 use Symfony\Component\HttpFoundation\Request;
 
 class RidiOAuth2MiddlewareFactory
@@ -33,7 +34,7 @@ class RidiOAuth2MiddlewareFactory
     {
         /**
          * @param Request $request
-         * @throws InvalidJwtException
+         * @throws InvalidRequestException
          */
         return function (Request $request) use ($jwt_info) {
             $access_token = $request->cookies->get(AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY);
@@ -42,7 +43,11 @@ class RidiOAuth2MiddlewareFactory
             }
 
             $token_validator = new RidiTokenValidator($jwt_info);
-            $ridi_token = $token_validator->validateToken($access_token);
+            try {
+                $ridi_token = $token_validator->validateToken($access_token);
+            } catch (InvalidJwtException $e) {
+                throw new InvalidRequestException($e->getMessage());
+            }
             self::setTokenToRequest($request, $ridi_token);
         };
     }
@@ -55,6 +60,9 @@ class RidiOAuth2MiddlewareFactory
     {
         /**
          * @param Request $request
+         * @throws AccessTokenDoesNotExistException
+         * @throws InvalidTokenException
+         * @throws ExpiredTokenException
          */
         return function (Request $request) {
             $token = self::getTokenFromRequest($request);
@@ -62,10 +70,10 @@ class RidiOAuth2MiddlewareFactory
                 throw new AccessTokenDoesNotExistException();
             }
             if (!$token->isValid()) {
-                throw new InvalidJwtSignatureException();
+                throw new InvalidTokenException();
             }
             if ($token->isExpired()) {
-                throw new ExpireTokenException();
+                throw new ExpiredTokenException();
             }
         };
     }
@@ -80,7 +88,7 @@ class RidiOAuth2MiddlewareFactory
         /**
          * @param Request $request
          * @throws AccessTokenDoesNotExistException
-         * @throws InvalidScopeException
+         * @throws InsufficientScopeException
          */
         return function (Request $request) use ($require_scopes) {
             $token = self::getTokenFromRequest($request);
@@ -89,7 +97,7 @@ class RidiOAuth2MiddlewareFactory
             }
 
             if (!$token->hasScopes($require_scopes)) {
-                throw new InvalidScopeException();
+                throw new InsufficientScopeException();
             }
         };
     }
