@@ -6,9 +6,9 @@ namespace Ridibooks\Test\OAuth2Resource;
 use Lcobucci\JWT\Signer\Hmac\Sha256 as HS256;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2Resource\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2Resource\Authorization\Token\RidiTokenInfo;
+use Ridibooks\OAuth2Resource\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2Resource\Authorization\Validator\JwtInfo;
-use Ridibooks\OAuth2Resource\Authorization\Validator\RidiTokenValidator;
+use Ridibooks\OAuth2Resource\Authorization\Validator\JwtTokenValidator;
 
 
 final class TokenValidatorTest extends TestCase
@@ -18,7 +18,7 @@ final class TokenValidatorTest extends TestCase
     private function introspect($access_token)
     {
         $jwt_info = new JwtInfo($this->secret, new HS256());
-        $validator = new RidiTokenValidator($jwt_info);
+        $validator = new JwtTokenValidator($jwt_info);
 
         return $validator->validateToken($access_token);
     }
@@ -29,7 +29,7 @@ final class TokenValidatorTest extends TestCase
         $token = $this->introspect($access_token);
 
         $this->assertNotNull($token);
-        $this->assertInstanceOf(RidiTokenInfo::class, $token);
+        $this->assertInstanceOf(JwtToken::class, $token);
     }
 
     public function testIntrospectExpiredToken()
@@ -38,7 +38,7 @@ final class TokenValidatorTest extends TestCase
         $token = $this->introspect($access_token);
 
         $this->assertNotNull($token);
-        $this->assertInstanceOf(RidiTokenInfo::class, $token);
+        $this->assertInstanceOf(JwtToken::class, $token);
         $this->assertTrue($token->isExpired());
     }
 

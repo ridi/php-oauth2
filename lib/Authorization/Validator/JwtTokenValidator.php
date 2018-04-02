@@ -4,10 +4,9 @@ namespace Ridibooks\OAuth2Resource\Authorization\Validator;
 
 use Lcobucci\JWT\Parser;
 use Ridibooks\OAuth2Resource\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2Resource\Authorization\Token\RidiTokenInfo;
-use Ridibooks\OAuth2Resource\Authorization\Token\BaseTokenInfo;
+use Ridibooks\OAuth2Resource\Authorization\Token\JwtToken;
 
-class RidiTokenValidator implements TokenValidatorInterface
+class JwtTokenValidator
 {
     private $jwt_info;
 
@@ -18,10 +17,10 @@ class RidiTokenValidator implements TokenValidatorInterface
 
     /**
      * @param string $access_token
-     * @return BaseTokenInfo
+     * @return JwtToken
      * @throws InvalidJwtException
      */
-    public function validateToken(string $access_token): BaseTokenInfo
+    public function validateToken(string $access_token): JwtToken
     {
         if (empty($access_token)) {
             throw new InvalidJwtException('access_token is empty');
@@ -33,7 +32,7 @@ class RidiTokenValidator implements TokenValidatorInterface
                 throw new InvalidJwtException('Access token could not be verified');
             }
 
-            return RidiTokenInfo::createFrom($token);
+            return JwtToken::createFrom($token);
         } catch (\InvalidArgumentException $e) {
             throw new InvalidJwtException($e->getMessage());
         } catch (\RuntimeException $e) {

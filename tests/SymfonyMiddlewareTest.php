@@ -5,12 +5,12 @@ namespace Ridibooks\Test\OAuth2Resource;
 
 use Lcobucci\JWT\Signer\Hmac\Sha256 as HS256;
 use PHPUnit\Framework\TestCase;
-use Ridibooks\OAuth2Resource\Authorization\Token\RidiTokenInfo;
+use Ridibooks\OAuth2Resource\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2Resource\Authorization\Validator\JwtInfo;
 use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2Resource\Symfony\Exception\AccessTokenDoesNotExistException;
 use Ridibooks\OAuth2Resource\Symfony\Exception\InsufficientScopeException;
-use Ridibooks\OAuth2Resource\Symfony\Middleware\RidiOAuth2MiddlewareFactory;
+use Ridibooks\OAuth2Resource\Symfony\Middleware\OAuth2MiddlewareFactory;
 use Symfony\Component\HttpFoundation\Request;
 
 
@@ -27,7 +27,7 @@ final class SymfonyMiddlewareTest extends TestCase
             $request->cookies->add([AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
         }
 
-        $introspect_func = RidiOAuth2MiddlewareFactory::introspect(new JwtInfo($this->secret, new HS256()));
+        $introspect_func = OAuth2MiddlewareFactory::introspect(new JwtInfo($this->secret, new HS256()));
         $introspect_func($request);
 
         $token = $request->attributes->get(AccessTokenConstant::ACCESS_TOKEN_INFO_KEY);
@@ -39,7 +39,7 @@ final class SymfonyMiddlewareTest extends TestCase
         $access_token = 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJyaWRpb2F1dGgydGVzdCIsInVfaWR4IjoyODAzMDUwLCJleHAiOjE5MzExMDM0ODUsImNsaWVudF9pZCI6ImlheDdPY0N1WUo4U3U1cDlzd2pzN1JOb3NMN3pZWjR6ZFY1eHlIVngiLCJzY29wZSI6ImFsbCJ9.Eh_kyD7VS5hbveUfWryK_uST2wMpWeESnCrfoJvLCbQ';
         $token = $this->introspect($access_token);
 
-        $this->assertInstanceOf(RidiTokenInfo::class, $token);
+        $this->assertInstanceOf(JwtToken::class, $token);
     }
 
     public function testIntrospectWhenTokenDoesNotExist()
@@ -54,7 +54,7 @@ final class SymfonyMiddlewareTest extends TestCase
 
         $this->expectException(AccessTokenDoesNotExistException::class);
 
-        $check_scope_func = RidiOAuth2MiddlewareFactory::checkScope(['write', 'read', ['write_profile', 'write_pay']]);
+        $check_scope_func = OAuth2MiddlewareFactory::checkScope(['write', 'read', ['write_profile', 'write_pay']]);
         $check_scope_func($request);
     }
 
@@ -65,7 +65,7 @@ final class SymfonyMiddlewareTest extends TestCase
         $request = new Request();
         $this->introspect($access_token, $request);
 
-        $check_scope_func = RidiOAuth2MiddlewareFactory::checkScope(['write', 'read', ['write_profile', 'write_pay']]);
+        $check_scope_func = OAuth2MiddlewareFactory::checkScope(['write', 'read', ['write_profile', 'write_pay']]);
         $result = $check_scope_func($request);
         $this->assertNull($result);
     }
@@ -80,7 +80,7 @@ final class SymfonyMiddlewareTest extends TestCase
 
         $this->expectException(InsufficientScopeException::class);
 
-        $check_scope_func = RidiOAuth2MiddlewareFactory::checkScope(['write', 'read', ['write_profile', 'write_pay']]);
+        $check_scope_func = OAuth2MiddlewareFactory::checkScope(['write', 'read', ['write_profile', 'write_pay']]);
         $check_scope_func($request);
     }
 
@@ -90,7 +90,7 @@ final class SymfonyMiddlewareTest extends TestCase
         $request = new Request();
         $this->introspect($access_token, $request);
 
-        $login_required_func = RidiOAuth2MiddlewareFactory::loginRequired();
+        $login_required_func = OAuth2MiddlewareFactory::loginRequired();
         $login_required_func($request);
 
         $this->assertTrue(true);
@@ -102,7 +102,7 @@ final class SymfonyMiddlewareTest extends TestCase
 
         $this->expectException(AccessTokenDoesNotExistException::class);
 
-        $login_required_func = RidiOAuth2MiddlewareFactory::loginRequired();
+        $login_required_func = OAuth2MiddlewareFactory::loginRequired();
         $login_required_func($request);
     }
 }

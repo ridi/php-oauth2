@@ -2,9 +2,9 @@
 namespace Ridibooks\OAuth2Resource\Symfony\Middleware;
 
 use Ridibooks\OAuth2Resource\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2Resource\Authorization\Token\RidiTokenInfo;
+use Ridibooks\OAuth2Resource\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2Resource\Authorization\Validator\JwtInfo;
-use Ridibooks\OAuth2Resource\Authorization\Validator\RidiTokenValidator;
+use Ridibooks\OAuth2Resource\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2Resource\Symfony\Exception\AccessTokenDoesNotExistException;
 use Ridibooks\OAuth2Resource\Symfony\Exception\ExpiredTokenException;
@@ -13,9 +13,9 @@ use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidTokenException;
 use Ridibooks\OAuth2Resource\Symfony\Exception\InsufficientScopeException;
 use Symfony\Component\HttpFoundation\Request;
 
-class RidiOAuth2MiddlewareFactory
+class OAuth2MiddlewareFactory
 {
-    private static function setTokenToRequest(Request $request, RidiTokenInfo $token)
+    private static function setTokenToRequest(Request $request, JwtToken $token)
     {
         $request->attributes->set(AccessTokenConstant::ACCESS_TOKEN_INFO_KEY, $token);
     }
@@ -42,7 +42,7 @@ class RidiOAuth2MiddlewareFactory
                 return;
             }
 
-            $token_validator = new RidiTokenValidator($jwt_info);
+            $token_validator = new JwtTokenValidator($jwt_info);
             try {
                 $ridi_token = $token_validator->validateToken($access_token);
             } catch (InvalidJwtException $e) {
@@ -66,7 +66,7 @@ class RidiOAuth2MiddlewareFactory
          */
         return function (Request $request) {
             $token = self::getTokenFromRequest($request);
-            if ($token === null || !($token instanceof RidiTokenInfo)) {
+            if ($token === null || !($token instanceof JwtToken)) {
                 throw new AccessTokenDoesNotExistException();
             }
             if (!$token->isValid()) {
@@ -92,7 +92,7 @@ class RidiOAuth2MiddlewareFactory
          */
         return function (Request $request) use ($require_scopes) {
             $token = self::getTokenFromRequest($request);
-            if ($token === null || !($token instanceof RidiTokenInfo)) {
+            if ($token === null || !($token instanceof JwtToken)) {
                 throw new AccessTokenDoesNotExistException();
             }
 
