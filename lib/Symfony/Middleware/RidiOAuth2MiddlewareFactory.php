@@ -5,7 +5,7 @@ use Ridibooks\OAuth2Resource\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2Resource\Authorization\Token\RidiTokenInfo;
 use Ridibooks\OAuth2Resource\Authorization\Validator\JwtInfo;
 use Ridibooks\OAuth2Resource\Authorization\Validator\RidiTokenValidator;
-use Ridibooks\OAuth2Resource\Constant\AuthorizationConstant;
+use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2Resource\Symfony\Exception\AccessTokenDoesNotExistException;
 use Ridibooks\OAuth2Resource\Symfony\Exception\ExpireTokenException;
 use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidJwtSignatureException;
@@ -16,12 +16,12 @@ class RidiOAuth2MiddlewareFactory
 {
     private static function setTokenToRequest(Request $request, RidiTokenInfo $token)
     {
-        $request->attributes->set(AuthorizationConstant::ACCESS_TOKEN_INFO_KEY, $token);
+        $request->attributes->set(AccessTokenConstant::ACCESS_TOKEN_INFO_KEY, $token);
     }
 
     private static function getTokenFromRequest(Request $request)
     {
-        return $request->attributes->get(AuthorizationConstant::ACCESS_TOKEN_INFO_KEY);
+        return $request->attributes->get(AccessTokenConstant::ACCESS_TOKEN_INFO_KEY);
     }
 
     /**
@@ -36,7 +36,7 @@ class RidiOAuth2MiddlewareFactory
          * @throws InvalidJwtException
          */
         return function (Request $request) use ($jwt_info) {
-            $access_token = $request->cookies->get(AuthorizationConstant::ACCESS_TOKEN_COOKIE_KEY);
+            $access_token = $request->cookies->get(AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY);
             if ($access_token === null) {
                 return;
             }

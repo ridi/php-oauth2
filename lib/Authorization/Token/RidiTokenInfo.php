@@ -4,9 +4,8 @@ namespace Ridibooks\OAuth2Resource\Authorization\Token;
 
 
 use Lcobucci\JWT\Token;
-use Ridibooks\OAuth2Resource\Authorization\Token\BaseTokenInfo;
 use Ridibooks\OAuth2Resource\Authorization\Validator\ScopeChecker;
-use Ridibooks\OAuth2Resource\Constant\AuthorizationConstant;
+use Ridibooks\OAuth2Resource\Constant\ScopeConstant;
 
 class RidiTokenInfo extends BaseTokenInfo
 {
@@ -93,7 +92,7 @@ class RidiTokenInfo extends BaseTokenInfo
             $token->getClaim('exp'),
             $token->getClaim('u_idx'),
             $token->getClaim('client_id'),
-            explode(AuthorizationConstant::DEFAULT_SCOPE_DELIMITER, $scope)
+            explode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $scope)
         );
     }
 

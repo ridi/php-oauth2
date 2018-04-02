@@ -5,7 +5,7 @@ namespace Ridibooks\Test\OAuth2Resource;
 
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2Resource\Authorization\Validator\ScopeChecker;
-use Ridibooks\OAuth2Resource\Constant\AuthorizationConstant;
+use Ridibooks\OAuth2Resource\Constant\ScopeConstant;
 
 
 final class ScopeCheckerTest extends TestCase
@@ -41,7 +41,7 @@ final class ScopeCheckerTest extends TestCase
     public function testCanCheckAllScope()
     {
         $require_scope = ['write', 'read', ['write_profile', 'write_pay']];
-        $user_scope = [AuthorizationConstant::SCOPE_FULL_AUTHORITY];
+        $user_scope = [ScopeConstant::SCOPE_FULL_AUTHORITY];
         $this->assertTrue(ScopeChecker::check($require_scope, $user_scope));
     }
 }

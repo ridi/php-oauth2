@@ -2,7 +2,7 @@
 
 namespace Ridibooks\OAuth2Resource\Authorization\Token;
 
-use Ridibooks\OAuth2Resource\Constant\AuthorizationConstant;
+use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
 
 class BaseTokenInfo
 {
@@ -63,7 +63,7 @@ class BaseTokenInfo
         return true;
     }
 
-    public function isExpired(int $margin = AuthorizationConstant::DEFAULT_EXPIRE_MARGIN): bool
+    public function isExpired(int $margin = AccessTokenConstant::DEFAULT_EXPIRE_MARGIN): bool
     {
         $expired = $this->getExpireTimestamp();
         return isset($expired) ? $expired + $margin < time() : true;

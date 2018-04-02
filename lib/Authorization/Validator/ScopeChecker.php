@@ -1,7 +1,7 @@
 <?php
 namespace Ridibooks\OAuth2Resource\Authorization\Validator;
 
-use Ridibooks\OAuth2Resource\Constant\AuthorizationConstant;
+use Ridibooks\OAuth2Resource\Constant\ScopeConstant;
 
 class ScopeChecker
 {
@@ -12,7 +12,7 @@ class ScopeChecker
      */
     public static function check(array $require_scopes, array $user_scope): bool
     {
-        if (in_array(AuthorizationConstant::SCOPE_FULL_AUTHORITY, $user_scope)) {
+        if (in_array(ScopeConstant::SCOPE_FULL_AUTHORITY, $user_scope)) {
             return true;
         }
 

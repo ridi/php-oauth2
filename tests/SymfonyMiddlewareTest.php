@@ -7,7 +7,7 @@ use Lcobucci\JWT\Signer\Hmac\Sha256 as HS256;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2Resource\Authorization\Token\RidiTokenInfo;
 use Ridibooks\OAuth2Resource\Authorization\Validator\JwtInfo;
-use Ridibooks\OAuth2Resource\Constant\AuthorizationConstant;
+use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2Resource\Symfony\Exception\AccessTokenDoesNotExistException;
 use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidScopeException;
 use Ridibooks\OAuth2Resource\Symfony\Middleware\RidiOAuth2MiddlewareFactory;
@@ -24,13 +24,13 @@ final class SymfonyMiddlewareTest extends TestCase
             $request = new Request();
         }
         if (isset($access_token)) {
-            $request->cookies->add([AuthorizationConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
+            $request->cookies->add([AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
         }
 
         $introspect_func = RidiOAuth2MiddlewareFactory::introspect(new JwtInfo($this->secret, new HS256()));
         $introspect_func($request);
 
-        $token = $request->attributes->get(AuthorizationConstant::ACCESS_TOKEN_INFO_KEY);
+        $token = $request->attributes->get(AccessTokenConstant::ACCESS_TOKEN_INFO_KEY);
         return $token;
     }
 
