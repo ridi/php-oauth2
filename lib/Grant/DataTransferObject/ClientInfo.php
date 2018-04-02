@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ridibooks\OAuth2Resource\Grant\DataTransferObject;
 
 class ClientInfo

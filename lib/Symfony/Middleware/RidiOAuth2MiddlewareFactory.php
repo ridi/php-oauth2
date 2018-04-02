@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 namespace Ridibooks\OAuth2Resource\Symfony\Middleware;
 
 use Ridibooks\OAuth2Resource\Authorization\Exception\InvalidJwtException;
