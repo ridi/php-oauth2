@@ -1,4 +1,4 @@
-# RIDI-PHP-OAuth2-Resource
+# PHP-OAuth2
 [![Build Status](https://travis-ci.org/ridi/php-oauth2.svg?branch=master)](https://travis-ci.org/ridi/php-oauth2)
 
 
