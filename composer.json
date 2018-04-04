@@ -1,7 +1,7 @@
 {
-  "name": "ridibooks/oauth2-resource",
-  "description": "Ridibooks OAuth2 Resource",
-  "version": "0.0.2",
+  "version": "0.0.1",
+  "name": "ridibooks/oauth2",
+  "description": "Ridibooks OAuth2",
   "type": "library",
   "license": "MIT",
   "require": {
