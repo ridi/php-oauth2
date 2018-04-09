@@ -1,5 +1,4 @@
 {
-  "version": "0.0.1",
   "name": "ridibooks/oauth2",
   "description": "Ridibooks OAuth2",
   "type": "library",
