@@ -5,12 +5,12 @@ namespace Ridibooks\Test\OAuth2Resource;
 
 use Lcobucci\JWT\Signer\Hmac\Sha256 as HS256;
 use PHPUnit\Framework\TestCase;
-use Ridibooks\OAuth2Resource\Authorization\Token\JwtToken;
-use Ridibooks\OAuth2Resource\Authorization\Validator\JwtInfo;
-use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
-use Ridibooks\OAuth2Resource\Symfony\Exception\AccessTokenDoesNotExistException;
-use Ridibooks\OAuth2Resource\Symfony\Exception\InsufficientScopeException;
-use Ridibooks\OAuth2Resource\Symfony\Middleware\OAuth2MiddlewareFactory;
+use Ridibooks\OAuth2\Authorization\Token\JwtToken;
+use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
+use Ridibooks\OAuth2\Constant\AccessTokenConstant;
+use Ridibooks\OAuth2\Symfony\Exception\AccessTokenDoesNotExistException;
+use Ridibooks\OAuth2\Symfony\Exception\InsufficientScopeException;
+use Ridibooks\OAuth2\Symfony\Middleware\OAuth2MiddlewareFactory;
 use Symfony\Component\HttpFoundation\Request;
 
 

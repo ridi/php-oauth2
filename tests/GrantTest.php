@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace Ridibooks\Test\OAuth2Resource;
 
 use PHPUnit\Framework\TestCase;
-use Ridibooks\OAuth2Resource\Grant\DataTransferObject\AuthorizationServerInfo;
-use Ridibooks\OAuth2Resource\Grant\DataTransferObject\ClientInfo;
-use Ridibooks\OAuth2Resource\Grant\Grant;
-use Ridibooks\OAuth2Resource\Constant\ScopeConstant;
+use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
+use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
+use Ridibooks\OAuth2\Grant\Grant;
+use Ridibooks\OAuth2\Constant\ScopeConstant;
 use Ridibooks\Test\OAuth2Resource\Util\StringUtil;
 
 

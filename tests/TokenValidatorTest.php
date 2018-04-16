@@ -5,10 +5,10 @@ namespace Ridibooks\Test\OAuth2Resource;
 
 use Lcobucci\JWT\Signer\Hmac\Sha256 as HS256;
 use PHPUnit\Framework\TestCase;
-use Ridibooks\OAuth2Resource\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2Resource\Authorization\Token\JwtToken;
-use Ridibooks\OAuth2Resource\Authorization\Validator\JwtInfo;
-use Ridibooks\OAuth2Resource\Authorization\Validator\JwtTokenValidator;
+use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
+use Ridibooks\OAuth2\Authorization\Token\JwtToken;
+use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
+use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 
 
 final class TokenValidatorTest extends TestCase

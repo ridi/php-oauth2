@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace Ridibooks\Test\OAuth2Resource;
 
 use PHPUnit\Framework\TestCase;
-use Ridibooks\OAuth2Resource\Authorization\Validator\ScopeChecker;
-use Ridibooks\OAuth2Resource\Constant\ScopeConstant;
+use Ridibooks\OAuth2\Authorization\Validator\ScopeChecker;
+use Ridibooks\OAuth2\Constant\ScopeConstant;
 
 
 final class ScopeCheckerTest extends TestCase

@@ -1,16 +1,17 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Symfony\Middleware;
+namespace Ridibooks\OAuth2\Symfony\Middleware;
 
-use Ridibooks\OAuth2Resource\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2Resource\Authorization\Token\JwtToken;
-use Ridibooks\OAuth2Resource\Authorization\Validator\JwtInfo;
-use Ridibooks\OAuth2Resource\Authorization\Validator\JwtTokenValidator;
-use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
-use Ridibooks\OAuth2Resource\Symfony\Exception\AccessTokenDoesNotExistException;
-use Ridibooks\OAuth2Resource\Symfony\Exception\ExpiredTokenException;
-use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidRequestException;
-use Ridibooks\OAuth2Resource\Symfony\Exception\InvalidTokenException;
-use Ridibooks\OAuth2Resource\Symfony\Exception\InsufficientScopeException;
+use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
+use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
+use Ridibooks\OAuth2\Authorization\Token\JwtToken;
+use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
+use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
+use Ridibooks\OAuth2\Constant\AccessTokenConstant;
+use Ridibooks\OAuth2\Symfony\Exception\AccessTokenDoesNotExistException;
+use Ridibooks\OAuth2\Symfony\Exception\ExpiredTokenException;
+use Ridibooks\OAuth2\Symfony\Exception\InvalidRequestException;
+use Ridibooks\OAuth2\Symfony\Exception\InvalidTokenException;
+use Ridibooks\OAuth2\Symfony\Exception\InsufficientScopeException;
 use Symfony\Component\HttpFoundation\Request;
 
 class OAuth2MiddlewareFactory
@@ -45,7 +46,7 @@ class OAuth2MiddlewareFactory
             $token_validator = new JwtTokenValidator($jwt_info);
             try {
                 $ridi_token = $token_validator->validateToken($access_token);
-            } catch (InvalidJwtException $e) {
+            } catch (AuthorizationException $e) {
                 throw new InvalidRequestException($e->getMessage());
             }
             self::setTokenToRequest($request, $ridi_token);
@@ -72,9 +73,7 @@ class OAuth2MiddlewareFactory
             if (!$token->isValid()) {
                 throw new InvalidTokenException();
             }
-            if ($token->isExpired()) {
-                throw new ExpiredTokenException();
-            }
+
         };
     }
 
