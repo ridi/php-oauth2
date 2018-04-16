@@ -1,10 +1,8 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Authorization\Token;
+namespace Ridibooks\OAuth2\Authorization\Token;
 
-use Lcobucci\JWT\Token;
-use Ridibooks\OAuth2Resource\Authorization\Validator\ScopeChecker;
-use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
-use Ridibooks\OAuth2Resource\Constant\ScopeConstant;
+use Ridibooks\OAuth2\Authorization\Validator\ScopeChecker;
+use Ridibooks\OAuth2\Constant\ScopeConstant;
 
 class JwtToken
 {
@@ -59,19 +57,17 @@ class JwtToken
     }
 
     /**
-     * @param Token $token
+     * @param \stdClass $token
      * @return JwtToken
      */
-    public static function createFrom(Token $token): JwtToken
+    public static function createFrom(\stdClass $token): JwtToken
     {
-        $scope = $token->getClaim('scope');
-
         return new self(
-            $token->getClaim('sub'),
-            $token->getClaim('exp'),
-            $token->getClaim('u_idx'),
-            $token->getClaim('client_id'),
-            explode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $scope)
+            $token->sub,
+            $token->exp,
+            $token->u_idx,
+            $token->client_id,
+            explode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $token->scope)
         );
     }
 
@@ -124,16 +120,6 @@ class JwtToken
     }
 
     /**
-     * @param int $margin
-     * @return bool
-     */
-    public function isExpired(int $margin = AccessTokenConstant::DEFAULT_EXPIRE_MARGIN): bool
-    {
-        $expired = $this->getExpireTimestamp();
-        return isset($expired) ? $expired + $margin < time() : true;
-    }
-
-    /**
      * @return bool
      */
     public function isValid(): bool
@@ -153,6 +139,6 @@ class JwtToken
      */
     public function hasScopes(array $scopes): bool
     {
-        return ScopeChecker::check($scopes, $this->getScopes());
+        return (new ScopeChecker())->check($scopes, $this->getScopes());
     }
 }

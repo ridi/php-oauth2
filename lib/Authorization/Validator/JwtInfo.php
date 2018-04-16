@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Authorization\Validator;
+namespace Ridibooks\OAuth2\Authorization\Validator;
 
-use Lcobucci\JWT\Signer;
 
 class JwtInfo
 {
@@ -13,9 +12,9 @@ class JwtInfo
     private $secret;
 
     /**
-     * @var Signer
+     * @var string
      */
-    private $signer;
+    private $algorithm;
 
     /**
      * @var integer
@@ -25,13 +24,13 @@ class JwtInfo
     /**
      * JwtInfo constructor.
      * @param string $secret
-     * @param Signer $signer
+     * @param string $signer
      * @param int $expire_term
      */
-    public function __construct(string $secret, Signer $signer, int $expire_term=JwtInfo::DEFAULT_EXPIRE_TERM)
+    public function __construct(string $secret, string $signer, int $expire_term = JwtInfo::DEFAULT_EXPIRE_TERM)
     {
         $this->secret = $secret;
-        $this->signer = $signer;
+        $this->algorithm = $signer;
         $this->expire_term = $expire_term;
     }
 
@@ -44,11 +43,11 @@ class JwtInfo
     }
 
     /**
-     * @return Signer
+     * @return string
      */
-    public function getSigner(): Signer
+    public function getAlgorithm(): string
     {
-        return $this->signer;
+        return $this->algorithm;
     }
 
     /**

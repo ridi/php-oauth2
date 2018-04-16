@@ -1,7 +1,7 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Authorization\Validator;
+namespace Ridibooks\OAuth2\Authorization\Validator;
 
-use Ridibooks\OAuth2Resource\Constant\ScopeConstant;
+use Ridibooks\OAuth2\Constant\ScopeConstant;
 
 class ScopeChecker
 {
@@ -11,7 +11,7 @@ class ScopeChecker
      * @param array $user_scopes
      * @return bool
      */
-    public static function check(array $required_scopes, array $user_scopes): bool
+    public function check(array $required_scopes, array $user_scopes): bool
     {
         if (in_array(ScopeConstant::SCOPE_FULL_AUTHORITY, $user_scopes)) {
             return true;
@@ -25,7 +25,7 @@ class ScopeChecker
      * @param array $user_scopes
      * @return bool
      */
-    private static function some(array $required_scopes, array $user_scopes): bool
+    private function some(array $required_scopes, array $user_scopes): bool
     {
         foreach ($required_scopes as $required_scope) {
             if (is_array($required_scope) && self::every($required_scope, $user_scopes)) {
@@ -42,7 +42,7 @@ class ScopeChecker
      * @param array $user_scopes
      * @return bool
      */
-    private static function every(array $required_scopes, array $user_scopes): bool
+    private function every(array $required_scopes, array $user_scopes): bool
     {
         foreach ($required_scopes as $required_scope) {
             if (!in_array($required_scope, $user_scopes)) {
