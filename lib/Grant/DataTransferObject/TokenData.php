@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Grant\DataTransferObject;
+namespace Ridibooks\OAuth2\Grant\DataTransferObject;
 
 use InvalidArgumentException;
 

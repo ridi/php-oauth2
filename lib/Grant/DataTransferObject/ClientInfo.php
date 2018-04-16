@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Grant\DataTransferObject;
+namespace Ridibooks\OAuth2\Grant\DataTransferObject;
 
 class ClientInfo
 {
@@ -14,7 +14,7 @@ class ClientInfo
     private $client_secret;
 
     /**
-     * @var string
+     * @var array
      */
     private $scope;
 
@@ -27,13 +27,13 @@ class ClientInfo
      * ClientInfo constructor.
      * @param string $client_id
      * @param string $client_secret
-     * @param string $scope
+     * @param array $scope
      * @param string $redirect_uri
      */
     public function __construct(
         string $client_id,
         string $client_secret,
-        string $scope = null,
+        array $scope = [],
         string $redirect_uri = null
     ) {
         $this->client_id = $client_id;
@@ -59,9 +59,9 @@ class ClientInfo
     }
 
     /**
-     * @return string
+     * @return array
      */
-    public function getScope(): string
+    public function getScope(): array
     {
         return $this->scope;
     }
