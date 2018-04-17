@@ -34,7 +34,7 @@ class OAuth2MiddlewareFactory
         $this->default_user_provider = $app[OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER];
     }
 
-    public function authorize(OAuth2ExceptionHandlerInterface $exception_handler = null, UserProviderInterface $user_provider = null, array $required_scopes = [])
+    public function authorize(array $required_scopes = [], OAuth2ExceptionHandlerInterface $exception_handler = null, UserProviderInterface $user_provider = null)
     {
         if ($exception_handler === null) {
             $exception_handler = $this->default_exception_handler;
@@ -42,7 +42,7 @@ class OAuth2MiddlewareFactory
         if ($user_provider === null) {
             $user_provider = $this->default_user_provider;
         }
-        return function (Request $request, Application $app) use ($exception_handler, $user_provider, $required_scopes) {
+        return function (Request $request, Application $app) use ($required_scopes, $exception_handler, $user_provider) {
             try {
                 $access_token = $request->cookies->get(AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY);
                 // 1. Validate access_token
