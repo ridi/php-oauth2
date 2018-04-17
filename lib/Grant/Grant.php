@@ -36,7 +36,7 @@ class Grant
     /**
      * @param string $state
      * @param string $redirect_uri
-     * @param string $scope
+     * @param array $scope
      * @return string
      */
     public function authorize(string $state, string $redirect_uri = null, array $scope = null): string

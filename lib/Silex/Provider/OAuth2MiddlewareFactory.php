@@ -1,17 +1,14 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\Silex\Provider;
-
+namespace Ridibooks\OAuth2\Silex\Provider;
 
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\InsufficientScopeException;
-use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Authorization\Validator\ScopeChecker;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2\Grant\Grant;
 use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
 use Ridibooks\OAuth2\Silex\Handler\OAuth2ExceptionHandlerInterface;
-use Ridibooks\OAuth2\Silex\Provider\UserProviderInterface;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -50,9 +47,6 @@ class OAuth2MiddlewareFactory
                 $access_token = $request->cookies->get(AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY);
                 // 1. Validate access_token
                 $token = $this->token_validator->validateToken($access_token);
-                if (!$token->isValid()) {
-                    throw new InvalidTokenException();
-                }
                 // 2. Check scope
                 if (!empty($required_scopes) && !$token->hasScopes($required_scopes)) {
                     throw new InsufficientScopeException($required_scopes);

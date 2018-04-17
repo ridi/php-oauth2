@@ -1,14 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace Ridibooks\Test\OAuth2Resource;
+namespace Ridibooks\Test\OAuth2\Grant;
 
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
 use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
 use Ridibooks\OAuth2\Grant\Grant;
 use Ridibooks\OAuth2\Constant\ScopeConstant;
-use Ridibooks\Test\OAuth2Resource\Util\StringUtil;
+use Ridibooks\Test\OAuth2\Common\StringUtil;
 
 
 final class GrantTest extends TestCase
@@ -22,7 +22,7 @@ final class GrantTest extends TestCase
 
     public function testCanGenerateAuthorizationUrl()
     {
-        $client_info = new ClientInfo($this->client_id, $this->client_secret, ScopeConstant::ALL, $this->redirect_uri);
+        $client_info = new ClientInfo($this->client_id, $this->client_secret, [ScopeConstant::ALL], $this->redirect_uri);
         $auth_server_info = new AuthorizationServerInfo($this->authorization_url, $this->token_url);
         $state = StringUtil::getRandomString(8);
 

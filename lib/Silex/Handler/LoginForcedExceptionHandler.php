@@ -14,11 +14,16 @@ use Symfony\Component\HttpFoundation\Request;
 
 class LoginForcedExceptionHandler implements OAuth2ExceptionHandlerInterface
 {
+    private function generateState()
+    {
+        return \bin2hex(\random_bytes(8));
+    }
+
     public function handle(AuthorizationException $e, Request $request, Application $app)
     {
         /** @var Grant $grant */
         $grant = $app[OAuth2ProviderKeyConstant::GRANT];
-        $state = \random_bytes(10);
+        $state = $this->generateState();
 
         if ($e instanceof InsufficientScopeException) {
             $url = $grant->authorize($state, $request->getUri(), $e->getRequiredScopes());
@@ -26,7 +31,7 @@ class LoginForcedExceptionHandler implements OAuth2ExceptionHandlerInterface
             $url = $grant->authorize($state, $request->getUri());
         }
         $response = RedirectResponse::create($url);
-        $cookie = new Cookie('ridi.oauth2.state', $state, $request->getHost(), true, true);
+        $cookie = new Cookie(OAuth2ProviderKeyConstant::STATE, $state, 0, $request->getHost(), true, true);
         $response->headers->setCookie($cookie);
         return $response;
     }

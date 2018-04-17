@@ -4,7 +4,7 @@ namespace Ridibooks\OAuth2\Silex\Handler;
 
 
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
-use Ridibooks\OAuth2\Symfony\Exception\InsufficientScopeException;
+use Ridibooks\OAuth2\Authorization\Exception\InsufficientScopeException;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

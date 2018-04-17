@@ -1,5 +1,5 @@
 <?php
-namespace Ridibooks\Test\OAuth2Resource\Util;
+namespace Ridibooks\Test\OAuth2\Common;
 
 class StringUtil
 {
