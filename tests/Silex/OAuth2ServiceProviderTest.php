@@ -41,8 +41,10 @@ class OAuth2ServiceProviderTest extends TestCase
     {
         $app = $this->registerProvider();
 
-        $app->get('/', function () {})
-            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new IgnoreExceptionHandler(), new TestUserProvider()));
+        $app->get('/', function () {
+        })
+            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new IgnoreExceptionHandler(),
+                new TestUserProvider()));
 
         $access_token = TokenConstant::TOKEN_VALID;
         $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
@@ -54,8 +56,10 @@ class OAuth2ServiceProviderTest extends TestCase
     public function testExpiredTokenWithLoginForcedExceptionHandler()
     {
         $app = $this->registerProvider();
-        $app->get('/', function () {})
-            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginForcedExceptionHandler(), new TestUserProvider()));
+        $app->get('/', function () {
+        })
+            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginForcedExceptionHandler(),
+                new TestUserProvider()));
 
         $access_token = TokenConstant::TOKEN_EXPIRED;
         $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
@@ -74,8 +78,10 @@ class OAuth2ServiceProviderTest extends TestCase
     public function testExpiredTokenWithLoginRequiredExceptionHandler()
     {
         $app = $this->registerProvider();
-        $app->get('/', function () {})
-            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginRequiredExceptionHandler(), new TestUserProvider()));
+        $app->get('/', function () {
+        })
+            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginRequiredExceptionHandler(),
+                new TestUserProvider()));
 
         $access_token = TokenConstant::TOKEN_EXPIRED;
         $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
@@ -87,8 +93,10 @@ class OAuth2ServiceProviderTest extends TestCase
     public function testInvalidPayloadToken()
     {
         $app = $this->registerProvider();
-        $app->get('/', function () {})
-            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginRequiredExceptionHandler(), new TestUserProvider()));
+        $app->get('/', function () {
+        })
+            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginRequiredExceptionHandler(),
+                new TestUserProvider()));
 
         $access_token = TokenConstant::TOKEN_INVALID_PAYLOAD;
         $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
@@ -100,8 +108,10 @@ class OAuth2ServiceProviderTest extends TestCase
     public function testInvalidSignatureToken()
     {
         $app = $this->registerProvider();
-        $app->get('/', function () {})
-            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginRequiredExceptionHandler(), new TestUserProvider()));
+        $app->get('/', function () {
+        })
+            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginRequiredExceptionHandler(),
+                new TestUserProvider()));
 
         $access_token = TokenConstant::TOKEN_INVALID_SIGNATURE;
         $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
@@ -114,8 +124,10 @@ class OAuth2ServiceProviderTest extends TestCase
     {
         $app = $this->registerProvider();
         $app['debug'] = true;
-        $app->get('/', function () {})
-            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginForcedExceptionHandler(), new TestUserProvider(), ['test_scope']));
+        $app->get('/', function () {
+        })
+            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginForcedExceptionHandler(),
+                new TestUserProvider(), ['test_scope']));
 
         $access_token = TokenConstant::TOKEN_HAS_NO_SCOPE;
         $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
@@ -135,13 +147,30 @@ class OAuth2ServiceProviderTest extends TestCase
     {
         $app = $this->registerProvider();
         $app['debug'] = true;
-        $app->get('/', function () {})
-            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginRequiredExceptionHandler(), new TestUserProvider(), ['test_scope']));
+        $app->get('/', function () {
+        })
+            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginRequiredExceptionHandler(),
+                new TestUserProvider(), ['test_scope']));
 
         $access_token = TokenConstant::TOKEN_HAS_NO_SCOPE;
         $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
         $resp = $app->handle($req);
 
         $this->assertEquals(Response::HTTP_FORBIDDEN, $resp->getStatusCode());
+    }
+
+    public function testUnknownUserToken()
+    {
+        $app = $this->registerProvider();
+        $app->get('/', function () {
+        })
+            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginRequiredExceptionHandler(),
+                new TestUserProvider()));
+
+        $access_token = TokenConstant::TOKEN_UNKNOWN_USER;
+        $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
+        $resp = $app->handle($req);
+
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $resp->getStatusCode());
     }
 }
