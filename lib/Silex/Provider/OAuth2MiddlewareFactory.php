@@ -24,12 +24,15 @@ class OAuth2MiddlewareFactory
     private $default_exception_handler;
     /** @var UserProviderInterface */
     private $default_user_provider;
+    /** @var array */
+    private $default_scopes;
 
     public function __construct($app)
     {
         $this->grant = $app[OAuth2ProviderKeyConstant::GRANT];
         $this->token_validator = $app[OAuth2ProviderKeyConstant::TOKEN_VALIDATOR];
         $this->scope_checker = $app[OAuth2ProviderKeyConstant::SCOPE_CHECKER];
+        $this->default_scopes = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE];
         $this->default_exception_handler = $app[OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER];
         $this->default_user_provider = $app[OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER];
     }
@@ -41,6 +44,9 @@ class OAuth2MiddlewareFactory
         }
         if ($user_provider === null) {
             $user_provider = $this->default_user_provider;
+        }
+        if (empty($required_scopes)) {
+            $required_scopes = $this->default_scopes;
         }
         return function (Request $request, Application $app) use ($required_scopes, $exception_handler, $user_provider) {
             try {

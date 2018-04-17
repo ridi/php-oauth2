@@ -23,12 +23,13 @@ class LoginForcedExceptionHandler implements OAuth2ExceptionHandlerInterface
     {
         /** @var Grant $grant */
         $grant = $app[OAuth2ProviderKeyConstant::GRANT];
+        $redirect_uri = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_REDIRECT_URI] ?: $request->getUri();
         $state = $this->generateState();
 
         if ($e instanceof InsufficientScopeException) {
-            $url = $grant->authorize($state, $request->getUri(), $e->getRequiredScopes());
+            $url = $grant->authorize($state, $redirect_uri, $e->getRequiredScopes());
         } else {
-            $url = $grant->authorize($state, $request->getUri());
+            $url = $grant->authorize($state, $redirect_uri);
         }
         $response = RedirectResponse::create($url);
         $cookie = new Cookie(OAuth2ProviderKeyConstant::STATE, $state, 0, $request->getHost(), true, true);
