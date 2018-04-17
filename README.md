@@ -6,10 +6,10 @@
 - OAuth2 클라이언트와 리소스 서버를 구축하기 위한 PHP 라이브러리입니다.
 - Ridi 스타일 가이드([내부 서비스간의 SSO](https://github.com/ridi/style-guide/blob/master/API.md#%EB%82%B4%EB%B6%80-%EC%84%9C%EB%B9%84%EC%8A%A4%EA%B0%84%EC%9D%98-sso))에 따라 작성 되었습니다.
 
-## 필수 조건
+## 필요 조건
 
 - `PHP 7.0` or higher
-- Silex 1.3.x
+- `Silex v1.2.x or v1.3.x`
 
 ## 설치
 
