@@ -21,8 +21,6 @@ class JwtInfo
     private $expire_term;
 
     /**
-     * JwtInfo constructor.
-     *
      * @param string $secret
      * @param string $algorithm
      * @param int $expire_term
