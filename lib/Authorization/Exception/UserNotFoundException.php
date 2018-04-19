@@ -2,8 +2,6 @@
 
 namespace Ridibooks\OAuth2\Authorization\Exception;
 
-
 class UserNotFoundException extends AuthorizationException
 {
-
 }

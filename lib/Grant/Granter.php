@@ -43,7 +43,7 @@ class Granter
         $query = http_build_query([
             'client_id' => $this->client_info->getClientId(),
             'redirect_uri' => $redirect_uri ?? $this->client_info->getRedirectUri(),
-            'scope' => implode(ScopeConstant::DEFAULT_SCOPE_DELIMITER,$scope ?? $this->client_info->getScope()),
+            'scope' => implode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $scope ?? $this->client_info->getScope()),
             'state' => $state,
             'response_type' => 'code',
         ]);
@@ -51,7 +51,6 @@ class Granter
         $authorize_url = $this->auth_server_info->getAuthorizationUrl() . '?' . $query;
         return $authorize_url;
     }
-
 
     /**
      * @param string $code

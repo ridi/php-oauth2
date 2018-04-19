@@ -2,7 +2,6 @@
 
 namespace Ridibooks\OAuth2\Silex\Constant;
 
-
 class OAuth2ProviderKeyConstant
 {
     // Configurations

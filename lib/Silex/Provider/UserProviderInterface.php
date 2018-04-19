@@ -2,7 +2,6 @@
 
 namespace Ridibooks\OAuth2\Silex\Provider;
 
-
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 

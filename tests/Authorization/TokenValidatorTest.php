@@ -12,13 +12,11 @@ use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\Test\OAuth2\Common\TokenConstant;
 
-
 final class TokenValidatorTest extends TestCase
 {
-
     private function validate($access_token)
     {
-        $jwt_info = new JwtInfo( TokenConstant::SECRET, TokenConstant::ALGORITHM);
+        $jwt_info = new JwtInfo(TokenConstant::SECRET, TokenConstant::ALGORITHM);
         $validator = new JwtTokenValidator($jwt_info);
 
         return $validator->validateToken($access_token);

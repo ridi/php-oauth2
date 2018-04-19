@@ -2,7 +2,6 @@
 
 namespace Ridibooks\Test\OAuth2\Silex;
 
-
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2\Grant\Granter;

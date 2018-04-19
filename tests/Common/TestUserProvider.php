@@ -2,7 +2,6 @@
 
 namespace Ridibooks\Test\OAuth2\Common;
 
-
 use Ridibooks\OAuth2\Authorization\Exception\UserNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Silex\Provider\UserProviderInterface;

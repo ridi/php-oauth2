@@ -7,7 +7,6 @@ use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Validator\ScopeChecker;
 use Ridibooks\OAuth2\Constant\ScopeConstant;
 
-
 final class ScopeCheckerTest extends TestCase
 {
     public function testFullAuthorityGrantedScope()

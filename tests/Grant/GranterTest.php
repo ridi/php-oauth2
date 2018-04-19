@@ -4,12 +4,11 @@ declare(strict_types=1);
 namespace Ridibooks\Test\OAuth2\Grant;
 
 use PHPUnit\Framework\TestCase;
+use Ridibooks\OAuth2\Constant\ScopeConstant;
 use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
 use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
 use Ridibooks\OAuth2\Grant\Granter;
-use Ridibooks\OAuth2\Constant\ScopeConstant;
 use Ridibooks\Test\OAuth2\Common\StringUtil;
-
 
 final class GranterTest extends TestCase
 {
@@ -29,9 +28,9 @@ final class GranterTest extends TestCase
         $granter = new Granter($client_info, $auth_server_info);
         $authorization_url = $granter->authorize($state);
         $this->assertStringStartsWith($this->authorization_url, $authorization_url);
-        $this->assertRegexp('/' . 'client_id=' . $this->client_id. '/', $authorization_url);
+        $this->assertRegexp('/' . 'client_id=' . $this->client_id . '/', $authorization_url);
         $this->assertRegexp('/' . 'state=' . urlencode($state) . '/', $authorization_url);
-        $this->assertRegexp('/' . 'redirect_uri=' .urlencode($this->redirect_uri) . '/', $authorization_url);
+        $this->assertRegexp('/' . 'redirect_uri=' . urlencode($this->redirect_uri) . '/', $authorization_url);
         $this->assertRegexp('/' . 'response_type=code' . '/', $authorization_url);
     }
 }

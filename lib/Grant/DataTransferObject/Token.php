@@ -9,7 +9,7 @@ class Token
     private $token;
 
     /**
-     * @var integer
+     * @var int
      */
     private $expires_in;
 

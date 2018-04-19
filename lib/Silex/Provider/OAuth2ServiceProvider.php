@@ -2,10 +2,8 @@
 
 namespace Ridibooks\OAuth2\Silex\Provider;
 
-
 use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
-use Ridibooks\OAuth2\Authorization\Validator\ScopeChecker;
 use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
 use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
 use Ridibooks\OAuth2\Grant\Granter;

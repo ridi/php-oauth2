@@ -1,7 +1,6 @@
 <?php declare(strict_types=1);
 namespace Ridibooks\OAuth2\Authorization\Validator;
 
-
 class JwtInfo
 {
     const DEFAULT_EXPIRE_TERM = 60 * 5; // second
@@ -17,7 +16,7 @@ class JwtInfo
     private $algorithm;
 
     /**
-     * @var integer
+     * @var int
      */
     private $expire_term;
 

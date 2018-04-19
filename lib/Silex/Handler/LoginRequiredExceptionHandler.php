@@ -2,7 +2,6 @@
 
 namespace Ridibooks\OAuth2\Silex\Handler;
 
-
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\InsufficientScopeException;
 use Silex\Application;

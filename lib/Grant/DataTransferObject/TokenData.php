@@ -76,14 +76,14 @@ class TokenData
     {
         if (in_array(
             null,
-            array(
+            [
                 $dict['access_token'],
                 $dict['expires_in'],
                 $dict['token_type'],
                 $dict['scope'],
                 $dict['refresh_token'],
                 $dict['refresh_token_expires_in']
-            )
+            ]
         )) {
             throw new InvalidArgumentException();
         }
