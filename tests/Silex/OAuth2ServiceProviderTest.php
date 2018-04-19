@@ -5,7 +5,7 @@ namespace Ridibooks\Test\OAuth2\Silex;
 
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
-use Ridibooks\OAuth2\Grant\Grant;
+use Ridibooks\OAuth2\Grant\Granter;
 use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
 use Ridibooks\OAuth2\Silex\Handler\IgnoreExceptionHandler;
 use Ridibooks\OAuth2\Silex\Handler\LoginForcedExceptionHandler;
@@ -66,9 +66,9 @@ class OAuth2ServiceProviderTest extends TestCase
         $this->assertEquals(Response::HTTP_FOUND, $resp->getStatusCode());
 
         $state = ($resp->headers->getCookies()[0])->getValue();
-        /** @var Grant $grant */
-        $grant = $app[OAuth2ProviderKeyConstant::GRANT];
-        $authorize_url = $grant->authorize($state, $req->getUri());
+        /** @var Granter $granter */
+        $granter = $app[OAuth2ProviderKeyConstant::GRANTER];
+        $authorize_url = $granter->authorize($state, $req->getUri());
 
         $this->assertEquals($authorize_url, $resp->headers->get('location'));
     }
@@ -128,9 +128,9 @@ class OAuth2ServiceProviderTest extends TestCase
         $this->assertEquals(Response::HTTP_FOUND, $resp->getStatusCode());
 
         $state = ($resp->headers->getCookies()[0])->getValue();
-        /** @var Grant $grant */
-        $grant = $app[OAuth2ProviderKeyConstant::GRANT];
-        $authorize_url = $grant->authorize($state, $req->getUri(), ['test_scope']);
+        /** @var Granter $granter */
+        $granter = $app[OAuth2ProviderKeyConstant::GRANTER];
+        $authorize_url = $granter->authorize($state, $req->getUri(), ['test_scope']);
 
         $this->assertEquals($authorize_url, $resp->headers->get('location'));
     }

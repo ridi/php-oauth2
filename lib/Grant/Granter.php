@@ -10,7 +10,7 @@ use Ridibooks\OAuth2\Grant\DataTransferObject\TokenData;
 use Ridibooks\OAuth2\Grant\Exception\InvalidResponseException;
 use Ridibooks\OAuth2\Grant\Exception\OAuthFailureException;
 
-class Grant
+class Granter
 {
     /**
      * @var ClientInfo
@@ -23,7 +23,6 @@ class Grant
     private $auth_server_info;
 
     /**
-     * BaseGrant constructor.
      * @param ClientInfo $client_info
      * @param AuthorizationServerInfo $auth_server_info
      */

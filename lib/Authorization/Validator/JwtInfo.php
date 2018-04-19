@@ -23,14 +23,15 @@ class JwtInfo
 
     /**
      * JwtInfo constructor.
+     *
      * @param string $secret
-     * @param string $signer
+     * @param string $algorithm
      * @param int $expire_term
      */
-    public function __construct(string $secret, string $signer, int $expire_term = JwtInfo::DEFAULT_EXPIRE_TERM)
+    public function __construct(string $secret, string $algorithm, int $expire_term = JwtInfo::DEFAULT_EXPIRE_TERM)
     {
         $this->secret = $secret;
-        $this->algorithm = $signer;
+        $this->algorithm = $algorithm;
         $this->expire_term = $expire_term;
     }
 

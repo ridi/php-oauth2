@@ -8,7 +8,7 @@ use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Authorization\Validator\ScopeChecker;
 use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
 use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
-use Ridibooks\OAuth2\Grant\Grant;
+use Ridibooks\OAuth2\Grant\Granter;
 use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -41,8 +41,11 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
         $app[OAuth2ProviderKeyConstant::STATE] = null;
 
         // Initialize services
-        $app[OAuth2ProviderKeyConstant::GRANT] = function ($app) {
+        $app[OAuth2ProviderKeyConstant::GRANTER] = function ($app) {
             $client_id = $app[OAuth2ProviderKeyConstant::CLIENT_ID];
+            if (!$client_id) {
+                return null;
+            }
             $client_secret = $app[OAuth2ProviderKeyConstant::CLIENT_SECRET];
             $client_default_scope = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE];
             $client_default_redirect_uri = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_REDIRECT_URI];
@@ -53,7 +56,7 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
             $client_info = new ClientInfo($client_id, $client_secret, $client_default_scope, $client_default_redirect_uri);
             $auth_server_info = new AuthorizationServerInfo($authorize_url, $token_url);
 
-            return new Grant($client_info, $auth_server_info);
+            return new Granter($client_info, $auth_server_info);
         };
 
         $app[OAuth2ProviderKeyConstant::TOKEN_VALIDATOR] = function ($app) {
@@ -65,8 +68,6 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
 
             return new JwtTokenValidator($jwt_info);
         };
-
-        $app[OAuth2ProviderKeyConstant::SCOPE_CHECKER] = new ScopeChecker();
 
         $app[OAuth2ProviderKeyConstant::MIDDLEWARE] = $app->share(function ($app) {
             return new OAuth2MiddlewareFactory($app);

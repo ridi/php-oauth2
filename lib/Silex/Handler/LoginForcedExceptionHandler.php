@@ -5,7 +5,7 @@ namespace Ridibooks\OAuth2\Silex\Handler;
 
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\InsufficientScopeException;
-use Ridibooks\OAuth2\Grant\Grant;
+use Ridibooks\OAuth2\Grant\Granter;
 use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Cookie;
@@ -21,15 +21,15 @@ class LoginForcedExceptionHandler implements OAuth2ExceptionHandlerInterface
 
     public function handle(AuthorizationException $e, Request $request, Application $app)
     {
-        /** @var Grant $grant */
-        $grant = $app[OAuth2ProviderKeyConstant::GRANT];
+        /** @var Granter $granter */
+        $granter = $app[OAuth2ProviderKeyConstant::GRANTER];
         $redirect_uri = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_REDIRECT_URI] ?: $request->getUri();
         $state = $this->generateState();
 
         if ($e instanceof InsufficientScopeException) {
-            $url = $grant->authorize($state, $redirect_uri, $e->getRequiredScopes());
+            $url = $granter->authorize($state, $redirect_uri, $e->getRequiredScopes());
         } else {
-            $url = $grant->authorize($state, $redirect_uri);
+            $url = $granter->authorize($state, $redirect_uri);
         }
         $response = RedirectResponse::create($url);
         $cookie = new Cookie(OAuth2ProviderKeyConstant::STATE, $state, 0, $request->getHost(), true, true);

@@ -4,9 +4,7 @@ namespace Ridibooks\OAuth2\Silex\Provider;
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\InsufficientScopeException;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
-use Ridibooks\OAuth2\Authorization\Validator\ScopeChecker;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
-use Ridibooks\OAuth2\Grant\Grant;
 use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
 use Ridibooks\OAuth2\Silex\Handler\OAuth2ExceptionHandlerInterface;
 use Silex\Application;
@@ -14,12 +12,8 @@ use Symfony\Component\HttpFoundation\Request;
 
 class OAuth2MiddlewareFactory
 {
-    /** @var Grant */
-    private $grant;
     /** @var JwtTokenValidator */
     private $token_validator;
-    /** @var ScopeChecker */
-    private $scope_checker;
     /** @var OAuth2ExceptionHandlerInterface */
     private $default_exception_handler;
     /** @var UserProviderInterface */
@@ -29,9 +23,7 @@ class OAuth2MiddlewareFactory
 
     public function __construct($app)
     {
-        $this->grant = $app[OAuth2ProviderKeyConstant::GRANT];
         $this->token_validator = $app[OAuth2ProviderKeyConstant::TOKEN_VALIDATOR];
-        $this->scope_checker = $app[OAuth2ProviderKeyConstant::SCOPE_CHECKER];
         $this->default_scopes = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE];
         $this->default_exception_handler = $app[OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER];
         $this->default_user_provider = $app[OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER];

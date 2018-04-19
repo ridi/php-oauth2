@@ -130,6 +130,6 @@ class JwtToken
      */
     public function hasScopes(array $scopes): bool
     {
-        return (new ScopeChecker())->check($scopes, $this->getScopes());
+        return ScopeChecker::every($scopes, $this->getScopes());
     }
 }

@@ -10,38 +10,48 @@ use Ridibooks\OAuth2\Constant\ScopeConstant;
 
 final class ScopeCheckerTest extends TestCase
 {
-    public function testCanCheckScope()
+    public function testFullAuthorityGrantedScope()
     {
-        $require_scope = ['write', 'read', ['write_profile', 'write_pay']];
-        $user_scope = ['write'];
-        $this->assertTrue((new ScopeChecker())->check($require_scope, $user_scope));
+        $required = ['write', 'read'];
+        $granted = [ScopeConstant::SCOPE_FULL_AUTHORITY];
+        $this->assertTrue(ScopeChecker::every($required, $granted));
     }
 
-    public function testCanCheckDisallowScope()
+    public function testSameRequiredAndGrantedScope()
     {
-        $require_scope = ['write', 'read', ['write_profile', 'write_pay']];
-        $user_scope = ['write_comment'];
-        $this->assertFalse((new ScopeChecker())->check($require_scope, $user_scope));
+        $required = ['write', 'read', 'write_profile', 'write_pay'];
+        $granted = ['write', 'read', 'write_profile', 'write_pay'];
+        $this->assertTrue(ScopeChecker::every($required, $granted));
     }
 
-    public function testCanCheckAndScope()
+    public function testNoRequiredScope()
     {
-        $require_scope = ['write', 'read', ['write_profile', 'write_pay']];
-        $user_scope = ['write_profile', 'write_pay', 'write_comment'];
-        $this->assertTrue((new ScopeChecker())->check($require_scope, $user_scope));
+        $required = [];
+        $granted = ['write'];
+        $this->assertTrue(ScopeChecker::every($required, $granted));
+        $required = [];
+        $granted = [];
+        $this->assertTrue(ScopeChecker::every($required, $granted));
     }
 
-    public function testCanCheckDisallowAndScope()
+    public function testIncludedAllRequiredScope()
     {
-        $require_scope = ['write', 'read', ['write_profile', 'write_pay']];
-        $user_scope = ['write_profile'];
-        $this->assertFalse((new ScopeChecker())->check($require_scope, $user_scope));
+        $required = ['write', 'read'];
+        $granted = ['write', 'read', 'write_profile', 'write_pay'];
+        $this->assertTrue(ScopeChecker::every($required, $granted));
     }
 
-    public function testCanCheckAllScope()
+    public function testNotGrantedSomeRequiredScope()
     {
-        $require_scope = ['write', 'read', ['write_profile', 'write_pay']];
-        $user_scope = [ScopeConstant::SCOPE_FULL_AUTHORITY];
-        $this->assertTrue((new ScopeChecker())->check($require_scope, $user_scope));
+        $required = ['write', 'read'];
+        $granted = ['write'];
+        $this->assertFalse(ScopeChecker::every($required, $granted));
+    }
+
+    public function testNoGrantedScope()
+    {
+        $required = ['write', 'read'];
+        $granted = [];
+        $this->assertFalse(ScopeChecker::every($required, $granted));
     }
 }

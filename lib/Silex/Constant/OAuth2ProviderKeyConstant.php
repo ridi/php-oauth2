@@ -22,9 +22,8 @@ class OAuth2ProviderKeyConstant
     const DEFAULT_USER_PROVIDER = 'ridi.oauth2.default_user_provider';
 
     // Services
-    const GRANT = 'ridi.oauth2.grant';
+    const GRANTER = 'ridi.oauth2.granter';
     const TOKEN_VALIDATOR = 'ridi.oauth2.token_validator';
-    const SCOPE_CHECKER = 'ridi.oauth2.scope_checker';
     const MIDDLEWARE = 'ridi.oauth2.middleware';
 
     // Returns
