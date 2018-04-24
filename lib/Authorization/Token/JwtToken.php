@@ -1,10 +1,9 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Authorization\Token;
+namespace Ridibooks\OAuth2\Authorization\Token;
 
-use Lcobucci\JWT\Token;
-use Ridibooks\OAuth2Resource\Authorization\Validator\ScopeChecker;
-use Ridibooks\OAuth2Resource\Constant\AccessTokenConstant;
-use Ridibooks\OAuth2Resource\Constant\ScopeConstant;
+use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
+use Ridibooks\OAuth2\Authorization\Validator\ScopeChecker;
+use Ridibooks\OAuth2\Constant\ScopeConstant;
 
 class JwtToken
 {
@@ -48,8 +47,7 @@ class JwtToken
         int $u_idx,
         string $client_id,
         array $scopes
-    )
-    {
+    ) {
         $this->subject = $subject;
         $this->expire_timestamp = $expire_timestamp;
         $this->expire_date = (new \DateTime())->setTimestamp($expire_timestamp);
@@ -59,19 +57,21 @@ class JwtToken
     }
 
     /**
-     * @param Token $token
+     * @param \stdClass $token
      * @return JwtToken
+     * @throws InvalidTokenException
      */
-    public static function createFrom(Token $token): JwtToken
+    public static function createFrom(\stdClass $token): JwtToken
     {
-        $scope = $token->getClaim('scope');
-
+        if (!isset($token->sub, $token->exp, $token->u_idx, $token->client_id, $token->scope)) {
+            throw new InvalidTokenException();
+        }
         return new self(
-            $token->getClaim('sub'),
-            $token->getClaim('exp'),
-            $token->getClaim('u_idx'),
-            $token->getClaim('client_id'),
-            explode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $scope)
+            $token->sub,
+            $token->exp,
+            $token->u_idx,
+            $token->client_id,
+            explode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $token->scope)
         );
     }
 
@@ -124,35 +124,11 @@ class JwtToken
     }
 
     /**
-     * @param int $margin
-     * @return bool
-     */
-    public function isExpired(int $margin = AccessTokenConstant::DEFAULT_EXPIRE_MARGIN): bool
-    {
-        $expired = $this->getExpireTimestamp();
-        return isset($expired) ? $expired + $margin < time() : true;
-    }
-
-    /**
-     * @return bool
-     */
-    public function isValid(): bool
-    {
-        return isset(
-            $this->subject,
-            $this->expire_timestamp,
-            $this->u_idx,
-            $this->client_id,
-            $this->scopes
-        );
-    }
-
-    /**
      * @param array $scopes
      * @return bool
      */
     public function hasScopes(array $scopes): bool
     {
-        return ScopeChecker::check($scopes, $this->getScopes());
+        return ScopeChecker::every($scopes, $this->getScopes());
     }
 }

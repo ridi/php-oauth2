@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Constant;
+namespace Ridibooks\OAuth2\Constant;
 
 class AccessTokenConstant
 {

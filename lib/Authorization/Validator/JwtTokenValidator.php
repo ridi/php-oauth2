@@ -1,10 +1,14 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Authorization\Validator;
+namespace Ridibooks\OAuth2\Authorization\Validator;
 
-
-use Lcobucci\JWT\Parser;
-use Ridibooks\OAuth2Resource\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2Resource\Authorization\Token\JwtToken;
+use Firebase\JWT\ExpiredException;
+use Firebase\JWT\JWT;
+use Firebase\JWT\SignatureInvalidException;
+use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
+use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
+use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
+use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
+use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 
 class JwtTokenValidator
 {
@@ -18,25 +22,24 @@ class JwtTokenValidator
     /**
      * @param string $access_token
      * @return JwtToken
-     * @throws InvalidJwtException
+     * @throws AuthorizationException
      */
     public function validateToken(string $access_token): JwtToken
     {
-        if (empty($access_token)) {
-            throw new InvalidJwtException('access_token is empty');
+        if (!isset($access_token)) {
+            throw new TokenNotFoundException();
         }
 
+        JWT::$leeway = $this->jwt_info->getExpireTerm();
         try {
-            $token = (new Parser())->parse($access_token);
-            if ($token->verify($this->jwt_info->getSigner(), $this->jwt_info->getSecret()) === false) {
-                throw new InvalidJwtException('Access token could not be verified');
-            }
-
+            $token = JWT::decode($access_token, $this->jwt_info->getSecret(), [$this->jwt_info->getAlgorithm()]);
             return JwtToken::createFrom($token);
-        } catch (\InvalidArgumentException $e) {
-            throw new InvalidJwtException($e->getMessage());
-        } catch (\RuntimeException $e) {
-            throw new InvalidJwtException($e->getMessage());
+        } catch (SignatureInvalidException $e) {
+            throw new InvalidJwtException($e);
+        } catch (ExpiredException $e) {
+            throw new ExpiredTokenException();
+        } catch (\UnexpectedValueException $e) {
+            throw new InvalidJwtException($e);
         }
     }
 }

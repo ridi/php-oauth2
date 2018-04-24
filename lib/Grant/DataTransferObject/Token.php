@@ -1,5 +1,5 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Grant\DataTransferObject;
+namespace Ridibooks\OAuth2\Grant\DataTransferObject;
 
 class Token
 {
@@ -9,7 +9,7 @@ class Token
     private $token;
 
     /**
-     * @var integer
+     * @var int
      */
     private $expires_in;
 

@@ -1,15 +1,16 @@
 <?php declare(strict_types=1);
-namespace Ridibooks\OAuth2Resource\Grant;
+namespace Ridibooks\OAuth2\Grant;
 
 use InvalidArgumentException;
-use Ridibooks\OAuth2Resource\Constant\GrantTypeConstant;
-use Ridibooks\OAuth2Resource\Grant\DataTransferObject\AuthorizationServerInfo;
-use Ridibooks\OAuth2Resource\Grant\DataTransferObject\ClientInfo;
-use Ridibooks\OAuth2Resource\Grant\DataTransferObject\TokenData;
-use Ridibooks\OAuth2Resource\Grant\Exception\InvalidResponseException;
-use Ridibooks\OAuth2Resource\Grant\Exception\OAuthFailureException;
+use Ridibooks\OAuth2\Constant\GrantTypeConstant;
+use Ridibooks\OAuth2\Constant\ScopeConstant;
+use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
+use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
+use Ridibooks\OAuth2\Grant\DataTransferObject\TokenData;
+use Ridibooks\OAuth2\Grant\Exception\InvalidResponseException;
+use Ridibooks\OAuth2\Grant\Exception\OAuthFailureException;
 
-class Grant
+class Granter
 {
     /**
      * @var ClientInfo
@@ -22,7 +23,6 @@ class Grant
     private $auth_server_info;
 
     /**
-     * BaseGrant constructor.
      * @param ClientInfo $client_info
      * @param AuthorizationServerInfo $auth_server_info
      */
@@ -34,14 +34,16 @@ class Grant
 
     /**
      * @param string $state
+     * @param string $redirect_uri
+     * @param array $scope
      * @return string
      */
-    public function authorize(string $state): string
+    public function authorize(string $state, string $redirect_uri = null, array $scope = null): string
     {
         $query = http_build_query([
             'client_id' => $this->client_info->getClientId(),
-            'redirect_uri' => $this->client_info->getRedirectUri(),
-            'scope' => $this->client_info->getScope(),
+            'redirect_uri' => $redirect_uri ?? $this->client_info->getRedirectUri(),
+            'scope' => implode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $scope ?? $this->client_info->getScope()),
             'state' => $state,
             'response_type' => 'code',
         ]);
@@ -50,18 +52,18 @@ class Grant
         return $authorize_url;
     }
 
-
     /**
      * @param string $code
+     * @param string $redirect_uri
      * @return TokenData
      * @throws InvalidResponseException
      * @throws OAuthFailureException
      */
-    public function code(string $code): TokenData
+    public function code(string $code, string $redirect_uri = null): TokenData
     {
         $data = $this->getDefaultTokenData(GrantTypeConstant::AUTHORIZATION_CODE);
         $data['code'] = $code;
-        $data['redirect_uri'] = $this->client_info->getRedirectUri();
+        $data['redirect_uri'] = $redirect_uri ?? $this->client_info->getRedirectUri();
         return $this->requestToken($data);
     }
 
