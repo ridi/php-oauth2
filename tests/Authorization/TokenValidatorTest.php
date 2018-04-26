@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
+use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
@@ -53,6 +54,13 @@ final class TokenValidatorTest extends TestCase
 
         $access_token = TokenConstant::TOKEN_INVALID_SIGNATURE;
         $this->validate($access_token);
+    }
+
+    public function testCannotIntrospectNullToken()
+    {
+        $this->expectException(TokenNotFoundException::class);
+
+        $this->validate(null);
     }
 
     public function testCannotIntrospectEmptyToken()
