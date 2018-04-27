@@ -17,8 +17,7 @@ final class TokenValidatorTest extends TestCase
 {
     private function validate($access_token)
     {
-        $jwt_info = new JwtInfo(TokenConstant::SECRET, TokenConstant::ALGORITHM);
-        $validator = new JwtTokenValidator($jwt_info);
+        $validator = new JwtTokenValidator(TokenConstant::SECRET, TokenConstant::ALGORITHM, 300);
 
         return $validator->validateToken($access_token);
     }

@@ -3,7 +3,7 @@
 namespace Ridibooks\OAuth2\Silex\Provider;
 
 use Ridibooks\OAuth2\Authorization\Authorizer;
-use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
+use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
 use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
 use Ridibooks\OAuth2\Grant\Granter;
@@ -30,7 +30,7 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
 
         $app[OAuth2ProviderKeyConstant::JWT_ALGORITHM] = 'HS256';
         $app[OAuth2ProviderKeyConstant::JWT_SECRET] = 'secret';
-        $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM] = JwtInfo::DEFAULT_EXPIRE_TERM;
+        $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM] = 60 * 5;
 
         $app[OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER] = null;
         $app[OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER] = null;
@@ -63,9 +63,9 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
             $jwt_expire_term = $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM];
 
             $client_default_scope = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE];
-            $jwt_info = new JwtInfo($jwt_secret, $jwt_algorithm, $jwt_expire_term);
+            $jwt_token_validator = new JwtTokenValidator($jwt_secret, $jwt_algorithm, $jwt_expire_term);
 
-            return new Authorizer($jwt_info, $client_default_scope);
+            return new Authorizer($jwt_token_validator, $client_default_scope);
         };
 
         $app[OAuth2ProviderKeyConstant::MIDDLEWARE] = $app->share(function ($app) {

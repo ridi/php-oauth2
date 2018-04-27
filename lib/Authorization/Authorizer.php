@@ -8,7 +8,6 @@ use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\InsufficientScopeException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
-use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,9 +19,9 @@ class Authorizer
     /** @var array */
     private $default_scopes;
 
-    public function __construct(JwtInfo $jwt_info, array $default_scopes = [])
+    public function __construct(JwtTokenValidator $token_validator, array $default_scopes = [])
     {
-        $this->token_validator = new JwtTokenValidator($jwt_info);
+        $this->token_validator = $token_validator;
         $this->default_scopes = $default_scopes;
     }
 
