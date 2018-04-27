@@ -35,7 +35,7 @@ class Authorizer
     /**
      * @param Request $request
      * @param array $required_scopes
-     * @return JwtToken
+     * @return JwtToken if the given request is authorized successfully
      * @throws AuthorizationException
      * @throws InsufficientScopeException
      */
