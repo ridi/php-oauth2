@@ -6,6 +6,7 @@ namespace Ridibooks\OAuth2\Authorization;
 
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\InsufficientScopeException;
+use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
@@ -30,6 +31,7 @@ class Authorizer
      * @param array $required_scopes
      * @return JwtToken if the given request is authorized successfully
      * @throws AuthorizationException
+     * @throws TokenNotFoundException if there is no access_token in the given request
      * @throws InsufficientScopeException
      */
     public function authorize(Request $request, array $required_scopes = []): JwtToken

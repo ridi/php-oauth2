@@ -23,6 +23,7 @@ class JwtTokenValidator
      * @param string|null $access_token
      * @return JwtToken
      * @throws AuthorizationException
+     * @throws TokenNotFoundException
      */
     public function validateToken($access_token): JwtToken
     {
