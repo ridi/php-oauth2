@@ -58,7 +58,14 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
         };
 
         $app[OAuth2ProviderKeyConstant::AUTHORIZER] = function ($app) {
-            return new Authorizer($app);
+            $jwt_algorithm = $app[OAuth2ProviderKeyConstant::JWT_ALGORITHM];
+            $jwt_secret = $app[OAuth2ProviderKeyConstant::JWT_SECRET];
+            $jwt_expire_term = $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM];
+
+            $client_default_scope = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE];
+            $jwt_info = new JwtInfo($jwt_secret, $jwt_algorithm, $jwt_expire_term);
+
+            return new Authorizer($jwt_info, $client_default_scope);
         };
 
         $app[OAuth2ProviderKeyConstant::MIDDLEWARE] = $app->share(function ($app) {

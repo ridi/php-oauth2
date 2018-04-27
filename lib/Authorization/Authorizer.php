@@ -10,7 +10,6 @@ use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
-use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
 use Symfony\Component\HttpFoundation\Request;
 
 class Authorizer
@@ -20,16 +19,10 @@ class Authorizer
     /** @var array */
     private $default_scopes;
 
-    public function __construct($app)
+    public function __construct(JwtInfo $jwt_info, array $default_scopes = [])
     {
-        $jwt_algorithm = $app[OAuth2ProviderKeyConstant::JWT_ALGORITHM];
-        $jwt_secret = $app[OAuth2ProviderKeyConstant::JWT_SECRET];
-        $jwt_expire_term = $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM];
-
-        $jwt_info = new JwtInfo($jwt_secret, $jwt_algorithm, $jwt_expire_term);
-
         $this->token_validator = new JwtTokenValidator($jwt_info);
-        $this->default_scopes = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE];
+        $this->default_scopes = $default_scopes;
     }
 
     /**
