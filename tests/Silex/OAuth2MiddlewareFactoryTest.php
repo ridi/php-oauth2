@@ -16,7 +16,7 @@ use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-class OAuth2ServiceProviderTest extends TestCase
+class OAuth2MiddlewareFactoryTest extends TestCase
 {
     private $authorization_url = 'https://account.ridibooks.com/oauth2/authorize/';
     private $token_url = 'https://account.ridibooks.com/oauth2/token/';

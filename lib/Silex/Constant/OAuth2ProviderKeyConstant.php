@@ -22,7 +22,7 @@ class OAuth2ProviderKeyConstant
 
     // Services
     const GRANTER = 'ridi.oauth2.granter';
-    const TOKEN_VALIDATOR = 'ridi.oauth2.token_validator';
+    const AUTHORIZER = 'ridi.oauth2.token_validator';
     const MIDDLEWARE = 'ridi.oauth2.middleware';
 
     // Returns

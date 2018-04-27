@@ -2,8 +2,8 @@
 
 namespace Ridibooks\OAuth2\Silex\Provider;
 
+use Ridibooks\OAuth2\Authorization\Authorizer;
 use Ridibooks\OAuth2\Authorization\Validator\JwtInfo;
-use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
 use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
 use Ridibooks\OAuth2\Grant\Granter;
@@ -57,14 +57,8 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
             return new Granter($client_info, $auth_server_info);
         };
 
-        $app[OAuth2ProviderKeyConstant::TOKEN_VALIDATOR] = function ($app) {
-            $jwt_algorithm = $app[OAuth2ProviderKeyConstant::JWT_ALGORITHM];
-            $jwt_secret = $app[OAuth2ProviderKeyConstant::JWT_SECRET];
-            $jwt_expire_term = $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM];
-
-            $jwt_info = new JwtInfo($jwt_secret, $jwt_algorithm, $jwt_expire_term);
-
-            return new JwtTokenValidator($jwt_info);
+        $app[OAuth2ProviderKeyConstant::AUTHORIZER] = function ($app) {
+            return new Authorizer($app);
         };
 
         $app[OAuth2ProviderKeyConstant::MIDDLEWARE] = $app->share(function ($app) {
