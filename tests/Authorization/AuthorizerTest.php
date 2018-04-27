@@ -58,7 +58,7 @@ class AuthorizerTest extends TestCase
         $this->assertEquals(TokenConstant::USERNAME, $response->getContent());
     }
 
-    public function testAuthorizerWithExpireddToken()
+    public function testAuthorizerWithExpiredToken()
     {
         $app = $this->registerProvider();
         $app['debug'] = true;
