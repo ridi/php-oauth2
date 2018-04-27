@@ -69,7 +69,6 @@ class AuthorizerTest extends TestCase
                 $token = $authorizer->authorize($request);
                 return $token->getSubject();
             } catch (AuthorizationException $e) {
-                var_dump($e->getMessage());
                 $app->abort(401);
             }
         });
