@@ -8,7 +8,7 @@
 
 ## 필요 조건
 
-- `PHP 7.0` or higher
+- `PHP 7.1` or higher
 - `Silex v1.2.x or v1.3.x`
 
 ## 설치
