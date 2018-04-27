@@ -43,6 +43,8 @@ class OAuth2MiddlewareFactory
             } catch (AuthorizationException $e) {
                 return $exception_handler->handle($e, $request, $app);
             }
+
+            return null;
         };
     }
 }
