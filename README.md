@@ -19,7 +19,7 @@ composer require ridibooks/oauth2
 
 ## Usage
 
-### `Silex`와 함께 사용하기: `OAuth2ServiceProvider`
+### `ridi.oauth2.middleware` 서비스: `Silex`와 함께 사용하기
 
 `OAuth2ServiceProvider`를 Silex 애플리케이션에 등록(`register`)해 사용한다.
 
@@ -65,10 +65,10 @@ public function authRequiredApi(Application $app)
 
 #### 서비스
 
-- **`OAuth2ProviderKeyConstant::GRANT`**
+- **`OAuth2ProviderKeyConstant::GRANTER`**
     - `authorize(string $state, string $redirect_uri = null, array $scope = null): string`: `/authorize`를 위한 URL을 반환
-- **`OAuth2ProviderKeyConstant::TOKEN_VALIDATOR`**
-	- `validateToken(string $access_token): JwtToken`: `access_token` 유효성 검사 후 `JwtToken` 객체를 반환
+- **`OAuth2ProviderKeyConstant::AUTHORIZER`**
+	- `autorize(Request $request): JwtToken`: `access_token` 유효성 검사 후 `JwtToken` 객체를 반환
 - **`OAuth2ProviderKeyConstant::MIDDLEWARE`**
 	- `authorize(OAuth2ExceptionHandlerInterface $exception_handler = null, UserProviderInterface $user_provider = null, array $required_scopes = [])`: 미들웨어를 반환
 
@@ -77,3 +77,37 @@ public function authRequiredApi(Application $app)
 - **`IgnoreExceptionHandler`**: 인증 관련 오류를 무시
 - **`LoginRequiredExceptionHandler`**: 인증 오류시 `401 UNAUTHORIZED`, `403 FORBIDDEN` 에러 발생 
 - **`LoginForcedExceptionHandler`**: 인증 오류시 `OAuth2ProviderKeyConstant::AUTHORIZE_URL`로 redirect
+
+### `ridi.oauth2.authorizer` 서비스
+
+```php
+use Ridibooks\OAuth2\Authorization\Authorizer;
+use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
+use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
+use Ridibooks\OAuth2\Silex\Provider\OAuth2ServiceProvider;
+use Silex\Application;
+use Symfony\Component\HttpFoundation\Request;
+
+...
+
+// `OAuth2ServiceProvider` 등록
+$app->register(new OAuth2ServiceProvider(), [
+	KeyConstant::CLIENT_ID => 'example-client-id',
+	KeyConstant::CLIENT_SECRET => 'example-client-secret',
+	KeyConstant::JWT_ALGORITHM => 'HS256',
+	KeyConstant::JWT_SECRET => 'example-secret'
+]);
+
+...
+
+$app->get('/', function (Application $app, Request $request) {
+	/** @var Authorizer $authorizer */
+	$authorizer = $app[OAuth2ProviderKeyConstant::AUTHORIZER];
+	try {
+		$token = $authorizer->authorize($request);
+		return $token->getSubject();
+	} catch (AuthorizationException $e) {
+		// handle authorization error ...
+	}
+});
+```

@@ -12,17 +12,32 @@ use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 
 class JwtTokenValidator
 {
-    private $jwt_info;
+    /** @var string  */
+    private $secret;
 
-    public function __construct(JwtInfo $jwt_info)
+    /** @var string  */
+    private $algorithm;
+
+    /** @var int  */
+    private $expire_term;
+
+    /**
+     * @param string $secret
+     * @param string $algorithm
+     * @param int $expire_term in second
+     */
+    public function __construct(string $secret, string $algorithm, int $expire_term)
     {
-        $this->jwt_info = $jwt_info;
+        $this->secret = $secret;
+        $this->algorithm = $algorithm;
+        $this->expire_term = $expire_term;
     }
 
     /**
      * @param string|null $access_token
      * @return JwtToken
      * @throws AuthorizationException
+     * @throws TokenNotFoundException
      */
     public function validateToken($access_token): JwtToken
     {
@@ -30,9 +45,9 @@ class JwtTokenValidator
             throw new TokenNotFoundException();
         }
 
-        JWT::$leeway = $this->jwt_info->getExpireTerm();
+        JWT::$leeway = $this->expire_term;
         try {
-            $token = JWT::decode($access_token, $this->jwt_info->getSecret(), [$this->jwt_info->getAlgorithm()]);
+            $token = JWT::decode($access_token, $this->secret, [$this->algorithm]);
             return JwtToken::createFrom($token);
         } catch (SignatureInvalidException $e) {
             throw new InvalidJwtException($e);
