@@ -25,15 +25,18 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
         $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE] = [];
         $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_REDIRECT_URI] = null;
 
-        $app[OAuth2ProviderKeyConstant::AUTHORIZE_URL] = 'https://account.ridibooks.com/oauth2/authorize';
-        $app[OAuth2ProviderKeyConstant::TOKEN_URL] = 'https://account.ridibooks.com/oauth2/token';
+        $app[OAuth2ProviderKeyConstant::AUTHORIZE_URL] = 'https://account.ridibooks.com/oauth2/authorize/';
+        $app[OAuth2ProviderKeyConstant::TOKEN_URL] = 'https://account.ridibooks.com/oauth2/token/';
+        $app[OAuth2ProviderKeyConstant::USER_INFO_URL] = 'https://account.ridibooks.com/accounts/me/';
 
         $app[OAuth2ProviderKeyConstant::JWT_ALGORITHM] = 'HS256';
         $app[OAuth2ProviderKeyConstant::JWT_SECRET] = 'secret';
         $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM] = 60 * 5;
 
         $app[OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER] = null;
-        $app[OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER] = null;
+        $app[OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER] = function ($app) {
+            return new DefaultUserProvider($app[OAuth2ProviderKeyConstant::USER_INFO_URL]);
+        };
 
         $app[OAuth2ProviderKeyConstant::USER] = null;
         $app[OAuth2ProviderKeyConstant::STATE] = null;

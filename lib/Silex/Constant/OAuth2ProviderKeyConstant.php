@@ -12,6 +12,7 @@ class OAuth2ProviderKeyConstant
 
     const AUTHORIZE_URL = 'ridi.oauth2.authorize_url';
     const TOKEN_URL = 'ridi.oauth2.token_url';
+    const USER_INFO_URL = 'ridi.oauth2.user_info_url';
 
     const JWT_ALGORITHM = 'ridi.oauth2.jwt_algorithm';
     const JWT_SECRET = 'ridi.oauth2.jwt_secret';

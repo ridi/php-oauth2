@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [unreleased]
 
+### Added
+
+- New `UserProviderInterface` implementation: `DefaultUserProvider` for default action to acquire user information from URL
+- New Option: `OAuth2ProviderKeyConstant::USER_INFO_URL` option for provider
+
 ## [0.1.2] - 2018-04-30
 ### Added
 
@@ -41,7 +46,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 
 
-[unreleased]: https://github.com/ridi/php-oauth2/compare/v0.1.1...HEAD
+[unreleased]: https://github.com/ridi/php-oauth2/compare/v0.1.2...HEAD
 [0.1.2]: https://github.com/ridi/php-oauth2/compare/v0.1.1...v0.1.2
 [0.1.1]: https://github.com/ridi/php-oauth2/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/ridi/php-oauth2/compare/v0.0.2...v0.1.0
