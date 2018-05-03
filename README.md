@@ -9,7 +9,8 @@
 ## Requirements
 
 - `PHP 7.1` or higher
-- `Silex v1.2.x or v1.3.x`
+- `silex/silex v1.2.x or v1.3.x` (optional)
+- `guzzlehttp/guzzle` (optional)
 
 ## Installation
 
