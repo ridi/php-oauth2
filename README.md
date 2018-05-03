@@ -19,6 +19,42 @@ composer require ridibooks/oauth2
 
 ## Usage
 
+### `JwtTokenValidator`
+
+```php
+$access_token = '...';
+$validator = new JwtTokenValidator(TokenConstant::SECRET, TokenConstant::ALGORITHM, 300);
+try {
+	$validator->validateToken($access_token);
+} catch (AuthorizationException $e) {
+	// handle exception
+}
+```
+
+### `ScopeChecker`
+
+```php
+$required = ['write', 'read'];
+if (ScopeChecker::every($required, $granted)) {
+	// pass
+}
+```
+
+### `Granter`
+
+```php
+$client_info = new ClientInfo('client_id', 'client_secret', ['scope'], 'redirect_uri');
+$auth_server_info = new AuthorizationServerInfo('authorization_url', 'token_url');
+
+$granter = new Granter($client_info, $auth_server_info);
+$authorization_url = $granter->authorize();
+// Redirect to `$authorization_url`
+```
+
+## Usage: with Silex Provider
+
+`OAuth2ServiceProvider`를 Silex 애플리케이션에 등록(`register`)해 사용한다.
+
 ### Options
 
 - **`OAuth2ProviderKeyConstant::CLIENT_ID`**: (default = `null`)
@@ -34,6 +70,17 @@ composer require ridibooks/oauth2
 - **`OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER`**: (default = `null`) 미들웨어에서 사용할 기본 `OAuth2ExceptionHandlerInterface` 구현체
 - **`OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER`**: (default = `DefaultUserProvider`) 미들웨어에서 사용할 기본 `UserProviderInterface` 구현체
 
+#### Built-in `OAuth2ExceptionHandlerInterface` Implementations
+
+- **`IgnoreExceptionHandler`**: 인증 관련 오류를 무시
+- **`LoginRequiredExceptionHandler`**: 인증 오류시 `401 UNAUTHORIZED`, `403 FORBIDDEN` 에러 발생 
+- **`LoginForcedExceptionHandler`**: 인증 오류시 `OAuth2ProviderKeyConstant::AUTHORIZE_URL`로 redirect
+
+#### Built-in `UserProviderInterface` Implementations
+
+- **`DefaultUserProvider`**: 정해진 URL을 통해 사용자 정보를 조회
+
+
 ### Services
 
 - **`OAuth2ProviderKeyConstant::GRANTER`**
@@ -42,20 +89,8 @@ composer require ridibooks/oauth2
 	- `autorize(Request $request): JwtToken`: `access_token` 유효성 검사 후 `JwtToken` 객체를 반환
 - **`OAuth2ProviderKeyConstant::MIDDLEWARE`**
 	- `authorize(OAuth2ExceptionHandlerInterface $exception_handler = null, UserProviderInterface $user_provider = null, array $required_scopes = [])`: 미들웨어를 반환
-
-### Built-in `OAuth2ExceptionHandlerInterface` Implementations
-
-- **`IgnoreExceptionHandler`**: 인증 관련 오류를 무시
-- **`LoginRequiredExceptionHandler`**: 인증 오류시 `401 UNAUTHORIZED`, `403 FORBIDDEN` 에러 발생 
-- **`LoginForcedExceptionHandler`**: 인증 오류시 `OAuth2ProviderKeyConstant::AUTHORIZE_URL`로 redirect
-
-### Built-in `UserProviderInterface` Implementations
-
-- **`DefaultUserProvider`**: 정해진 URL을 통해 사용자 정보를 조회
-
-### `ridi.oauth2.middleware` 서비스: `Silex`와 함께 사용하기
-
-`OAuth2ServiceProvider`를 Silex 애플리케이션에 등록(`register`)해 사용한다.
+	
+#### Example: `OAuth2ProviderKeyConstant::MIDDLEWARE` Service
 
 ```php
 use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant as KeyConstant;
@@ -83,8 +118,7 @@ public function authRequiredApi(Application $app)
 }
 ```
 
-
-### `ridi.oauth2.authorizer` 서비스
+#### Example: `OAuth2ProviderKeyConstant::AUTHORIZER` Service
 
 ```php
 use Ridibooks\OAuth2\Authorization\Authorizer;
