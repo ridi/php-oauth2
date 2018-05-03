@@ -7,13 +7,14 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 ## [unreleased]
 
 ### Added
-
 - New `UserProviderInterface` implementation: `DefaultUserProvider` for default action to acquire user information from URL
 - New Option: `OAuth2ProviderKeyConstant::USER_INFO_URL` option for provider
 
+### Changed
+- Make the 1st param `$state` of `Granter::authorize()` optional
+
 ## [0.1.2] - 2018-04-30
 ### Added
-
 - Introduce new `ridi.oauth2.authorizer` Silex service provider utilized by `Authorizer` class.
 - `Authorizer` class for dealing with authorization without Silex context
 
@@ -26,22 +27,18 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [0.1.1] - 2018-04-26
 ### Fixed
-
 - Make `JwtTokenValidator::validateToken()` handle nullable access_token properly [#6](https://github.com/ridi/php-oauth2/pull/6)
 
 ## [0.1.0] - 2018-04-25
 ### Added
-
 - Silex Provider [#5](https://github.com/ridi/php-oauth2/pull/5)
 
 ## [0.0.2] - 2018-04-09
 ### Added
-
 - Middlewares for Symfony [#3](https://github.com/ridi/php-oauth2/pull/3)
 
 ## [0.0.1] - 2018-03-20
 ### Added
-
 - Initial release
 
 

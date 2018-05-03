@@ -38,7 +38,7 @@ class Granter
      * @param array $scope
      * @return string
      */
-    public function authorize(string $state, string $redirect_uri = null, array $scope = null): string
+    public function authorize(string $state = null, string $redirect_uri = null, array $scope = null): string
     {
         $query = http_build_query([
             'client_id' => $this->client_info->getClientId(),
