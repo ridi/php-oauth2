@@ -55,32 +55,6 @@ $authorization_url = $granter->authorize();
 
 `OAuth2ServiceProvider`를 Silex 애플리케이션에 등록(`register`)해 사용한다.
 
-### Options
-
-- **`OAuth2ProviderKeyConstant::CLIENT_ID`**: (default = `null`)
-- **`OAuth2ProviderKeyConstant::CLIENT_SECRET`**: (default = `null`)
-- **`OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE`**: (default = `[]`) 미들웨어에서 체크할 scope 기본값
-- **`OAuth2ProviderKeyConstant::CLIENT_DEFAULT_REDIRECT_URI`**: (default = `null`)
-- **`OAuth2ProviderKeyConstant::AUTHORIZE_URL`**: (default = `https://account.ridibooks.com/oauth2/authorize/`)
-- **`OAuth2ProviderKeyConstant::TOKEN_URL`**: (default = `https://account.ridibooks.com/oauth2/token/`)
-- **`OAuth2ProviderKeyConstant::USER_INFO_URL`**: (default = `https://account.ridibooks.com/accounts/me/`)
-- **`OAuth2ProviderKeyConstant::JWT_ALGORITHM`**: (default = `HS256`)
-- **`OAuth2ProviderKeyConstant::JWT_SECRET`**: (default = `secret`)
-- **`OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM`**: (default = `60 * 5` seconds)
-- **`OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER`**: (default = `null`) 미들웨어에서 사용할 기본 `OAuth2ExceptionHandlerInterface` 구현체
-- **`OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER`**: (default = `DefaultUserProvider`) 미들웨어에서 사용할 기본 `UserProviderInterface` 구현체
-
-#### Built-in `OAuth2ExceptionHandlerInterface` Implementations
-
-- **`IgnoreExceptionHandler`**: 인증 관련 오류를 무시
-- **`LoginRequiredExceptionHandler`**: 인증 오류시 `401 UNAUTHORIZED`, `403 FORBIDDEN` 에러 발생 
-- **`LoginForcedExceptionHandler`**: 인증 오류시 `OAuth2ProviderKeyConstant::AUTHORIZE_URL`로 redirect
-
-#### Built-in `UserProviderInterface` Implementations
-
-- **`DefaultUserProvider`**: 정해진 URL을 통해 사용자 정보를 조회
-
-
 ### Services
 
 - **`OAuth2ProviderKeyConstant::GRANTER`**
