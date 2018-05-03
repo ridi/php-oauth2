@@ -16,6 +16,8 @@
 
 ```bash
 composer require ridibooks/oauth2
+// If needed
+composer require silex/silex:1.3 guzzlehttp/guzzle
 ```
 
 ## Usage
