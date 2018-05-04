@@ -38,7 +38,10 @@ class DefaultUserProvider implements UserProviderInterface
 
         $client = new Client($this->http_options);
         try {
-            $response = $client->get($this->user_info_url, ['cookies' => $cookie_jar]);
+            $response = $client->get($this->user_info_url, [
+                'cookies' => $cookie_jar,
+                'headers' => ['Accept' => 'application/json'],
+            ]);
             $content = $response->getBody()->getContents();
         } catch (BadResponseException $e) {
             $status = $e->getResponse()->getStatusCode();
