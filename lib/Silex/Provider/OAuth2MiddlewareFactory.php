@@ -37,7 +37,7 @@ class OAuth2MiddlewareFactory
                 $token = $this->authorizer->authorize($request, $required_scopes);
 
                 if (isset($user_provider)) {
-                    $user = $user_provider->getUser($token);
+                    $user = $user_provider->getUser($token, $request, $app);
                     $app[OAuth2ProviderKeyConstant::USER] = $user;
                 }
             } catch (AuthorizationException $e) {

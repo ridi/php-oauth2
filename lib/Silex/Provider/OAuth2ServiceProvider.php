@@ -11,6 +11,58 @@ use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 
+/**
+ * Class OAuth2ServiceProvider
+ *
+ * OAuth2 Service Provider for Silex
+ * @see https://silex.symfony.com/doc/1.3/providers.html
+ *
+ * @package Ridibooks\OAuth2\Silex\Provider
+ *
+ * **Example usage:**
+ * ```php
+ *      $app->register(new OAuth2ServiceProvider(), [
+ *          OAuth2ProviderKeyConstant::CLIENT_ID => 'example-client-id',
+ *          OAuth2ProviderKeyConstant::CLIENT_SECRET => 'example-client-secret',
+ *          OAuth2ProviderKeyConstant::JWT_ALGORITHM => 'HS256',
+ *          OAuth2ProviderKeyConstant::JWT_SECRET => 'example-secret'
+ *      ]);
+ *      ...
+ *      $app->get('/auth-required', [$this, 'authRequiredApi'])
+ *          ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize(new LoginRequiredExceptionHandler(), new UserProvider());
+ * ```
+ *
+ * **`OAuth2ServiceProvider` Options: @see OAuth2ProviderKeyConstant**
+ *
+ * - OAuth2ProviderKeyConstant::CLIENT_ID: (default = null)
+ * - OAuth2ProviderKeyConstant::CLIENT_SECRET: (default = null)
+ * - OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE: (default = []) Default required scopes checked at middleware
+ * - OAuth2ProviderKeyConstant::CLIENT_DEFAULT_REDIRECT_URI: (default = null)
+ * - OAuth2ProviderKeyConstant::AUTHORIZE_URL: (default = https://account.ridibooks.com/oauth2/authorize/)
+ * - OAuth2ProviderKeyConstant::TOKEN_URL: (default = https://account.ridibooks.com/oauth2/token/)
+ * - OAuth2ProviderKeyConstant::USER_INFO_URL: (default = https://account.ridibooks.com/accounts/me/)
+ * - OAuth2ProviderKeyConstant::JWT_ALGORITHM: (default = HS256)
+ * - OAuth2ProviderKeyConstant::JWT_SECRET: (default = secret)
+ * - OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM: (default = 60 * 5 seconds)
+ * - OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER: (default = null) Default `OAuth2ExceptionHandlerInterface` implementation used by middleware
+ * - OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER: (default = DefaultUserProvider) Default `UserProviderInterface` implementation used by middleware
+ *
+ * **Built-in `OAuth2ExceptionHandlerInterface` Implementations:**
+ *
+ * - **`IgnoreExceptionHandler`**: Ignore all `AuthorizationException`
+ * - **`LoginRequiredExceptionHandler`**: Handle `AuthorizationException` with `401 UNAUTHORIZED`, `403 FORBIDDEN` response
+ * - **`LoginForcedExceptionHandler`**: Redirect `OAuth2ProviderKeyConstant::AUTHORIZE_URL` when `AuthorizationException` is occurred
+ *
+ * **Built-in `UserProviderInterface` Implementations:**
+ *
+ * - **`DefaultUserProvider`**: Get user information through specified URL request with access_token
+ *
+ * **`OAuth2ServiceProvider` Services:**
+ *
+ * - OAuth2ProviderKeyConstant::GRANTER @see Granter
+ * - OAuth2ProviderKeyConstant::AUTHORIZER @see Authorizer
+ * - OAuth2ProviderKeyConstant::MIDDLEWARE @see OAuth2MiddlewareFactory
+ */
 class OAuth2ServiceProvider implements ServiceProviderInterface
 {
     private $app;
@@ -25,15 +77,18 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
         $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE] = [];
         $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_REDIRECT_URI] = null;
 
-        $app[OAuth2ProviderKeyConstant::AUTHORIZE_URL] = 'https://account.ridibooks.com/oauth2/authorize';
-        $app[OAuth2ProviderKeyConstant::TOKEN_URL] = 'https://account.ridibooks.com/oauth2/token';
+        $app[OAuth2ProviderKeyConstant::AUTHORIZE_URL] = 'https://account.ridibooks.com/oauth2/authorize/';
+        $app[OAuth2ProviderKeyConstant::TOKEN_URL] = 'https://account.ridibooks.com/oauth2/token/';
+        $app[OAuth2ProviderKeyConstant::USER_INFO_URL] = 'https://account.ridibooks.com/accounts/me/';
 
         $app[OAuth2ProviderKeyConstant::JWT_ALGORITHM] = 'HS256';
         $app[OAuth2ProviderKeyConstant::JWT_SECRET] = 'secret';
         $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM] = 60 * 5;
 
         $app[OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER] = null;
-        $app[OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER] = null;
+        $app[OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER] = function ($app) {
+            return new DefaultUserProvider($app[OAuth2ProviderKeyConstant::USER_INFO_URL]);
+        };
 
         $app[OAuth2ProviderKeyConstant::USER] = null;
         $app[OAuth2ProviderKeyConstant::STATE] = null;

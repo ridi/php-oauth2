@@ -1,8 +1,6 @@
 <?php declare(strict_types=1);
 
-
 namespace Ridibooks\Test\OAuth2\Authorization;
-
 
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Authorizer;

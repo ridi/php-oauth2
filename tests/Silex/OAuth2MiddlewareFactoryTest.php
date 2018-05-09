@@ -2,6 +2,9 @@
 
 namespace Ridibooks\Test\OAuth2\Silex;
 
+use GuzzleHttp\Handler\MockHandler;
+use GuzzleHttp\HandlerStack;
+use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2\Grant\Granter;
@@ -9,6 +12,7 @@ use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
 use Ridibooks\OAuth2\Silex\Handler\IgnoreExceptionHandler;
 use Ridibooks\OAuth2\Silex\Handler\LoginForcedExceptionHandler;
 use Ridibooks\OAuth2\Silex\Handler\LoginRequiredExceptionHandler;
+use Ridibooks\OAuth2\Silex\Provider\DefaultUserProvider;
 use Ridibooks\OAuth2\Silex\Provider\OAuth2ServiceProvider;
 use Ridibooks\Test\OAuth2\Common\TestUserProvider;
 use Ridibooks\Test\OAuth2\Common\TokenConstant;
@@ -36,6 +40,14 @@ class OAuth2MiddlewareFactoryTest extends TestCase
         ], $options);
         $app->register(new OAuth2ServiceProvider(), $options);
         return $app;
+    }
+
+    private function getDefaultUserProvider(GuzzleResponse $expected_response)
+    {
+        $mock = new MockHandler([$expected_response]);
+        $handler = HandlerStack::create($mock);
+
+        return new DefaultUserProvider('/', ['handler' => $handler]);
     }
 
     public function testLoadUser()
@@ -157,6 +169,55 @@ class OAuth2MiddlewareFactoryTest extends TestCase
             ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize());
 
         $access_token = TokenConstant::TOKEN_UNKNOWN_USER;
+        $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
+        $resp = $app->handle($req);
+
+        $this->assertEquals(Response::HTTP_UNAUTHORIZED, $resp->getStatusCode());
+    }
+
+    public function testDefaultUserProvider()
+    {
+        // Initialize DefaultUserProvider Mock
+        $body = [
+            "result" => [
+                "id" => TokenConstant::USERNAME,
+                "idx" => TokenConstant::USER_IDX,
+                "is_verified_adult" => true,
+            ],
+            "message" => "정상적으로 완료되었습니다."
+        ];
+        $response = new GuzzleResponse(200, [], json_encode($body));
+        $userProvider = $this->getDefaultUserProvider($response);
+
+        // Initialize App
+        $app = $this->registerProvider();
+        $app->get('/', function () {})
+            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize([], new IgnoreExceptionHandler(), $userProvider));
+
+        $access_token = TokenConstant::TOKEN_VALID;
+        $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
+        $app->handle($req);
+
+        $this->assertEquals(TokenConstant::USER_IDX, $app[OAuth2ProviderKeyConstant::USER]->idx);
+        $this->assertEquals(TokenConstant::USERNAME, $app[OAuth2ProviderKeyConstant::USER]->id);
+    }
+
+    public function testDefaultUserProviderUserNotFound()
+    {
+        // Initialize DefaultUserProvider Mock
+        $body = [
+            'code' => 'LOGIN_REQUIRED',
+            'message' => '로그인이 필요합니다.'
+        ];
+        $response = new GuzzleResponse(401, [], json_encode($body));
+        $userProvider = $this->getDefaultUserProvider($response);
+
+        // Initialize App
+        $app = $this->registerProvider();
+        $app->get('/', function () {})
+            ->before($app[OAuth2ProviderKeyConstant::MIDDLEWARE]->authorize([], new LoginRequiredExceptionHandler(), $userProvider));
+
+        $access_token = TokenConstant::TOKEN_VALID;
         $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
         $resp = $app->handle($req);
 
