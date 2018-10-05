@@ -3,7 +3,6 @@
 namespace Ridibooks\OAuth2\Silex\Provider;
 
 use GuzzleHttp\Client;
-use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\BadResponseException;
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
@@ -16,7 +15,6 @@ use Symfony\Component\HttpFoundation\Response;
 
 class DefaultUserProvider implements UserProviderInterface
 {
-    const TOKEN_COOKIE_DOMAIN = '.ridibooks.com';
     private $user_info_url;
     private $http_options;
 
@@ -33,14 +31,13 @@ class DefaultUserProvider implements UserProviderInterface
             throw new TokenNotFoundException();
         }
 
-        $cookie_jar = CookieJar::fromArray([AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token],
-            self::TOKEN_COOKIE_DOMAIN);
-
         $client = new Client($this->http_options);
         try {
             $response = $client->get($this->user_info_url, [
-                'cookies' => $cookie_jar,
-                'headers' => ['Accept' => 'application/json'],
+                'headers' => [
+                    'Accept' => 'application/json',
+                    'Cookie' => AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY . '=' . $access_token
+                ]
             ]);
             $content = $response->getBody()->getContents();
         } catch (BadResponseException $e) {
