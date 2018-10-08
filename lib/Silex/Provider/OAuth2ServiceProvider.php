@@ -77,6 +77,8 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
         $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE] = [];
         $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_REDIRECT_URI] = null;
 
+        $app[OAuth2ProviderKeyConstant::TOKEN_COOKIE_DOMAIN] = '.ridibooks.com';
+
         $app[OAuth2ProviderKeyConstant::AUTHORIZE_URL] = 'https://account.ridibooks.com/oauth2/authorize/';
         $app[OAuth2ProviderKeyConstant::TOKEN_URL] = 'https://account.ridibooks.com/oauth2/token/';
         $app[OAuth2ProviderKeyConstant::USER_INFO_URL] = 'https://account.ridibooks.com/accounts/me/';

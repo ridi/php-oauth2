@@ -24,17 +24,21 @@ class OAuth2MiddlewareFactory
         $this->default_user_provider = $app[OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER];
     }
 
-    public function authorize(array $required_scopes = [], OAuth2ExceptionHandlerInterface $exception_handler = null, UserProviderInterface $user_provider = null)
-    {
+    public function authorize(
+        array $required_scopes = [],
+        OAuth2ExceptionHandlerInterface $exception_handler = null,
+        UserProviderInterface $user_provider = null,
+        $use_refreshing_access_token = false
+    ) {
         if ($exception_handler === null) {
             $exception_handler = $this->default_exception_handler;
         }
         if ($user_provider === null) {
             $user_provider = $this->default_user_provider;
         }
-        return function (Request $request, Application $app) use ($required_scopes, $exception_handler, $user_provider) {
+        return function (Request $request, Application $app) use ($required_scopes, $exception_handler, $user_provider, $use_refreshing_access_token) {
             try {
-                $token = $this->authorizer->authorize($request, $required_scopes);
+                $token = $this->authorizer->authorize($request, $app, $required_scopes, $use_refreshing_access_token);
 
                 if (isset($user_provider)) {
                     $user = $user_provider->getUser($token, $request, $app);
