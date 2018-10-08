@@ -119,10 +119,11 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
             $jwt_secret = $app[OAuth2ProviderKeyConstant::JWT_SECRET];
             $jwt_expire_term = $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM];
 
-            $client_default_scope = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE];
             $jwt_token_validator = new JwtTokenValidator($jwt_secret, $jwt_algorithm, $jwt_expire_term);
+            $granter = $app[OAuth2ProviderKeyConstant::GRANTER];
+            $client_default_scope = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE];
 
-            return new Authorizer($jwt_token_validator, $client_default_scope);
+            return new Authorizer($jwt_token_validator, $granter, $client_default_scope);
         };
 
         $app[OAuth2ProviderKeyConstant::MIDDLEWARE] = $app->share(function ($app) {
