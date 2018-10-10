@@ -36,8 +36,10 @@ class JwtTokenValidator
     /**
      * @param string|null $access_token
      * @return JwtToken
-     * @throws AuthorizationException
+     * @throws ExpiredTokenException
+     * @throws InvalidJwtException
      * @throws TokenNotFoundException
+     * @throws \Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException
      */
     public function validateToken($access_token): JwtToken
     {

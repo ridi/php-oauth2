@@ -44,8 +44,12 @@ class AuthorizerTest extends TestCase
         $app->get('/', function (Application $app, Request $request) {
             /** @var Authorizer $authorizer */
             $authorizer = $app[OAuth2ProviderKeyConstant::AUTHORIZER];
-            $token = $authorizer->authorize($request);
-            return $token->getSubject();
+
+            $access_token = $request->cookies->get(AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY);
+            $refresh_token = $request->cookies->get(AccessTokenConstant::REFRESH_TOKEN_COOKIE_KEY);
+
+            $authorize_result = $authorizer->authorize($access_token, $refresh_token);
+            return $authorize_result->getJwtToken()->getSubject();
         });
 
         $access_token = TokenConstant::TOKEN_VALID;
@@ -64,8 +68,12 @@ class AuthorizerTest extends TestCase
             /** @var Authorizer $authorizer */
             $authorizer = $app[OAuth2ProviderKeyConstant::AUTHORIZER];
             try {
-                $token = $authorizer->authorize($request);
-                return $token->getSubject();
+                $access_token = $request->cookies->get(AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY);
+                $refresh_token = $request->cookies->get(AccessTokenConstant::REFRESH_TOKEN_COOKIE_KEY);
+
+                $authorize_result = $authorizer->authorize($access_token, $refresh_token);
+
+                return $authorize_result->getJwtToken()->getSubject();
             } catch (AuthorizationException $e) {
                 $app->abort(401);
             }

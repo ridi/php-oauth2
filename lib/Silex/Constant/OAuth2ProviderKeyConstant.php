@@ -10,6 +10,8 @@ class OAuth2ProviderKeyConstant
     const CLIENT_DEFAULT_SCOPE = 'ridi.oauth2.default_scope';
     const CLIENT_DEFAULT_REDIRECT_URI = 'ridi.oauth2.default_redirect_uri';
 
+    const TOKEN_COOKIE_DOMAIN = 'ridi.oauth2.token_cookie_domain';
+
     const AUTHORIZE_URL = 'ridi.oauth2.authorize_url';
     const TOKEN_URL = 'ridi.oauth2.token_url';
     const USER_INFO_URL = 'ridi.oauth2.user_info_url';
