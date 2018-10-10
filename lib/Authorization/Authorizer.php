@@ -33,14 +33,14 @@ class Authorizer
         // 1. Validate access_token
         try {
             $token = $this->token_validator->validateToken($access_token);
-            $authorize_result = AuthorizeResult::createForAuthorizedToken($token);
+            $authorize_result = AuthorizeResult::createFromAuthorizedToken($token);
         } catch (TokenNotFoundException | ExpiredTokenException $e) {
             // Refresh access token if requested
             if ($use_refreshing_access_token && !empty($refresh_token)) {
                 $token_data = $this->granter->refresh($refresh_token);
                 $token = $this->token_validator->validateToken($token_data->getAccessToken()->getToken());
 
-                $authorize_result = AuthorizeResult::createForRefreshedAndAuthorizedToken($token, $token_data);
+                $authorize_result = AuthorizeResult::createFromRefreshedAndAuthorizedToken($token, $token_data);
             } else {
                 throw $e;
             }

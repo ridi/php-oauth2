@@ -10,16 +10,12 @@ class AuthorizeResult
     /** @var JwtToken */
     private $jwt_token;
 
-    /** @var bool */
-    private $token_refreshed;
-
     /** @var TokenData */
     private $refreshed_token_data;
 
-    private function __construct(JwtToken $jwt_token, bool $token_refreshed, ?TokenData $refreshed_token_data)
+    private function __construct(JwtToken $jwt_token, ?TokenData $refreshed_token_data)
     {
         $this->jwt_token = $jwt_token;
-        $this->token_refreshed = $token_refreshed;
         $this->refreshed_token_data = $refreshed_token_data;
     }
 
@@ -27,9 +23,9 @@ class AuthorizeResult
      * @param JwtToken $jwt_token
      * @return AuthorizeResult
      */
-    public static function createForAuthorizedToken(JwtToken $jwt_token)
+    public static function createFromAuthorizedToken(JwtToken $jwt_token)
     {
-        return new AuthorizeResult($jwt_token, false, null);
+        return new AuthorizeResult($jwt_token, null);
     }
 
     /**
@@ -37,9 +33,9 @@ class AuthorizeResult
      * @param TokenData $refreshed_token_data
      * @return AuthorizeResult
      */
-    public static function createForRefreshedAndAuthorizedToken(JwtToken $jwt_token, TokenData $refreshed_token_data)
+    public static function createFromRefreshedAndAuthorizedToken(JwtToken $jwt_token, TokenData $refreshed_token_data)
     {
-        return new AuthorizeResult($jwt_token, true, $refreshed_token_data);
+        return new AuthorizeResult($jwt_token, $refreshed_token_data);
     }
 
     /**
@@ -55,7 +51,7 @@ class AuthorizeResult
      */
     public function isTokenRefreshed(): bool
     {
-        return $this->token_refreshed;
+        return ($this->refreshed_token_data !== null);
     }
 
     /**
