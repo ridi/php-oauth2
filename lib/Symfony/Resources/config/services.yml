@@ -1,0 +1,10 @@
+services:
+  oauth2_service_provider:
+    class: Ridibooks\OAuth2\Symfony\Provider\OAuth2ServiceProvider
+    autowire: true
+    autoconfigure: true
+    public: false
+    arguments:
+      - '@annotation_reader'
+      - '@event_dispatcher'
+      - '%o_auth2_service_provider%'
