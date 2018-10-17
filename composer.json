@@ -18,5 +18,10 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^7"
+    },
+    "suggest": {
+        "silex/silex": "Required when using `OAuth2ServiceProvider`(compatible with `1.x.x` version)",
+        "symfony/symfony": "Required when using `OAuth2ServiceProviderBundle`",
+        "guzzlehttp/guzzle": "Required when using `OAuth2ServiceProvider` and `DefaultUserProvider` of Silex & Symfony"
     }
 }
