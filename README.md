@@ -128,7 +128,7 @@ $app->get('/', function (Application $app, Request $request) {
 });
 ```
 
-## Usage: with Symfony Provider
+## Usage: with Symfony Bundle
 
 ### Services
 - **`Granter()`**
@@ -157,17 +157,19 @@ return [
 ```
 
 ##### 2. Parameter 및 Service 설정
+- '%env(VARIABLE)%'을 이용해 environment variable을 이용할 수 있습니다. 
+
 ```yaml
 # example: <project_root>/config/packages/o_auth2_service_provider.yml
 
 o_auth2_service_provider:
-  client_id: iax7OcCuYJ8Su5p9swjs7RNosL7zYZ4zdV5xyHVx
-  client_secret: vk31iDFzVM1EKQySvkp46TUNjWn9Bvc1wv7CLSwEWzAUDz5GA3iN0QjGktVXi53KCHxIcfq3V62q9aSQkWzB1zx8Um6OWYO4nEqtJYj4uPHnhjDKW7tV4zGeW9yygvZx
+  client_id: '%env(CLIENT_ID)%'
+  client_secret: '%env(CLIENT_SECRET)%'
   authorize_url: https://account.dev.ridi.io/ridi/authorize/
   token_url: https://account.dev.ridi.io/oauth2/token/
   user_info_url: https://account.dev.ridi.io/accounts/me/
   token_cookie_domain: .ridi.io
-  jwt_secret: secret
+  jwt_secret: '%env(JWT_SECRET)%'
 ```
 
 ```yaml
