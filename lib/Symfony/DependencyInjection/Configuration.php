@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Ridibooks\OAuth2\Symfony\DependencyInjection;
 
+use Ridibooks\OAuth2\Symfony\Provider\DefaultUserProvider;
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 
@@ -58,6 +59,14 @@ class Configuration implements ConfigurationInterface
                 ->end()
                 ->integerNode('jwt_expire_term')
                     ->defaultValue(5 * 60)
+                ->end()
+                ->scalarNode('default_user_provider')
+                    ->cannotBeEmpty()
+                    ->defaultValue(DefaultUserProvider::class)
+                ->end()
+                ->scalarNode('default_exception_handler')
+                    ->isRequired()
+                    ->cannotBeEmpty()
                 ->end()
             ->end();
 

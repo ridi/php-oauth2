@@ -25,7 +25,7 @@ class TestController extends Controller
 
     /**
      * @Route("/oauth2", methods={"GET"})
-     * @OAuth2(exception_handler="Ridibooks\Test\OAuth2\Symfony\TestExceptionHandler")
+     * @OAuth2()
      *
      * @param Request $request
      * @return JsonResponse
@@ -42,10 +42,7 @@ class TestController extends Controller
 
     /**
      * @Route("/oauth2-scope-test", methods={"GET"})
-     * @OAuth2(
-     *   scopes={"test_scope"},
-     *   exception_handler="Ridibooks\Test\OAuth2\Symfony\TestExceptionHandler"
-     * )
+     * @OAuth2(scopes={"test_scope"})
      *
      * @param Request $request
      * @return JsonResponse

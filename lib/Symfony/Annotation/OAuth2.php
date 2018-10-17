@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Ridibooks\OAuth2\Symfony\Annotation;
 
 use Ridibooks\OAuth2\Symfony\Handler\OAuth2ExceptionHandlerInterface;
-use Ridibooks\OAuth2\Symfony\Provider\DefaultUserProvider;
 use Ridibooks\OAuth2\Symfony\Provider\UserProviderInterface;
 use Ridibooks\OAuth2\Symfony\Subscriber\OAuth2Middleware;
 
@@ -22,10 +21,10 @@ class OAuth2
     /** @var string[] */
     private $scopes;
 
-    /** @var UserProviderInterface */
+    /** @var null|string */
     private $user_provider;
 
-    /** @var OAuth2ExceptionHandlerInterface */
+    /** @var null|string */
     private $exception_handler;
 
     /**
@@ -47,17 +46,17 @@ class OAuth2
     }
 
     /**
-     * @return UserProviderInterface
+     * @return null|string
      */
-    public function getUserProvider(): UserProviderInterface
+    public function getUserProvider(): ?string
     {
         return $this->user_provider;
     }
 
     /**
-     * @return OAuth2ExceptionHandlerInterface
+     * @return null|string
      */
-    public function getExceptionHandler(): OAuth2ExceptionHandlerInterface
+    public function getExceptionHandler(): ?string
     {
         return $this->exception_handler;
     }
@@ -80,22 +79,7 @@ class OAuth2
     private function setUserProvider(array $data)
     {
         if (isset($data['user_provider'])) {
-            $user_provider_class = $data['user_provider'];
-
-            try {
-                $reflection_class = new \ReflectionClass($user_provider_class);
-            } catch (\Exception $e) {
-                throw new \InvalidArgumentException('The user_provider is invalid.');
-            }
-
-            $user_provider_interface_class = UserProviderInterface::class;
-            if (!in_array($user_provider_interface_class, $reflection_class->getInterfaceNames())) {
-                throw new \InvalidArgumentException("The user_provider must implement {$user_provider_interface_class}.");
-            }
-
-            $this->user_provider = new $user_provider_class();
-        } else {
-            $this->user_provider = new DefaultUserProvider();
+            $this->user_provider = $data['user_provider'];
         }
     }
 
@@ -104,24 +88,8 @@ class OAuth2
      */
     private function setExceptionHandler(array $data)
     {
-        if (!isset($data['exception_handler'])) {
-            throw new \InvalidArgumentException('The exception_handler is required.');
+        if (isset($data['exception_handler'])) {
+            $this->exception_handler = $data['exception_handler'];
         }
-
-        try {
-            $exception_handler_class = $data['exception_handler'];
-            $reflection_class = new \ReflectionClass($exception_handler_class);
-        } catch (\Exception $e) {
-            throw new \InvalidArgumentException('The exception_handler is invalid.');
-        }
-
-        $exception_handler_interface_class = OAuth2ExceptionHandlerInterface::class;
-        if (!in_array($exception_handler_interface_class, $reflection_class->getInterfaceNames())) {
-            throw new \InvalidArgumentException(
-                "The exception_handler must implement {$exception_handler_interface_class}."
-            );
-        }
-
-        $this->exception_handler = new $exception_handler_class();
     }
 }

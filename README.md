@@ -170,6 +170,7 @@ o_auth2_service_provider:
   user_info_url: https://account.dev.ridi.io/accounts/me/
   token_cookie_domain: .ridi.io
   jwt_secret: '%env(JWT_SECRET)%'
+  default_exception_handler: Ridibooks\OAuth2\Example\DefaultExceptionHandler
 ```
 
 ```yaml
