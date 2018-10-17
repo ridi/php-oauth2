@@ -20,8 +20,8 @@
         "phpunit/phpunit": "^7"
     },
     "suggest": {
-        "silex/silex": "Required when using `OAuth2ServiceProvider`(compatible with `1.x.x` version)",
-        "symfony/symfony": "Required when using `OAuth2ServiceProviderBundle`",
-        "guzzlehttp/guzzle": "Required when using `OAuth2ServiceProvider` and `DefaultUserProvider` of Silex & Symfony"
+        "silex/silex": "Required when using `Ridibooks\\OAuth2\\Silex\\Provider\\OAuth2ServiceProvider`(compatible with 1.3.x versions)",
+        "symfony/symfony": "Required when using `Ridibooks\\OAuth2\\Symfony\\OAuth2ServiceProviderBundle`(compatible with 4.x.x versions)",
+        "guzzlehttp/guzzle": "Required when using `Ridibooks\\OAuth2\\Silex\\Provider\\DefaultUserProvider`or `Ridibooks\\OAuth2\\Symfony\\Provider\\DefaultUserProvider`"
     }
 }
