@@ -157,7 +157,22 @@ return [
 ```
 
 ##### 2. Parameter 및 Service 설정
-- '%env(VARIABLE)%'을 이용해 environment variable을 이용할 수 있습니다. 
+- '%env(VARIABLE)%'을 이용해 environment variable을 이용할 수 있습니다.
+- Required
+  - client_id
+  - client_secret
+  - authorize_url
+  - token_url
+  - user_info_url
+  - token_cookie_domain
+  - jwt_secret
+  - default_exception_handler
+- optional
+  - client_default_scope
+  - client_default_redirect_uri
+  - jwt_algorithm
+  - jwt_expire_term
+  - default_user_provider
 
 ```yaml
 # example: <project_root>/config/packages/o_auth2_service_provider.yml
@@ -212,7 +227,7 @@ class ExampleController extends Controller
 
     /**
      * @Route("/oauth2", methods={"GET"})
-     * @OAuth2(exception_handler="Ridibooks\OAuth2\Example\ExampleExceptionHandler")
+     * @OAuth2()
      *
      * @param Request $request
      * @return Response
@@ -231,7 +246,7 @@ class ExampleController extends Controller
 
 #### OAuth2 Exception Handler 설정
 - Exception Handler는 OAuth2 과정 중, 오류 발생 시 Exception 상황을 처리하는 역할을 담당합니다. 
-- `OAuth2Middleware`를 이용하려는 경우, Exception Handler는 반드시 지정이 필요합니다.
+- Application Controller에서 `default_exception_handler` 파라미터로 지정한 Exception Handler가 아닌 별도의 Exception Handler를 이용하려는 경우, 아래 절차를 따릅니다.
     - `Ridibooks\OAuth2\Symfony\Handler\OAuth2ExceptionHandlerInterface`를 implement한 Exception Handler를 생성합니다.
          - example: `Ridibooks\Test\OAuth2\Symfony\TestExceptionHandler`
     - Application Controller의 `@OAuth2` Annotation에서 `exception_handler` 속성을 지정합니다.
@@ -239,8 +254,8 @@ class ExampleController extends Controller
 
 #### Custom User Provider 설정
 - User Provider는 인증 이후, User 정보를 가져오는 역할을 담당합니다.
-- 별도의 User Provider를 지정하지 않으면, `Ridibooks\OAuth2\Symfony\Provider\DefaultUserProvider`를 이용합니다.
-- `DefaultUserProvider`가 아닌 다른 User Provider를 이용하려는 경우, 아래 절차를 따릅니다.
+- `default_user_provider` 파라미터를 지정하지 않은 경우, 기본적으로 `Ridibooks\OAuth2\Symfony\Provider\DefaultUserProvider`를 이용합니다.
+- Application Controller에서 `default_user_provider` 파라미터로 지정한 User Provider가 아닌 별도의 User Provider를 이용하려는 경우, 아래 절차를 따릅니다.
     - `Ridibooks\OAuth2\Symfony\Provider\UserProviderInterface`를 implement한 User Provider를 생성합니다.
     - Application Controller의 `@OAuth2` Annotation에서 `user_provider` 속성을 지정합니다.
 ```php
@@ -280,10 +295,7 @@ class ExampleController extends Controller
 {
     /**
      * @Route("/oauth2", methods={"GET"})
-     * @OAuth2(
-     *   user_provider="Ridibooks\OAuth2\Example\CustomUserProvider",
-     *   exception_handler="Ridibooks\OAuth2\Example\ExampleExceptionHandler"
-     * )
+     * @OAuth2(user_provider="Ridibooks\OAuth2\Example\CustomUserProvider")
      *
      * @param Request $request
      * @return Response
