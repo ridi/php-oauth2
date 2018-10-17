@@ -12,12 +12,16 @@
         }
     },
     "require": {
-        "firebase/php-jwt": "^4.0|^5.0",
-        "guzzlehttp/guzzle": "^6.3",
-        "symfony/symfony": "^4.0"
+        "firebase/php-jwt": "^4.0|^5.0"
     },
     "require-dev": {
+        "symfony/symfony": "^4.0",
+        "guzzlehttp/guzzle": "^6.3",
         "phpunit/phpunit": "^7",
         "codeception/aspect-mock": "^3.0"
+    },
+    "suggest": {
+        "symfony/symfony": "Required when using `OAuth2ServiceProviderBundle`",
+        "guzzlehttp/guzzle": "Required when using `OAuth2ServiceProviderBundle` and `DefaultUserProvider`"
     }
 }
