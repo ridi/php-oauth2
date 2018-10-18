@@ -1,0 +1,9 @@
+o_auth2_service_provider:
+  client_id: iax7OcCuYJ8Su5p9swjs7RNosL7zYZ4zdV5xyHVx
+  client_secret: vk31iDFzVM1EKQySvkp46TUNjWn9Bvc1wv7CLSwEWzAUDz5GA3iN0QjGktVXi53KCHxIcfq3V62q9aSQkWzB1zx8Um6OWYO4nEqtJYj4uPHnhjDKW7tV4zGeW9yygvZx
+  authorize_url: https://account.dev.ridi.io/ridi/authorize/
+  token_url: https://account.dev.ridi.io/oauth2/token/
+  user_info_url: https://account.dev.ridi.io/accounts/me/
+  token_cookie_domain: .ridi.io
+  jwt_secret: secret
+  default_exception_handler: Ridibooks\Test\OAuth2\Symfony\TestExceptionHandler

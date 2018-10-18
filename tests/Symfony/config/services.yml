@@ -1,0 +1,8 @@
+services:
+  Ridibooks\Test\OAuth2\Symfony\TestController:
+    class: Ridibooks\Test\OAuth2\Symfony\TestController
+    autowire: true
+    autoconfigure: true
+    public: false
+    arguments:
+      - '@oauth2_service_provider'

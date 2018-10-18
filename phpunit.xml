@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <phpunit bootstrap="vendor/autoload.php"
- colors="true"
- stderr="true"
+    colors="true"
+    stderr="true"
 >
     <testsuites>
         <testsuite name="Test Suite">
             <directory>./tests</directory>
+            <exclude>./tests/Symfony</exclude>
         </testsuite>
     </testsuites>
 
