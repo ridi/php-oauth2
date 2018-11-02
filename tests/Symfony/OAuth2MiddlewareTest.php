@@ -33,6 +33,7 @@ class OAuth2MiddlewareTest extends WebTestCase
                         "result" => [
                             "id" => TokenConstant::USERNAME,
                             "idx" => TokenConstant::USER_IDX,
+                            "email" => 'oauth2-test@ridi.com',
                             "is_verified_adult" => true,
                         ],
                         "message" => "정상적으로 완료되었습니다."
