@@ -13,6 +13,12 @@ class User
     /** @var string */
     private $u_id;
 
+    /** @var string */
+    private $email;
+
+    /** @var bool */
+    private $is_verified_adult;
+
     /**
      * @param string $user_info_json
      * @throws AuthorizationException
@@ -27,6 +33,8 @@ class User
 
         $this->u_idx = $result->idx;
         $this->u_id = $result->id;
+        $this->email = $result->email;
+        $this->is_verified_adult = $result->is_verified_adult;
     }
 
     /**
@@ -43,5 +51,21 @@ class User
     public function getUid(): string
     {
         return $this->u_id;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEmail(): string
+    {
+        return $this->email;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isVerifiedAdult(): bool
+    {
+        return $this->is_verified_adult;
     }
 }
