@@ -5,5 +5,7 @@ o_auth2_service_provider:
   token_url: https://account.dev.ridi.io/oauth2/token/
   user_info_url: https://account.dev.ridi.io/accounts/me/
   token_cookie_domain: .ridi.io
-  jwt_secret: secret
+  jwt_keys:
+    - secret: secret
+      algorithm: HS256
   default_exception_handler: Ridibooks\Test\OAuth2\Symfony\TestExceptionHandler

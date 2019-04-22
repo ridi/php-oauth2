@@ -6,6 +6,7 @@ namespace Ridibooks\Test\OAuth2\Authorization;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
+use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtsignatureException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
@@ -16,9 +17,19 @@ final class TokenValidatorTest extends TestCase
 {
     private function validate($access_token)
     {
-        $validator = new JwtTokenValidator(TokenConstant::SECRET, TokenConstant::ALGORITHM, 300);
+        return JwtTokenValidator::create()
+            ->addKey(TokenConstant::SECRET, 'HS256')
+            ->setExpireTerm(300)
+            ->validateToken($access_token);
+    }
 
-        return $validator->validateToken($access_token);
+    private function validateWithKid($access_token)
+    {
+        return JwtTokenValidator::create()
+            ->addKey(TokenConstant::SECRET, 'HS256', 'kid0')
+            ->addKeyFromFile(TokenConstant::KEY_FILE, 'RS256', 'kid1')
+            ->setExpireTerm(300)
+            ->validateToken($access_token);
     }
 
     public function testCanIntrospect()
@@ -67,5 +78,28 @@ final class TokenValidatorTest extends TestCase
 
         $access_token = TokenConstant::TOKEN_EMPTY;
         $this->validate($access_token);
+    }
+
+    public function testCanIntrospectWithKid()
+    {
+        $access_token = TokenConstant::KID_TOKEN_VALID;
+        $token= $this->validateWithKid($access_token);
+
+        $this->assertNotNull($token);
+        $this->assertInstanceOf(JwtToken::class, $token);
+    }
+
+    public function testCannotIntrospectEmptyKid()
+    {
+        $this->expectException(InvalidJwtException::class);
+        $access_token = TokenConstant::KID_TOKEN_WITHOUT_KID;
+        $this->validateWithKid($access_token);
+    }
+
+    public function testCannotIntrospectWithInvalidKid()
+    {
+        $this->expectException(InvalidJwtException::class);
+        $access_token = TokenConstant::KID_TOKEN_INVALID_KID;
+        $this->validateWithKid($access_token);
     }
 }

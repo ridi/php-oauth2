@@ -5,6 +5,7 @@ namespace Ridibooks\Test\OAuth2\Authorization;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Authorizer;
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
+use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
 use Ridibooks\OAuth2\Silex\Handler\LoginRequiredExceptionHandler;
@@ -28,8 +29,7 @@ class AuthorizerTest extends TestCase
             OAuth2ProviderKeyConstant::CLIENT_SECRET => TokenConstant::CLIENT_SECRET,
             OAuth2ProviderKeyConstant::AUTHORIZE_URL => $this->authorization_url,
             OAuth2ProviderKeyConstant::TOKEN_URL => $this->token_url,
-            OAuth2ProviderKeyConstant::JWT_ALGORITHM => TokenConstant::ALGORITHM,
-            OAuth2ProviderKeyConstant::JWT_SECRET => TokenConstant::SECRET,
+            OAuth2ProviderKeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->addKey(TokenConstant::SECRET, 'HS256'),
             OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER => new TestUserProvider(),
             OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER => new LoginRequiredExceptionHandler(),
         ], $options);

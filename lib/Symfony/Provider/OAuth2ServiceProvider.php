@@ -92,11 +92,21 @@ class OAuth2ServiceProvider
 
     private function setAuthorizer(): void
     {
-        $jwt_token_validator = new JwtTokenValidator(
-            $this->configs['jwt_secret'],
-            $this->configs['jwt_algorithm'],
-            $this->configs['jwt_expire_term']
-        );
+        $jwt_token_validator = JwtTokenValidator::create();
+        if (!empty($this->configs['jwt_keys'])) {
+            foreach($this->configs['jwt_keys'] as $key_info) {
+                if (isset($key_info['secret'])) {
+                    $jwt_token_validator->addKey($key_info['secret'], $key_info['algorithm'], $key_info['kid'] ?? null);
+                } elseif (isset($key_info['file_path'])) {
+                    $jwt_token_validator->addKeyFromFile($key_info['file_path'], $key_info['algorithm'], $key_info['kid'] ?? null);
+                }
+            }
+        }
+
+        if (!isset($this->configs['jwt_expire_term'])) {
+            $jwt_token_validator->setExpireTerm($this->configs['jwt_expire_term']);
+        }
+
         $this->authorizer = new Authorizer($jwt_token_validator, $this->configs['client_default_scope']);
     }
 

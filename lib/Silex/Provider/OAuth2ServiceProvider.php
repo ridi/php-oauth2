@@ -24,8 +24,7 @@ use Silex\ServiceProviderInterface;
  *      $app->register(new OAuth2ServiceProvider(), [
  *          OAuth2ProviderKeyConstant::CLIENT_ID => 'example-client-id',
  *          OAuth2ProviderKeyConstant::CLIENT_SECRET => 'example-client-secret',
- *          OAuth2ProviderKeyConstant::JWT_ALGORITHM => 'HS256',
- *          OAuth2ProviderKeyConstant::JWT_SECRET => 'example-secret'
+ *          OAuth2ProviderKeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->addKey(...)
  *      ]);
  *      ...
  *      $app->get('/auth-required', [$this, 'authRequiredApi'])
@@ -41,9 +40,7 @@ use Silex\ServiceProviderInterface;
  * - OAuth2ProviderKeyConstant::AUTHORIZE_URL: (default = https://account.ridibooks.com/oauth2/authorize/)
  * - OAuth2ProviderKeyConstant::TOKEN_URL: (default = https://account.ridibooks.com/oauth2/token/)
  * - OAuth2ProviderKeyConstant::USER_INFO_URL: (default = https://account.ridibooks.com/accounts/me/)
- * - OAuth2ProviderKeyConstant::JWT_ALGORITHM: (default = HS256)
- * - OAuth2ProviderKeyConstant::JWT_SECRET: (default = secret)
- * - OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM: (default = 60 * 5 seconds)
+ * - OAuth2ProviderKeyConstant::JWT_VALIDATOR
  * - OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER: (default = null) Default `OAuth2ExceptionHandlerInterface` implementation used by middleware
  * - OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER: (default = DefaultUserProvider) Default `UserProviderInterface` implementation used by middleware
  *
@@ -81,10 +78,6 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
         $app[OAuth2ProviderKeyConstant::TOKEN_URL] = 'https://account.ridibooks.com/oauth2/token/';
         $app[OAuth2ProviderKeyConstant::USER_INFO_URL] = 'https://account.ridibooks.com/accounts/me/';
 
-        $app[OAuth2ProviderKeyConstant::JWT_ALGORITHM] = 'HS256';
-        $app[OAuth2ProviderKeyConstant::JWT_SECRET] = 'secret';
-        $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM] = 60 * 5;
-
         $app[OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER] = null;
         $app[OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER] = function ($app) {
             return new DefaultUserProvider($app[OAuth2ProviderKeyConstant::USER_INFO_URL]);
@@ -113,12 +106,8 @@ class OAuth2ServiceProvider implements ServiceProviderInterface
         };
 
         $app[OAuth2ProviderKeyConstant::AUTHORIZER] = function ($app) {
-            $jwt_algorithm = $app[OAuth2ProviderKeyConstant::JWT_ALGORITHM];
-            $jwt_secret = $app[OAuth2ProviderKeyConstant::JWT_SECRET];
-            $jwt_expire_term = $app[OAuth2ProviderKeyConstant::JWT_EXPIRE_TERM];
-
+            $jwt_token_validator = $app[OAuth2ProviderKeyConstant::JWT_VALIDATOR];
             $client_default_scope = $app[OAuth2ProviderKeyConstant::CLIENT_DEFAULT_SCOPE];
-            $jwt_token_validator = new JwtTokenValidator($jwt_secret, $jwt_algorithm, $jwt_expire_term);
 
             return new Authorizer($jwt_token_validator, $client_default_scope);
         };
