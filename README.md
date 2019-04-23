@@ -30,10 +30,8 @@ $access_token = '...';
 
 try {
    $validator = JwtTokenValidator::create()
-      ->addKey('example_secret_string_0', 'HS256')           // add key without `kid`
-      ->addKey('example_secret_string_1', 'HS256', 'key000') // add key with `kid`
-      ->addKeyFromFile('path/to/file', 'RS256')              // set key without `kid` from file
-      ->addKeyFromFile('path/to/file', 'HS256', 'key001')    // set key with `kid` from file
+      ->addKey('key000', 'example_secret_string_1', 'HS256') // add key with HS256 secret
+      ->addKeyFromFile('key001', 'path/to/file', 'RS256')    // add key with RS256 public key file
       ->setExpireTerm(60 * 5 /* default */);
     
     $validator->validateToken($access_token);
@@ -193,15 +191,11 @@ o_auth2_service_provider:
   user_info_url: https://account.dev.ridi.io/accounts/me/
   token_cookie_domain: .ridi.io
   jwt_keys:
-    - secret: '%env(JWT_KEY_1)%'           # key without `kid`
+    - kid: 'key001'                       # add key with RS267 public key file
+      file_path: 'path/to/file'
       algorithm: RS256
-    - file_path: '%env(JWT_KEY_2_PATH)%'   # key without `kid` from file
-      algorithm: RS256
-    - kid: '%env(JWT_KEY_3_KID)%'          # key with `kid` from file
-      file_path: '%env(JWT_KEY_3_PATH)%'
-      algorithm: HS256
-    - kid: '%env(JWT_KEY_4_KID)%'          # key with `kid` 
-      secret: '%env(JWT_KEY_4)%'
+    - kid: 'key002'                       # add key with HS256 secret 
+      secret: 'example_secret'
       algorithm: HS256
   default_exception_handler: Ridibooks\OAuth2\Example\DefaultExceptionHandler
 ```

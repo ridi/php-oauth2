@@ -7,20 +7,17 @@ use Firebase\JWT\SignatureInvalidException;
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtsignatureException;
+use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 
 class JwtTokenValidator
 {
     /** @var array */
-    private $keys_without_kid = [];
-
-    /** @var array */
-    private $keys_with_kid = [];
+    private $keys = [];
 
     /** @var array  */
-    private $algorithm = ['HS256', 'RS256'];
+    private $algorithm = [];
 
     /** @var int  */
     private $expire_term = 60 * 5;
@@ -49,7 +46,6 @@ class JwtTokenValidator
         list($function) = JWT::$supported_algs[$algorithm];
         if($function === 'openssl') {
             $key = openssl_pkey_get_public($key);
-            var_dump($key);
 
             if ($key === false) {
                 throw new AuthorizationException("Not found key file from ${path}");
@@ -59,36 +55,37 @@ class JwtTokenValidator
         return $key;
     }
 
+    private function addAlgorithm($algorithm)
+    {
+        if (!in_array($algorithm, $this->algorithm) && in_array($algorithm, array_keys(JWT::$supported_algs))) {
+            $this->algorithm[] = $algorithm;
+        }
+    }
+
     /**
      * @param string $key
      * @param string $algorithm
-     * @param string|null $key_id
+     * @param string $key_id
      * @return $this
      */
-    public function addKey(string $key, string $algorithm, string $key_id = null)
+    public function addKey(string $key_id, string $key, string $algorithm)
     {
-        if (empty($key_id)) {
-            $this->keys_without_kid[$algorithm][] = $key;
-        } else {
-            $this->keys_with_kid[$algorithm][$key_id] = $key;
-        }
+        $this->keys[$algorithm][$key_id] = $key;
+        $this->addAlgorithm($algorithm);
         return $this;
     }
 
     /**
-     * @param string|null $key_id
+     * @param string $key_id
      * @param string $algorithm
      * @param string $path
      * @throws AuthorizationException
      * @return $this
      */
-    public function addKeyFromFile(string $path, string $algorithm, string $key_id = null)
+    public function addKeyFromFile(string $key_id, string $path, string $algorithm)
     {
-        if (empty($key_id)) {
-            $this->keys_without_kid[$algorithm][] = $this->readKeyFile($path, $algorithm);
-        } else {
-            $this->keys_with_kid[$algorithm][$key_id] = $this->readKeyFile($path, $algorithm);
-        }
+        $this->keys[$algorithm][$key_id] = $this->readKeyFile($path, $algorithm);
+        $this->addAlgorithm($algorithm);
         return $this;
     }
 
@@ -137,15 +134,15 @@ class JwtTokenValidator
             throw new InvalidJwtException('Empty algorithm');
         }
 
-        $key_iterate = [];
-        if (empty($header->kid) && !empty($this->keys_without_kid[$header->alg])) {
-            $key_iterate = $this->keys_without_kid[$header->alg];
-        } else if (!empty($header->kid) && !empty($this->keys_with_kid[$header->alg])) {
-            $key_iterate[] = $this->keys_with_kid[$header->alg];
+        if (empty($this->keys[$header->alg])) {
+            throw new InvalidJwtException("No matched algorithm in registered keys");
         }
 
-        if (empty($key_iterate)) {
-            throw new InvalidJwtException('No matched validation key');
+        $key_iterate = [];
+        if (empty($header->kid)) {
+            $key_iterate = array_values($this->keys[$header->alg]);
+        } else {
+            $key_iterate[] = $this->keys[$header->alg];
         }
 
         $verified = false;
@@ -166,7 +163,7 @@ class JwtTokenValidator
         }
 
         if (!$verified) {
-            throw new InvalidJwtsignatureException();
+            throw new InvalidJwtSignatureException();
         }
 
         return JwtToken::createFrom($token);

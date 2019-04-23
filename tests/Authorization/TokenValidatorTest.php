@@ -6,7 +6,7 @@ namespace Ridibooks\Test\OAuth2\Authorization;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtsignatureException;
+use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
@@ -18,7 +18,7 @@ final class TokenValidatorTest extends TestCase
     private function validate($access_token)
     {
         return JwtTokenValidator::create()
-            ->addKey(TokenConstant::SECRET, 'HS256')
+            ->addKey('key1', TokenConstant::SECRET, 'HS256')
             ->setExpireTerm(300)
             ->validateToken($access_token);
     }
@@ -26,8 +26,8 @@ final class TokenValidatorTest extends TestCase
     private function validateWithKid($access_token)
     {
         return JwtTokenValidator::create()
-            ->addKey(TokenConstant::SECRET, 'HS256', 'kid0')
-            ->addKeyFromFile(TokenConstant::KEY_FILE, 'RS256', 'kid1')
+            ->addKey('kid0', TokenConstant::SECRET, 'HS256')
+            ->addKeyFromFile('kid1', TokenConstant::KEY_FILE, 'RS256')
             ->setExpireTerm(300)
             ->validateToken($access_token);
     }
@@ -89,11 +89,14 @@ final class TokenValidatorTest extends TestCase
         $this->assertInstanceOf(JwtToken::class, $token);
     }
 
-    public function testCannotIntrospectEmptyKid()
+    public function testCanIntrospectEmptyKid()
     {
-        $this->expectException(InvalidJwtException::class);
+        // for backwards compatibility
         $access_token = TokenConstant::KID_TOKEN_WITHOUT_KID;
-        $this->validateWithKid($access_token);
+        $token = $this->validateWithKid($access_token);
+
+        $this->assertNotNull($token);
+        $this->assertInstanceOf(JwtToken::class, $token);
     }
 
     public function testCannotIntrospectWithInvalidKid()

@@ -6,6 +6,7 @@ o_auth2_service_provider:
   user_info_url: https://account.dev.ridi.io/accounts/me/
   token_cookie_domain: .ridi.io
   jwt_keys:
-    - secret: secret
+    - kid: key01
+      secret: secret
       algorithm: HS256
   default_exception_handler: Ridibooks\Test\OAuth2\Symfony\TestExceptionHandler

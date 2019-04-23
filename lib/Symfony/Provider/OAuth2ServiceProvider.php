@@ -96,9 +96,9 @@ class OAuth2ServiceProvider
         if (!empty($this->configs['jwt_keys'])) {
             foreach($this->configs['jwt_keys'] as $key_info) {
                 if (isset($key_info['secret'])) {
-                    $jwt_token_validator->addKey($key_info['secret'], $key_info['algorithm'], $key_info['kid'] ?? null);
+                    $jwt_token_validator->addKey($key_info['kid'], $key_info['secret'], $key_info['algorithm']);
                 } elseif (isset($key_info['file_path'])) {
-                    $jwt_token_validator->addKeyFromFile($key_info['file_path'], $key_info['algorithm'], $key_info['kid'] ?? null);
+                    $jwt_token_validator->addKeyFromFile($key_info['kid'], $key_info['file_path'], $key_info['algorithm']);
                 }
             }
         }
