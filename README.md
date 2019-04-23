@@ -24,10 +24,17 @@ composer require ridibooks/oauth2
 ### `JwtTokenValidator`
 
 ```php
+use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
+
 $access_token = '...';
-$validator = new JwtTokenValidator(TokenConstant::SECRET, TokenConstant::ALGORITHM, 300);
+
 try {
-	$validator->validateToken($access_token);
+   $validator = JwtTokenValidator::create()
+      ->addKey('key000', 'example_secret_string_1', 'HS256') // add key with HS256 secret
+      ->addKeyFromFile('key001', 'path/to/file', 'RS256')    // add key with RS256 public key file
+      ->setExpireTerm(60 * 5 /* default */);
+    
+    $validator->validateToken($access_token);
 } catch (AuthorizationException $e) {
 	// handle exception
 }
@@ -72,14 +79,14 @@ $authorization_url = $granter->authorize();
 use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant as KeyConstant;
 use Ridibooks\OAuth2\Silex\Handler\LoginRequiredExceptionHandler;
 use Ridibooks\OAuth2\Silex\Provider\OAuth2ServiceProvider;
+use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Example\UserProvder;
 
 // `OAuth2ServiceProvider` 등록
 $app->register(new OAuth2ServiceProvider(), [
 	KeyConstant::CLIENT_ID => 'example-client-id',
 	KeyConstant::CLIENT_SECRET => 'example-client-secret',
-	KeyConstant::JWT_ALGORITHM => 'HS256',
-	KeyConstant::JWT_SECRET => 'example-secret'
+	KeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->...
 ]);
 
 // 미들웨어 등록
@@ -103,6 +110,7 @@ use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;
 use Ridibooks\OAuth2\Silex\Provider\OAuth2ServiceProvider;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
+use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 
 ...
 
@@ -110,8 +118,7 @@ use Symfony\Component\HttpFoundation\Request;
 $app->register(new OAuth2ServiceProvider(), [
 	KeyConstant::CLIENT_ID => 'example-client-id',
 	KeyConstant::CLIENT_SECRET => 'example-client-secret',
-	KeyConstant::JWT_ALGORITHM => 'HS256',
-	KeyConstant::JWT_SECRET => 'example-secret'
+	KeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->...
 ]);
 
 ...
@@ -165,13 +172,12 @@ return [
   - token_url
   - user_info_url
   - token_cookie_domain
-  - jwt_secret
+  - jwt_keys (array)
   - default_exception_handler
 - optional
   - client_default_scope
   - client_default_redirect_uri
-  - jwt_algorithm
-  - jwt_expire_term
+  - jwt_expire_term (int) : default `60 * 5` = 5분
   - default_user_provider
 
 ```yaml
@@ -184,7 +190,13 @@ o_auth2_service_provider:
   token_url: https://account.dev.ridi.io/oauth2/token/
   user_info_url: https://account.dev.ridi.io/accounts/me/
   token_cookie_domain: .ridi.io
-  jwt_secret: '%env(JWT_SECRET)%'
+  jwt_keys:
+    - kid: 'key001'                       # add key with RS267 public key file
+      file_path: 'path/to/file'
+      algorithm: RS256
+    - kid: 'key002'                       # add key with HS256 secret 
+      secret: 'example_secret'
+      algorithm: HS256
   default_exception_handler: Ridibooks\OAuth2\Example\DefaultExceptionHandler
 ```
 
