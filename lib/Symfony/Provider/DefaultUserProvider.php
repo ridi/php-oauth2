@@ -43,7 +43,9 @@ class DefaultUserProvider implements UserProviderInterface
                 $oauth2_service_provider->getConfigs()['user_info_url'],
                 [
                     'cookies' => $cookie_jar,
-                    'headers' => ['Accept' => 'application/json']
+                    'headers' => ['Accept' => 'application/json'],
+                    'connect_timeout' => 3,
+                    'timeout' => 3
                 ]
             );
             $content = $response->getBody()->getContents();
