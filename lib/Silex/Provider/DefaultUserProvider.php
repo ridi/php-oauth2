@@ -36,7 +36,9 @@ class DefaultUserProvider implements UserProviderInterface
             $response = $client->get($this->user_info_url, [
                 'headers' => [
                     'Accept' => 'application/json',
-                    'Cookie' => AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY . '=' . $access_token
+                    'Cookie' => AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY . '=' . $access_token,
+                    'connect_timeout' => 3,
+                    'timeout' => 3
                 ]
             ]);
             $content = $response->getBody()->getContents();

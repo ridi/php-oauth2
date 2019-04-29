@@ -120,16 +120,12 @@ class Granter
         $headers = ['Accept: application/json'];
 
         $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 10); // Conn timeout
-        curl_setopt($ch, CURLOPT_TIMEOUT, 10); // Read timeout
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3); // Conn timeout
+        curl_setopt($ch, CURLOPT_TIMEOUT, 3); // Read timeout
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($data));
-
-        // TODO: 개발이 완료 되면 해당 옵션 제거
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 
         $body = curl_exec($ch);
 
