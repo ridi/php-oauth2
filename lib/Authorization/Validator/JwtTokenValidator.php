@@ -4,12 +4,19 @@ namespace Ridibooks\OAuth2\Authorization\Validator;
 use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
 use Firebase\JWT\SignatureInvalidException;
+use function MongoDB\BSON\toJSON;
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
+use Ridibooks\OAuth2\Authorization\Key\KeyHandler;
+use Jose\Component\Signature\Serializer\JWSSerializerManager;
+use Jose\Component\Signature\Serializer\CompactSerializer;
+use Jose\Component\Core\AlgorithmManager;
+use Jose\Component\Signature\Algorithm\RS256;
+use Jose\Component\Signature\JWSVerifier;
 
 class JwtTokenValidator
 {
@@ -108,7 +115,23 @@ class JwtTokenValidator
             throw new InvalidJwtException('Wrong number of segments');
         }
         list($headb64) = $tks;
-        if (null === ($header = JWT::jsonDecode(JWT::urlsafeB64Decode($headb64)))) {
+
+        $input = JWT::urlsafeB64Decode($headb64);
+
+        if (null === ($header = JWT::jsonDecode($input))) {
+            throw new InvalidJwtException('Invalid header encoding');
+        }
+        return $header;
+    }
+
+    private function readJwtBody($jwt)
+    {
+        $tks = explode('.', $jwt);
+        if (count($tks) != 3) {
+            throw new InvalidJwtException('Wrong number of segments');
+        }
+
+        if (null === ($header = JWT::jsonDecode(JWT::urlsafeB64Decode($tks[1])))) {
             throw new InvalidJwtException('Invalid header encoding');
         }
         return $header;
@@ -128,38 +151,45 @@ class JwtTokenValidator
             throw new TokenNotFoundException();
         }
 
+
         $header = $this->readJwtHeader($access_token);
+        $body = $this->readJwtBody($access_token);
+
 
         if (!isset($header->alg)) {
             throw new InvalidJwtException('Empty algorithm');
         }
+        // TODO : 아래 주석 처리하기
+//        if (empty($this->keys[$header->alg])) {
+//            throw new InvalidJwtException("No matched algorithm in registered keys");
+//        }
+        $jwk = KeyHandler::get_public_key_by_kid($body->client_id, $header->kid);
+        var_dump('$jwk is ', $jwk);
+        $serializerManager = new JWSSerializerManager([
+            new CompactSerializer(),
+        ]);
 
-        if (empty($this->keys[$header->alg])) {
-            throw new InvalidJwtException("No matched algorithm in registered keys");
-        }
-
-        $key_iterate = [];
-        if (empty($header->kid)) {
-            $key_iterate = array_values($this->keys[$header->alg]);
-        } else {
-            $key_iterate[] = $this->keys[$header->alg];
-        }
 
         $verified = false;
         $token = null;
-        foreach ($key_iterate as $key) {
-            try {
-                $token = JWT::decode($access_token, $key, $this->algorithm);
-                $verified = true;
-            } catch (\DomainException $e) {
-                continue;
-            } catch (SignatureInvalidException $e) {
-                continue;
-            } catch (ExpiredException $e) {
-                throw new ExpiredTokenException();
-            } catch (\UnexpectedValueException $e) {
-                throw new InvalidJwtException($e->getMessage());
-            }
+
+        try {
+            // The algorithm manager with the HS256 algorithm.
+            $algorithmManager = new AlgorithmManager([
+                new RS256(),
+            ]);
+            // We instantiate our JWS Verifier.
+            $jwsVerifier = new JWSVerifier(
+                $algorithmManager
+            );
+
+            $jws = $serializerManager->unserialize($access_token);
+            $isVerified = $jwsVerifier->verifyWithKey($jws, $jwk, 0);
+            var_dump('$isVerified is ', $isVerified);
+        } catch (ExpiredException $e) {
+            throw new ExpiredTokenException();
+        } catch (\UnexpectedValueException $e) {
+            throw new InvalidJwtException($e->getMessage());
         }
 
         if (!$verified) {

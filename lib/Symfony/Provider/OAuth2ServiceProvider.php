@@ -5,6 +5,7 @@ namespace Ridibooks\OAuth2\Symfony\Provider;
 
 use Doctrine\Common\Annotations\CachedReader;
 use Ridibooks\OAuth2\Authorization\Authorizer;
+use Ridibooks\OAuth2\Authorization\Key\KeyHandler;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
 use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
@@ -93,19 +94,22 @@ class OAuth2ServiceProvider
     private function setAuthorizer(): void
     {
         $jwt_token_validator = JwtTokenValidator::create();
-        if (!empty($this->configs['jwt_keys'])) {
-            foreach($this->configs['jwt_keys'] as $key_info) {
-                if (isset($key_info['secret'])) {
-                    $jwt_token_validator->addKey($key_info['kid'], $key_info['secret'], $key_info['algorithm']);
-                } elseif (isset($key_info['file_path'])) {
-                    $jwt_token_validator->addKeyFromFile($key_info['kid'], $key_info['file_path'], $key_info['algorithm']);
-                }
-            }
-        }
 
-        if (!isset($this->configs['jwt_expire_term'])) {
-            $jwt_token_validator->setExpireTerm($this->configs['jwt_expire_term']);
-        }
+        # 여기를 대체해야 한다!!!!!!
+//        KeyHandler::get_public_key_by_kid()
+//        if (!empty($this->configs['jwt_keys'])) {
+//            foreach($this->configs['jwt_keys'] as $key_info) {
+//                if (isset($key_info['secret'])) {
+//                    $jwt_token_validator->addKey($key_info['kid'], $key_info['secret'], $key_info['algorithm']);
+//                } elseif (isset($key_info['file_path'])) {
+//                    $jwt_token_validator->addKeyFromFile($key_info['kid'], $key_info['file_path'], $key_info['algorithm']);
+//                }
+//            }
+//        }
+//
+//        if (!isset($this->configs['jwt_expire_term'])) {
+//            $jwt_token_validator->setExpireTerm($this->configs['jwt_expire_term']);
+//        }
 
         $this->authorizer = new Authorizer($jwt_token_validator, $this->configs['client_default_scope']);
     }

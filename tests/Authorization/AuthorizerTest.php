@@ -45,6 +45,8 @@ class AuthorizerTest extends TestCase
             /** @var Authorizer $authorizer */
             $authorizer = $app[OAuth2ProviderKeyConstant::AUTHORIZER];
             $token = $authorizer->authorize($request);
+//            echo('$token->getSubject(); is ');
+//            echo($token->getSubject());
             return $token->getSubject();
         });
 
@@ -52,7 +54,8 @@ class AuthorizerTest extends TestCase
         $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
         /** @var Response $response */
         $response = $app->handle($req);
-
+//        echo("ttjtkttkklt\n");
+//        echo($response->getContent());
         $this->assertEquals(TokenConstant::USERNAME, $response->getContent());
     }
 

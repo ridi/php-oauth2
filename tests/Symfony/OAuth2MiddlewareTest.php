@@ -25,6 +25,7 @@ class OAuth2MiddlewareTest extends WebTestCase
      */
     public function testMiddleware(string $token, int $http_status_code)
     {
+//        echo $token;
         if ($http_status_code === Response::HTTP_OK) {
             Test::double(
                 DefaultUserProvider::class,
