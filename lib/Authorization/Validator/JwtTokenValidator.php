@@ -1,10 +1,8 @@
 <?php declare(strict_types=1);
+
 namespace Ridibooks\OAuth2\Authorization\Validator;
 
-use Firebase\JWT\ExpiredException;
 use Firebase\JWT\JWT;
-use Firebase\JWT\SignatureInvalidException;
-use function MongoDB\BSON\toJSON;
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
@@ -17,26 +15,39 @@ use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Signature\Algorithm\RS256;
 use Jose\Component\Signature\JWSVerifier;
-
+use Jose\Component\Checker\HeaderCheckerManager;
+use Jose\Component\Checker\AlgorithmChecker;
+use Jose\Component\Signature\JWSTokenSupport;
+use Jose\Component\Checker\ClaimCheckerManager;
+use Jose\Component\Signature\JWS;
+use Jose\Component\Checker;
+use InvalidArgumentException;
+use Jose\Component\Checker\InvalidClaimException;
+use Jose\Component\Checker\MissingMandatoryHeaderParameterException;
+use Jose\Component\Checker\MissingMandatoryClaimException;
+use Jose\Component\Core\JWK;
 class JwtTokenValidator
 {
     /** @var array */
     private $keys = [];
 
-    /** @var array  */
+    /** @var array */
     private $algorithm = [];
 
-    /** @var int  */
+    /** @var int */
     private $expire_term = 60 * 5;
 
     /**
      * @return JwtTokenValidator
      */
-    static public function create() {
+    static public function create()
+    {
         return new JwtTokenValidator();
     }
 
-    protected function __construct() {}
+    protected function __construct()
+    {
+    }
 
     /**\=
      * @param string $path
@@ -51,7 +62,7 @@ class JwtTokenValidator
         }
 
         list($function) = JWT::$supported_algs[$algorithm];
-        if($function === 'openssl') {
+        if ($function === 'openssl') {
             $key = openssl_pkey_get_public($key);
 
             if ($key === false) {
@@ -86,8 +97,8 @@ class JwtTokenValidator
      * @param string $key_id
      * @param string $algorithm
      * @param string $path
-     * @throws AuthorizationException
      * @return $this
+     * @throws AuthorizationException
      */
     public function addKeyFromFile(string $key_id, string $path, string $algorithm)
     {
@@ -108,33 +119,77 @@ class JwtTokenValidator
         return $this;
     }
 
-    private function readJwtHeader($jwt)
+    private function getJws(string $access_token): JWS
     {
-        $tks = explode('.', $jwt);
-        if (count($tks) != 3) {
-            throw new InvalidJwtException('Wrong number of segments');
-        }
-        list($headb64) = $tks;
+        $serializerManager = new JWSSerializerManager([
+            new CompactSerializer(),
+        ]);
 
-        $input = JWT::urlsafeB64Decode($headb64);
 
-        if (null === ($header = JWT::jsonDecode($input))) {
-            throw new InvalidJwtException('Invalid header encoding');
+        try {
+            return $serializerManager->unserialize($access_token);
+        } catch (InvalidArgumentException $e) {
+            throw new InvalidJwtException($e->getMessage());
         }
-        return $header;
+
     }
 
-    private function readJwtBody($jwt)
+    private function checkAndGetHeader(JWS $jws): array
     {
-        $tks = explode('.', $jwt);
-        if (count($tks) != 3) {
-            throw new InvalidJwtException('Wrong number of segments');
+        $headerCheckerManager = new HeaderCheckerManager(
+            [
+                new AlgorithmChecker(['RS256']), // We check the header "alg" (algorithm)
+            ],
+            [
+                new JWSTokenSupport(), // Adds JWS token type support
+            ]
+        );
+        try {
+            $headerCheckerManager->check($jws, 0, ['alg', 'typ', 'kid']);
+        } catch (MissingMandatoryHeaderParameterException $e){
+            throw new InvalidJwtException($e->getMessage());
         }
 
-        if (null === ($header = JWT::jsonDecode(JWT::urlsafeB64Decode($tks[1])))) {
-            throw new InvalidJwtException('Invalid header encoding');
+        return $jws->getSignature(0)->getProtectedHeader();
+    }
+
+    private function checkAndGetClaims(JWS $jws): array
+    {
+        $claimCheckerManager = new ClaimCheckerManager(
+            [
+                new Checker\ExpirationTimeChecker(),
+            ]
+        );
+        $claims = json_decode($jws->getPayload(), true);
+        try {
+            $claimCheckerManager->check($claims, ['sub', 'u_idx', 'exp', 'client_id']);
+        } catch (InvalidClaimException $e) {
+            throw new InvalidJwtException($e->getMessage());
+        } catch (MissingMandatoryClaimException $e) {
+            throw new InvalidJwtException($e->getMessage());
         }
-        return $header;
+
+        return $claims;
+    }
+
+    private function verifyJwsWithJwk(JWS $jws, JWK $jwk): void
+    {
+        $algorithmManager = new AlgorithmManager([
+            new RS256(),
+        ]);
+        $jwsVerifier = new JWSVerifier(
+            $algorithmManager
+        );
+
+        try {
+            $isVerified = $jwsVerifier->verifyWithKey($jws, $jwk, 0);
+        } catch (InvalidArgumentException $e) {
+            throw new InvalidJwtException($e->getMessage());
+        }
+
+        if (!$isVerified) {
+            throw new InvalidJwtSignatureException();
+        }
     }
 
     /**
@@ -145,57 +200,22 @@ class JwtTokenValidator
      */
     public function validateToken($access_token): JwtToken
     {
-        JWT::$leeway = $this->expire_term;
-
         if (!isset($access_token)) {
             throw new TokenNotFoundException();
         }
 
+        $jws = $this->getJws($access_token);
+        $header = $this->checkAndGetHeader($jws);
+        $claims = $this->checkAndGetClaims($jws);
 
-        $header = $this->readJwtHeader($access_token);
-        $body = $this->readJwtBody($access_token);
-
-
-        if (!isset($header->alg)) {
-            throw new InvalidJwtException('Empty algorithm');
-        }
         // TODO : 아래 주석 처리하기
 //        if (empty($this->keys[$header->alg])) {
 //            throw new InvalidJwtException("No matched algorithm in registered keys");
 //        }
-        $jwk = KeyHandler::get_public_key_by_kid($body->client_id, $header->kid);
-        var_dump('$jwk is ', $jwk);
-        $serializerManager = new JWSSerializerManager([
-            new CompactSerializer(),
-        ]);
 
+        $jwk = KeyHandler::get_public_key_by_kid($claims['client_id'], $header['kid']);
+        $this->verifyJwsWithJwk($jws, $jwk);
 
-        $verified = false;
-        $token = null;
-
-        try {
-            // The algorithm manager with the HS256 algorithm.
-            $algorithmManager = new AlgorithmManager([
-                new RS256(),
-            ]);
-            // We instantiate our JWS Verifier.
-            $jwsVerifier = new JWSVerifier(
-                $algorithmManager
-            );
-
-            $jws = $serializerManager->unserialize($access_token);
-            $isVerified = $jwsVerifier->verifyWithKey($jws, $jwk, 0);
-            var_dump('$isVerified is ', $isVerified);
-        } catch (ExpiredException $e) {
-            throw new ExpiredTokenException();
-        } catch (\UnexpectedValueException $e) {
-            throw new InvalidJwtException($e->getMessage());
-        }
-
-        if (!$verified) {
-            throw new InvalidJwtSignatureException();
-        }
-
-        return JwtToken::createFrom($token);
+        return JwtToken::createFrom($claims);
     }
 }

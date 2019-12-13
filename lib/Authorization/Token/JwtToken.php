@@ -57,21 +57,21 @@ class JwtToken
     }
 
     /**
-     * @param \stdClass $token
+     * @param array $token
      * @return JwtToken
      * @throws InvalidTokenException
      */
-    public static function createFrom(\stdClass $token): JwtToken
+    public static function createFrom(array $token): JwtToken
     {
-        if (!isset($token->sub, $token->exp, $token->u_idx, $token->client_id, $token->scope)) {
+        if (!isset($token['sub'], $token['exp'], $token['u_idx'], $token['client_id'], $token['scope'])) {
             throw new InvalidTokenException();
         }
         return new self(
-            $token->sub,
-            $token->exp,
-            $token->u_idx,
-            $token->client_id,
-            explode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $token->scope)
+            $token['sub'],
+            $token['exp'],
+            $token['u_idx'],
+            $token['client_id'],
+            explode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $token['scope'])
         );
     }
 

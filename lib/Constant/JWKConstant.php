@@ -4,6 +4,7 @@ namespace Ridibooks\OAuth2\Constant;
 class JWKConstant
 {
     const JWK_EXPIRES_MIN = 30;
+    const JWK_EXPIRES_KEY = 'expires';
 
     const RSA = 'RSA';
     const EC = 'EC';

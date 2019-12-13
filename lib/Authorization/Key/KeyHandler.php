@@ -4,32 +4,31 @@ namespace Ridibooks\OAuth2\Authorization\Key;
 
 use GuzzleHttp\Psr7\Response;
 use Jose\Component\Core\JWK;
-use function MongoDB\BSON\toJSON;
 use Ridibooks\OAuth2\Authorization\Exception\AccountServerException;
 use Ridibooks\OAuth2\Authorization\Exception\ClientRequestException;
 use Ridibooks\OAuth2\Authorization\Exception\FailToLoadPublicKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidPublicKeyException;
-use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\NotExistedKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\RetryFailyException;
-use Ridibooks\OAuth2\Authorization\Validator\ScopeChecker;
 use Ridibooks\OAuth2\Constant\JWKConstant;
 use GuzzleHttp\Client;
 use Jose\Component\Core\JWKSet;
-use Jose\Component\KeyManagement\JWKFactory;
-use Firebase\JWT\JWT;
-use Base64Url\Base64Url;
+use DateTime;
 
 class KeyHandler
 {
     protected static $public_key_dtos = [];
+
+    protected static function _is_expired_key($client_id): bool {
+        return self::$public_key_dtos[$client_id][JWKConstant::JWK_EXPIRES_KEY] < new DateTime();
+    }
 
     protected static function _get_memorized_key_dto(
         string $client_id,
         string $kid
     ): ?JWK
     {
-        if (!array_key_exists($client_id, self::$public_key_dtos)) {
+        if (!array_key_exists($client_id, self::$public_key_dtos) || self::_is_expired_key($client_id)) {
             return null;
         }
 
@@ -42,8 +41,7 @@ class KeyHandler
     ): JWK
     {
         $public_key_dto = self::_get_memorized_key_dto($client_id, $kid);
-        # TODO : is_expired 구현 따로 해줘야 함.
-        if (!$public_key_dto || $public_key_dto.is_expired) {
+        if (!$public_key_dto) {
             $public_key_dto = self::_reset_key_dtos($client_id, $kid);
         }
 
@@ -101,7 +99,6 @@ class KeyHandler
         $jwkset
     )
     {
-
         if (array_key_exists($client_id, self::$public_key_dtos)) {
             $key_dtos = self::$public_key_dtos[$client_id];
         } else {
@@ -113,6 +110,12 @@ class KeyHandler
         }
 
         self::$public_key_dtos[$client_id] = $key_dtos;
+
+        $jwk_expireds_min = JWKConstant::JWK_EXPIRES_MIN;
+        $date = new DateTime();
+        self::$public_key_dtos[$client_id][JWKConstant::JWK_EXPIRES_KEY] = $date->modify("+${jwk_expireds_min} minutes");
+
+
     }
 
     static function _process_response(
