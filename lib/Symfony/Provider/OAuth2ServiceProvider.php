@@ -95,18 +95,6 @@ class OAuth2ServiceProvider
     {
         $jwt_token_validator = JwtTokenValidator::create();
 
-        # 여기를 대체해야 한다!!!!!!
-//        KeyHandler::get_public_key_by_kid()
-//        if (!empty($this->configs['jwt_keys'])) {
-//            foreach($this->configs['jwt_keys'] as $key_info) {
-//                if (isset($key_info['secret'])) {
-//                    $jwt_token_validator->addKey($key_info['kid'], $key_info['secret'], $key_info['algorithm']);
-//                } elseif (isset($key_info['file_path'])) {
-//                    $jwt_token_validator->addKeyFromFile($key_info['kid'], $key_info['file_path'], $key_info['algorithm']);
-//                }
-//            }
-//        }
-//
 //        if (!isset($this->configs['jwt_expire_term'])) {
 //            $jwt_token_validator->setExpireTerm($this->configs['jwt_expire_term']);
 //        }

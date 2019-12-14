@@ -99,8 +99,6 @@ class KeyHandler
         $jwk_expireds_min = JWKConstant::JWK_EXPIRES_MIN;
         $date = new DateTime();
         self::$public_key_dtos[$client_id][JWKConstant::JWK_EXPIRES_KEY] = $date->modify("+${jwk_expireds_min} minutes");
-
-
     }
 
 
