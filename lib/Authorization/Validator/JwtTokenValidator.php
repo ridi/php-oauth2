@@ -7,6 +7,7 @@ use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
+use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Authorization\Key\KeyHandler;
@@ -47,76 +48,6 @@ class JwtTokenValidator
 
     protected function __construct()
     {
-    }
-
-    /**\=
-     * @param string $path
-     * @return string
-     * @throws AuthorizationException
-     */
-    private function readKeyFile(string $path, string $algorithm)
-    {
-        $key = file_get_contents($path);
-        if ($key === false) {
-            throw new AuthorizationException("Not found key file from ${path}");
-        }
-
-        list($function) = JWT::$supported_algs[$algorithm];
-        if ($function === 'openssl') {
-            $key = openssl_pkey_get_public($key);
-
-            if ($key === false) {
-                throw new AuthorizationException("Not found key file from ${path}");
-            }
-        }
-
-        return $key;
-    }
-
-    private function addAlgorithm($algorithm)
-    {
-        if (!in_array($algorithm, $this->algorithm) && in_array($algorithm, array_keys(JWT::$supported_algs))) {
-            $this->algorithm[] = $algorithm;
-        }
-    }
-
-    /**
-     * @param string $key
-     * @param string $algorithm
-     * @param string $key_id
-     * @return $this
-     */
-    public function addKey(string $key_id, string $key, string $algorithm)
-    {
-        $this->keys[$algorithm][$key_id] = $key;
-        $this->addAlgorithm($algorithm);
-        return $this;
-    }
-
-    /**
-     * @param string $key_id
-     * @param string $algorithm
-     * @param string $path
-     * @return $this
-     * @throws AuthorizationException
-     */
-    public function addKeyFromFile(string $key_id, string $path, string $algorithm)
-    {
-        $this->keys[$algorithm][$key_id] = $this->readKeyFile($path, $algorithm);
-        $this->addAlgorithm($algorithm);
-        return $this;
-    }
-
-    /**
-     * @param $expire_term
-     * @return $this
-     */
-    public function setExpireTerm(int $expire_term)
-    {
-        if (is_numeric($expire_term)) {
-            $this->expire_term = $expire_term;
-        }
-        return $this;
     }
 
     private function getJws(string $access_token): JWS
@@ -164,9 +95,9 @@ class JwtTokenValidator
         try {
             $claimCheckerManager->check($claims, ['sub', 'u_idx', 'exp', 'client_id']);
         } catch (InvalidClaimException $e) {
-            throw new InvalidJwtException($e->getMessage());
+            throw new ExpiredTokenException($e->getMessage());
         } catch (MissingMandatoryClaimException $e) {
-            throw new InvalidJwtException($e->getMessage());
+            throw new InvalidTokenException($e->getMessage());
         }
 
         return $claims;
@@ -205,15 +136,11 @@ class JwtTokenValidator
         }
 
         $jws = $this->getJws($access_token);
+
         $header = $this->checkAndGetHeader($jws);
         $claims = $this->checkAndGetClaims($jws);
 
-        // TODO : 아래 주석 처리하기
-//        if (empty($this->keys[$header->alg])) {
-//            throw new InvalidJwtException("No matched algorithm in registered keys");
-//        }
-
-        $jwk = KeyHandler::get_public_key_by_kid($claims['client_id'], $header['kid']);
+        $jwk = KeyHandler::getPublicKeyByKid($claims['client_id'], $header['kid']);
         $this->verifyJwsWithJwk($jws, $jwk);
 
         return JwtToken::createFrom($claims);

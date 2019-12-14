@@ -21,14 +21,7 @@ use Mockery;
 
 class OAuth2MiddlewareTest extends WebTestCase
 {
-    /**
-     * @dataProvider tokenProvider
-     *
-     * @param string $token
-     * @param int $http_status_code
-     * @throws AuthorizationException
-     */
-    public function testMiddleware(string $token, int $http_status_code)
+    protected function setUp()
     {
         $mock_data = <<<EOT
         {"keys":[
@@ -39,7 +32,25 @@ EOT;
         Mockery::mock('alias:Ridibooks\OAuth2\Authorization\Key\KeyRequestor', [
             "requestPublicKey" => json_decode($mock_data, true),
         ]);
+    }
 
+    protected function tearDown()
+    {
+        Mockery::close();
+    }
+
+    /**
+     * @dataProvider tokenProvider
+     *
+     * @param string $token
+     * @param int $http_status_code
+     * @throws AuthorizationException
+     */
+
+
+
+    public function testMiddleware(string $token, int $http_status_code)
+    {
         if ($http_status_code === Response::HTTP_OK) {
             Test::double(
                 DefaultUserProvider::class,
@@ -93,3 +104,4 @@ EOT;
         return new TestKernel('test', false);
     }
 }
+

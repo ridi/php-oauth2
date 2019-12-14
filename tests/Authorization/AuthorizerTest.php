@@ -15,9 +15,28 @@ use Ridibooks\Test\OAuth2\Common\TokenConstant;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Mockery;
 
 class AuthorizerTest extends TestCase
 {
+    protected function setUp()
+    {
+        $mock_data = <<<EOT
+        {"keys":[
+        {"kid": "RS999", "alg": "RS256", "kty": "RSA", "use": "sig", "n": "1rL5PCEv2PaAASaGldzfnlo0MiMCglC-eFxYHgUfa6a7qJhjo0QX8LeAelBlQpMCAMVGX33jUJ2FCCP_QDk3NIu74AgP7F3Z7IdmVvOfkt2myF1n3ZDyCHKdyi7MnOBtHIQCqQRGZ4XH2Ss5bmg_FuplBFT82e14UVmZx4kP-HwDjaSpvYHoTr3b5j20Ebx7aIy_SVrWeY0wxeAdFf-EOuEBQ-QIIe5Npd49gzq4CGHeNJlPQjs0EjMZFtPutCrIRSoEaLwccKQEIHcMSbsBLCJIJ5OuTmtK2WaSh7VYCrJsCbPh5tYKF6akN7TSOtDwGQVKwJjjOsxkPdYXNoAnIQ==", "e": "AQAB"},
+        {"kid": "kid1", "alg": "RS256", "kty": "RSA", "use": "sig", "n": "1rL5PCEv2PaAASaGldzfnlo0MiMCglC-eFxYHgUfa6a7qJhjo0QX8LeAelBlQpMCAMVGX33jUJ2FCCP_QDk3NIu74AgP7F3Z7IdmVvOfkt2myF1n3ZDyCHKdyi7MnOBtHIQCqQRGZ4XH2Ss5bmg_FuplBFT82e14UVmZx4kP-HwDjaSpvYHoTr3b5j20Ebx7aIy_SVrWeY0wxeAdFf-EOuEBQ-QIIe5Npd49gzq4CGHeNJlPQjs0EjMZFtPutCrIRSoEaLwccKQEIHcMSbsBLCJIJ5OuTmtK2WaSh7VYCrJsCbPh5tYKF6akN7TSOtDwGQVKwJjjOsxkPdYXNoAnIQ==", "e": "AQAB"}
+        ]}
+EOT;
+        Mockery::mock('alias:Ridibooks\OAuth2\Authorization\Key\KeyRequestor', [
+            "requestPublicKey" => json_decode($mock_data, true),
+        ]);
+    }
+
+    protected function tearDown()
+    {
+        Mockery::close();
+    }
+
     private $authorization_url = 'https://account.ridibooks.com/oauth2/authorize/';
     private $token_url = 'https://account.ridibooks.com/oauth2/token/';
 
@@ -29,7 +48,7 @@ class AuthorizerTest extends TestCase
             OAuth2ProviderKeyConstant::CLIENT_SECRET => TokenConstant::CLIENT_SECRET,
             OAuth2ProviderKeyConstant::AUTHORIZE_URL => $this->authorization_url,
             OAuth2ProviderKeyConstant::TOKEN_URL => $this->token_url,
-            OAuth2ProviderKeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->addKey('key001', TokenConstant::SECRET, 'HS256'),
+            OAuth2ProviderKeyConstant::JWT_VALIDATOR => JwtTokenValidator::create(),
             OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER => new TestUserProvider(),
             OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER => new LoginRequiredExceptionHandler(),
         ], $options);
@@ -45,8 +64,7 @@ class AuthorizerTest extends TestCase
             /** @var Authorizer $authorizer */
             $authorizer = $app[OAuth2ProviderKeyConstant::AUTHORIZER];
             $token = $authorizer->authorize($request);
-//            echo('$token->getSubject(); is ');
-//            echo($token->getSubject());
+
             return $token->getSubject();
         });
 
@@ -54,8 +72,6 @@ class AuthorizerTest extends TestCase
         $req = Request::create('/', 'GET', [], [AccessTokenConstant::ACCESS_TOKEN_COOKIE_KEY => $access_token]);
         /** @var Response $response */
         $response = $app->handle($req);
-//        echo("ttjtkttkklt\n");
-//        echo($response->getContent());
         $this->assertEquals(TokenConstant::USERNAME, $response->getContent());
     }
 
