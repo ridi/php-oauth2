@@ -53,7 +53,7 @@ class Configuration implements ConfigurationInterface
                     ->isRequired()
                     ->cannotBeEmpty()
                 ->end()
-                ->integerNode('jwt_expire_term')
+                ->integerNode('jwt_expiration_min')
                     ->defaultValue(5 * 60)
                 ->end()
                 ->scalarNode('default_user_provider')

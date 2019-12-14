@@ -2,22 +2,34 @@
 
 namespace Ridibooks\OAuth2\Authorization\Key;
 
-use Jose\Component\Core\JWK;
+use Ridibooks\OAuth2\Authorization\Exception\AccountServerException;
+use Ridibooks\OAuth2\Authorization\Exception\ClientRequestException;
+use Ridibooks\OAuth2\Authorization\Exception\ExpiredConstantException;
 use Ridibooks\OAuth2\Authorization\Exception\FailToLoadPublicKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidPublicKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\NotExistedKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\RetryFailyException;
 use Ridibooks\OAuth2\Constant\JWKConstant;
+use Jose\Component\Core\JWK;
 use Jose\Component\Core\JWKSet;
 use DateTime;
 
 class KeyHandler
 {
     /** @var int */
-    private $expire_term = JWKConstant::JWK_EXPIRES_MIN;
+    private $experation_min = JWKConstant::JWK_EXPIRATION_MIN;
     private $public_key_dtos = [];
 
+    /**
+     * @param string $client_id
+     * @param string $kid
+     * @return JWK
+     * @throws InvalidJwtException
+     * @throws FailToLoadPublicKeyException
+     * @throws NotExistedKeyException
+     * @throws InvalidPublicKeyException
+     */
     public function getPublicKeyByKid(
         string $client_id,
         string $kid
@@ -34,13 +46,36 @@ class KeyHandler
         return $public_key_dto;
     }
 
-    public function setExpireTerm(int $expire_term) {
-        $this->expire_term = $expire_term;
-    }
-    protected function isExpiredKey($client_id): bool {
-        return $this->public_key_dtos[$client_id][JWKConstant::JWK_EXPIRES_KEY] < new DateTime();
+    /**
+     * @param int $experation_min
+     * @return void
+     * @throws ExpiredConstantException
+     */
+    public function setExperationMin(int $experation_min): void {
+        if (is_numeric($experation_min)) {
+            $this->experation_min = $experation_min;
+        } else {
+            throw new ExpiredConstantException();
+        }
     }
 
+    /**
+     * @param string $client_id
+     * @return bool
+     * @throws \OutOfBoundsException
+     */
+    # TODO: 위에 왜 warning 주는지?
+    protected function isExpiredKey(string $client_id): bool {
+        return $this->public_key_dtos[$client_id][JWKConstant::JWK_EXPIRATION_AT_KEY] < new DateTime();
+    }
+
+
+    /**
+     * @param string $client_id
+     * @param string $kid
+     * @return JWK|null
+     * @throws InvalidJwtException
+     */
     protected function getMemorizedKeyDto(
         string $client_id,
         string $kid
@@ -56,9 +91,15 @@ class KeyHandler
         return $this->public_key_dtos[$client_id][$kid];
     }
 
+    /**
+     * @param JWK $key
+     * @return void
+     * @throws NotExistedKeyException
+     * @throws InvalidPublicKeyException
+     */
     protected function assertValidKey(
         JWK $key
-    )
+    ): void
     {
         if (!$key) {
             throw new NotExistedKeyException();
@@ -68,6 +109,13 @@ class KeyHandler
         }
     }
 
+    /**
+     * @param JWK $client_id
+     * @param JWK $kid
+     * @return JWK
+     * @throws FailToLoadPublicKeyException
+     * @throws InvalidJwtException
+     */
     protected function resetKeyDtos(
         string $client_id,
         string $kid
@@ -84,10 +132,17 @@ class KeyHandler
         return $this->getMemorizedKeyDto($client_id, $kid);
     }
 
+    /**
+     * @param string $client_id
+     * @param JWKSet $jwkset
+     * @return void
+     * @throws \OutOfBoundsException
+     */
+    # TODO: 위에 왜 warning 주는지?
     protected function memorizeKeyDtos(
         string $client_id,
-        $jwkset
-    )
+        JWKSet $jwkset
+    ): void
     {
         if (array_key_exists($client_id, $this->public_key_dtos)) {
             $key_dtos = $this->public_key_dtos[$client_id];
@@ -99,20 +154,25 @@ class KeyHandler
             $key_dtos[$kid] = $jwk;
         }
 
+        # TODO: 아래 변수를 그냥 string 에 박는 방법은 없는지 알아내서 간단하게 변경하자.
+        $jwk_experation_min= $this->experation_min;
+        $now_date = new DateTime();
+        $key_dtos[JWKConstant::JWK_EXPIRATION_AT_KEY] = $now_date->modify("+${jwk_experation_min} minutes");
         $this->public_key_dtos[$client_id] = $key_dtos;
-
-        $jwk_expireds_min = $this->expire_term;
-        $date = new DateTime();
-        $this->public_key_dtos[$client_id][JWKConstant::JWK_EXPIRES_KEY] = $date->modify("+${jwk_expireds_min} minutes");
     }
 
-
+    /**
+     * @param string $client_id
+     * @return JWKSet
+     * @throws AccountServerException
+     * @throws ClientRequestException
+     */
     protected function getValidPublicKeysByClientId(
         string $client_id
     ): JWKSet
     {
-        $data = KeyRequestor::requestPublicKey($client_id);
+        $public_key_array = KeyRequestor::requestPublicKey($client_id);
 
-        return JWKSet::createFromKeyData($data);
+        return JWKSet::createFromKeyData($public_key_array);
     }
 }

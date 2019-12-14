@@ -3,6 +3,7 @@
 namespace Ridibooks\OAuth2\Authorization\Validator;
 
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
+use Ridibooks\OAuth2\Authorization\Exception\ExpiredConstantException;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
@@ -13,6 +14,7 @@ use Ridibooks\OAuth2\Authorization\Key\KeyHandler;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Algorithm\RS256;
+use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWS;
@@ -31,10 +33,27 @@ class JwtTokenValidator
 {
     /** @var KeyHandler */
     private $keyHandler;
+
+    /** @var JWSSerializerManager */
+    private $serializerManager;
+
+    /** @var HeaderCheckerManager */
+    private $headerCheckerManager;
+
+    /** @var ClaimCheckerManager */
+    private $claimCheckerManager;
+
+    /** @var AlgorithmManager */
+    private $algorithmManager;
+
+    /** @var JWSVerifier */
+    private $jwsVerifier;
+
+
     /**
      * @return JwtTokenValidator
      */
-    static public function create()
+    static public function create(): JwtTokenValidator
     {
         return new JwtTokenValidator();
     }
@@ -42,52 +61,74 @@ class JwtTokenValidator
     protected function __construct()
     {
         $this->keyHandler = new KeyHandler();
-    }
-
-    private function getJws(string $access_token): JWS
-    {
-        $serializerManager = new JWSSerializerManager([
+        $this->serializerManager = new JWSSerializerManager([
             new CompactSerializer(),
         ]);
+        $this->headerCheckerManager = new HeaderCheckerManager(
+            [
+                new AlgorithmChecker(['RS256', 'ES256']),
+            ],
+            [
+                new JWSTokenSupport(),
+            ]
+        );
+        $this->claimCheckerManager = new ClaimCheckerManager(
+            [
+                new Checker\ExpirationTimeChecker(),
+            ]
+        );
+        $this->algorithmManager = new AlgorithmManager([
+            new RS256(),
+            new ES256(),
+        ]);
+        $this->jwsVerifier = new JWSVerifier(
+            $this->algorithmManager
+        );
+    }
 
-
+    /**
+     * @param string $access_token
+     * @return JWS
+     * @throws InvalidJwtException
+     */
+    private function getJws(string $access_token): JWS
+    {
         try {
-            return $serializerManager->unserialize($access_token);
+            return $this->serializerManager->unserialize($access_token);
         } catch (InvalidArgumentException $e) {
             throw new InvalidJwtException($e->getMessage());
         }
 
     }
 
+    /**
+     * @param JWS $jws
+     * @return array
+     * @throws InvalidJwtException
+     */
     private function checkAndGetHeader(JWS $jws): array
     {
-        $headerCheckerManager = new HeaderCheckerManager(
-            [
-                new AlgorithmChecker(['RS256']), // We check the header "alg" (algorithm)
-            ],
-            [
-                new JWSTokenSupport(), // Adds JWS token type support
-            ]
-        );
         try {
-            $headerCheckerManager->check($jws, 0, ['alg', 'typ', 'kid']);
-        } catch (MissingMandatoryHeaderParameterException $e){
+            $this->headerCheckerManager->check($jws, 0, ['alg', 'typ', 'kid']);
+        } catch (MissingMandatoryHeaderParameterException $e) {
             throw new InvalidJwtException($e->getMessage());
         }
 
         return $jws->getSignature(0)->getProtectedHeader();
     }
 
+    # TODO : InvalidTokenException 랑 InvalidJwtException 차이 알아보자
+    /**
+     * @param JWS $jws
+     * @return array
+     * @throws ExpiredTokenException
+     * @throws InvalidTokenException
+     */
     private function checkAndGetClaims(JWS $jws): array
     {
-        $claimCheckerManager = new ClaimCheckerManager(
-            [
-                new Checker\ExpirationTimeChecker(),
-            ]
-        );
         $claims = json_decode($jws->getPayload(), true);
         try {
-            $claimCheckerManager->check($claims, ['sub', 'u_idx', 'exp', 'client_id']);
+            $this->claimCheckerManager->check($claims, ['sub', 'u_idx', 'exp', 'client_id']);
         } catch (InvalidClaimException $e) {
             throw new ExpiredTokenException($e->getMessage());
         } catch (MissingMandatoryClaimException $e) {
@@ -97,17 +138,17 @@ class JwtTokenValidator
         return $claims;
     }
 
+    /**
+     * @param JWS $jws
+     * @param JWK $JWK
+     * @return void
+     * @throws InvalidJwtException
+     * @throws InvalidJwtSignatureException
+     */
     private function verifyJwsWithJwk(JWS $jws, JWK $jwk): void
     {
-        $algorithmManager = new AlgorithmManager([
-            new RS256(),
-        ]);
-        $jwsVerifier = new JWSVerifier(
-            $algorithmManager
-        );
-
         try {
-            $isVerified = $jwsVerifier->verifyWithKey($jws, $jwk, 0);
+            $isVerified = $this->jwsVerifier->verifyWithKey($jws, $jwk, 0);
         } catch (InvalidArgumentException $e) {
             throw new InvalidJwtException($e->getMessage());
         }
@@ -118,13 +159,13 @@ class JwtTokenValidator
     }
 
     /**
-     * @param $expire_term
+     * @param int $expiration_min
      * @return $this
+     * @throws ExpiredConstantException
      */
-    public function setExpireTerm(int $expire_term) {
-        if (is_numeric($expire_term)) {
-            $this->keyHandler->setExpireTerm($expire_term);
-        }
+    public function setKeyHandlerExpirationMin(int $expiration_min)
+    {
+        $this->keyHandler->setExperationMin($expiration_min);
 
         return $this;
     }

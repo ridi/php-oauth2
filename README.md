@@ -175,7 +175,7 @@ return [
 - optional
   - client_default_scope
   - client_default_redirect_uri
-  - jwt_expire_term (int) : default `60 * 5` = 5분
+  - jwt_expiration_min (int) : default `60 * 5` = 5분
   - default_user_provider
 
 ```yaml
