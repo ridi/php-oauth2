@@ -2,7 +2,6 @@
 
 namespace Ridibooks\OAuth2\Authorization\Validator;
 
-use Firebase\JWT\JWT;
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
@@ -13,21 +12,20 @@ use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Authorization\Key\KeyHandler;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use Jose\Component\Signature\Serializer\CompactSerializer;
-use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Signature\Algorithm\RS256;
 use Jose\Component\Signature\JWSVerifier;
+use Jose\Component\Signature\JWSTokenSupport;
+use Jose\Component\Signature\JWS;
 use Jose\Component\Checker\HeaderCheckerManager;
 use Jose\Component\Checker\AlgorithmChecker;
-use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Checker\ClaimCheckerManager;
-use Jose\Component\Signature\JWS;
 use Jose\Component\Checker;
-use InvalidArgumentException;
+use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Checker\InvalidClaimException;
 use Jose\Component\Checker\MissingMandatoryHeaderParameterException;
 use Jose\Component\Checker\MissingMandatoryClaimException;
 use Jose\Component\Core\JWK;
-use Symfony\Component\Lock\Key;
+use InvalidArgumentException;
 
 class JwtTokenValidator
 {
