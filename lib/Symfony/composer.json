@@ -24,6 +24,7 @@
         "symfony/symfony": "^4.0",
         "guzzlehttp/guzzle": "^6.3",
         "phpunit/phpunit": "^7",
-        "codeception/aspect-mock": "^3.0"
+        "codeception/aspect-mock": "^3.0",
+        "mockery/mockery": "^1.3"
     }
 }
