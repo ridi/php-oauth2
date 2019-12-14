@@ -95,9 +95,9 @@ class OAuth2ServiceProvider
     {
         $jwt_token_validator = JwtTokenValidator::create();
 
-//        if (!isset($this->configs['jwt_expire_term'])) {
-//            $jwt_token_validator->setExpireTerm($this->configs['jwt_expire_term']);
-//        }
+        if (isset($this->configs['jwt_expire_term'])) {
+            $jwt_token_validator->setExpireTerm($this->configs['jwt_expire_term']);
+        }
 
         $this->authorizer = new Authorizer($jwt_token_validator, $this->configs['client_default_scope']);
     }

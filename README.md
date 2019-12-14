@@ -30,8 +30,6 @@ $access_token = '...';
 
 try {
    $validator = JwtTokenValidator::create()
-      ->addKey('key000', 'example_secret_string_1', 'HS256') // add key with HS256 secret
-      ->addKeyFromFile('key001', 'path/to/file', 'RS256')    // add key with RS256 public key file
       ->setExpireTerm(60 * 5 /* default */);
     
     $validator->validateToken($access_token);

@@ -27,17 +27,12 @@ use Jose\Component\Checker\InvalidClaimException;
 use Jose\Component\Checker\MissingMandatoryHeaderParameterException;
 use Jose\Component\Checker\MissingMandatoryClaimException;
 use Jose\Component\Core\JWK;
+use Symfony\Component\Lock\Key;
+
 class JwtTokenValidator
 {
-    /** @var array */
-    private $keys = [];
-
-    /** @var array */
-    private $algorithm = [];
-
-    /** @var int */
-    private $expire_term = 60 * 5;
-
+    /** @var KeyHandler */
+    private $keyHandler;
     /**
      * @return JwtTokenValidator
      */
@@ -48,6 +43,7 @@ class JwtTokenValidator
 
     protected function __construct()
     {
+        $this->keyHandler = new KeyHandler();
     }
 
     private function getJws(string $access_token): JWS
@@ -124,6 +120,18 @@ class JwtTokenValidator
     }
 
     /**
+     * @param $expire_term
+     * @return $this
+     */
+    public function setExpireTerm(int $expire_term) {
+        if (is_numeric($expire_term)) {
+            $this->keyHandler->setExpireTerm($expire_term);
+        }
+
+        return $this;
+    }
+
+    /**
      * @param string|null $access_token
      * @return JwtToken
      * @throws AuthorizationException
@@ -140,7 +148,7 @@ class JwtTokenValidator
         $header = $this->checkAndGetHeader($jws);
         $claims = $this->checkAndGetClaims($jws);
 
-        $jwk = KeyHandler::getPublicKeyByKid($claims['client_id'], $header['kid']);
+        $jwk = $this->keyHandler->getPublicKeyByKid($claims['client_id'], $header['kid']);
         $this->verifyJwsWithJwk($jws, $jwk);
 
         return JwtToken::createFrom($claims);

@@ -25,7 +25,6 @@ class KeyRequestor
         Response $response
     )
     {
-
         if ($response->getStatusCode() >= 500) {
             throw new AccountServerException();
         } else if ($response->getStatusCode() >= 400) {

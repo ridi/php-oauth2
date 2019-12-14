@@ -14,44 +14,49 @@ use DateTime;
 
 class KeyHandler
 {
-    protected static $public_key_dtos = [];
+    /** @var int */
+    private $expire_term = JWKConstant::JWK_EXPIRES_MIN;
+    private $public_key_dtos = [];
 
-    protected static function isExpiredKey($client_id): bool {
-        return self::$public_key_dtos[$client_id][JWKConstant::JWK_EXPIRES_KEY] < new DateTime();
-    }
-
-    protected static function getMemorizedKeyDto(
-        string $client_id,
-        string $kid
-    ): ?JWK
-    {
-        if (!array_key_exists($client_id, self::$public_key_dtos) || self::isExpiredKey($client_id)) {
-            return null;
-        }
-        if (!array_key_exists($kid, self::$public_key_dtos[$client_id])) {
-            throw new InvalidJwtException("No matched JWK in registered JWKSet");
-        }
-
-        return self::$public_key_dtos[$client_id][$kid];
-    }
-
-    public static function getPublicKeyByKid(
+    public function getPublicKeyByKid(
         string $client_id,
         string $kid
     ): JWK
     {
-        $public_key_dto = self::getMemorizedKeyDto($client_id, $kid);
+        $public_key_dto = $this->getMemorizedKeyDto($client_id, $kid);
         if (!$public_key_dto) {
-            $public_key_dto = self::resetKeyDtos($client_id, $kid);
+            $public_key_dto = $this->resetKeyDtos($client_id, $kid);
         }
 
 
-        self::assertValidKey($public_key_dto);
+        $this->assertValidKey($public_key_dto);
 
         return $public_key_dto;
     }
 
-    protected static function assertValidKey(
+    public function setExpireTerm(int $expire_term) {
+        $this->expire_term = $expire_term;
+    }
+    protected function isExpiredKey($client_id): bool {
+        return $this->public_key_dtos[$client_id][JWKConstant::JWK_EXPIRES_KEY] < new DateTime();
+    }
+
+    protected function getMemorizedKeyDto(
+        string $client_id,
+        string $kid
+    ): ?JWK
+    {
+        if (!array_key_exists($client_id, $this->public_key_dtos) || $this->isExpiredKey($client_id)) {
+            return null;
+        }
+        if (!array_key_exists($kid, $this->public_key_dtos[$client_id])) {
+            throw new InvalidJwtException("No matched JWK in registered JWKSet");
+        }
+
+        return $this->public_key_dtos[$client_id][$kid];
+    }
+
+    protected function assertValidKey(
         JWK $key
     )
     {
@@ -63,29 +68,29 @@ class KeyHandler
         }
     }
 
-    protected static function resetKeyDtos(
+    protected function resetKeyDtos(
         string $client_id,
         string $kid
     ): JWK
     {
         try {
-            $keys = self::getValidPublicKeysByClientId($client_id);
+            $keys = $this->getValidPublicKeysByClientId($client_id);
         } catch (RetryFailyException $e) {
             throw new FailToLoadPublicKeyException();
         }
 
-        self::memorizeKeyDtos($client_id, $keys);
+        $this->memorizeKeyDtos($client_id, $keys);
 
-        return self::getMemorizedKeyDto($client_id, $kid);
+        return $this->getMemorizedKeyDto($client_id, $kid);
     }
 
-    protected static function memorizeKeyDtos(
+    protected function memorizeKeyDtos(
         string $client_id,
         $jwkset
     )
     {
-        if (array_key_exists($client_id, self::$public_key_dtos)) {
-            $key_dtos = self::$public_key_dtos[$client_id];
+        if (array_key_exists($client_id, $this->public_key_dtos)) {
+            $key_dtos = $this->public_key_dtos[$client_id];
         } else {
             $key_dtos = [];
         }
@@ -94,15 +99,15 @@ class KeyHandler
             $key_dtos[$kid] = $jwk;
         }
 
-        self::$public_key_dtos[$client_id] = $key_dtos;
+        $this->public_key_dtos[$client_id] = $key_dtos;
 
-        $jwk_expireds_min = JWKConstant::JWK_EXPIRES_MIN;
+        $jwk_expireds_min = $this->expire_term;
         $date = new DateTime();
-        self::$public_key_dtos[$client_id][JWKConstant::JWK_EXPIRES_KEY] = $date->modify("+${jwk_expireds_min} minutes");
+        $this->public_key_dtos[$client_id][JWKConstant::JWK_EXPIRES_KEY] = $date->modify("+${jwk_expireds_min} minutes");
     }
 
 
-    protected static function getValidPublicKeysByClientId(
+    protected function getValidPublicKeysByClientId(
         string $client_id
     ): JWKSet
     {

@@ -24,7 +24,7 @@ use Silex\ServiceProviderInterface;
  *      $app->register(new OAuth2ServiceProvider(), [
  *          OAuth2ProviderKeyConstant::CLIENT_ID => 'example-client-id',
  *          OAuth2ProviderKeyConstant::CLIENT_SECRET => 'example-client-secret',
- *          OAuth2ProviderKeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->addKey(...)
+ *          OAuth2ProviderKeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()
  *      ]);
  *      ...
  *      $app->get('/auth-required', [$this, 'authRequiredApi'])
