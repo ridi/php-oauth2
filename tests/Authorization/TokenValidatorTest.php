@@ -6,7 +6,6 @@ namespace Ridibooks\Test\OAuth2\Authorization;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
@@ -63,7 +62,7 @@ final class TokenValidatorTest extends TestCase
 
     public function testCannotIntrospectWrongFormatToken()
     {
-        $this->expectException(InvalidTokenException::class);
+        $this->expectException(InvalidJwtException::class);
 
         $access_token = TokenConstant::TOKEN_INVALID_PAYLOAD;
         $this->validate($access_token);

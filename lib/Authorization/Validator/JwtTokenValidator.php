@@ -7,7 +7,6 @@ use Ridibooks\OAuth2\Authorization\Exception\ExpiredConstantException;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
-use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
@@ -117,12 +116,11 @@ class JwtTokenValidator
         return $jws->getSignature(0)->getProtectedHeader();
     }
 
-    # TODO : InvalidTokenException 랑 InvalidJwtException 차이 알아보자
     /**
      * @param JWS $jws
      * @return array
      * @throws ExpiredTokenException
-     * @throws InvalidTokenException
+     * @throws InvalidJwtException
      */
     private function checkAndGetClaims(JWS $jws): array
     {
@@ -132,7 +130,7 @@ class JwtTokenValidator
         } catch (InvalidClaimException $e) {
             throw new ExpiredTokenException($e->getMessage());
         } catch (MissingMandatoryClaimException $e) {
-            throw new InvalidTokenException($e->getMessage());
+            throw new InvalidJwtException($e->getMessage());
         }
 
         return $claims;
