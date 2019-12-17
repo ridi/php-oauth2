@@ -18,16 +18,14 @@ use DateTime;
 
 class JwkHandler
 {
-    /** @var int */
-    private $experation_sec = JWKConstant::JWK_EXPIRATION_SEC;
-
     /** @var array */
     private $public_key_dtos = [];
 
     /** @var string */
     private $jwk_url;
 
-    public function __construct(string $jwk_url) {
+    public function __construct(string $jwk_url)
+    {
         $this->jwk_url = $jwk_url;
     }
 
@@ -57,25 +55,13 @@ class JwkHandler
     }
 
     /**
-     * @param int $experation_sec
-     * @return void
-     * @throws ExpiredConstantException
-     */
-    public function setExperationSec(int $experation_sec): void {
-        if (is_numeric($experation_sec)) {
-            $this->experation_sec = $experation_sec;
-        } else {
-            throw new ExpiredConstantException();
-        }
-    }
-
-    /**
      * @param string $client_id
      * @return bool
      * @throws \OutOfBoundsException
      */
     # TODO: 위에 왜 warning 주는지?
-    protected function isExpiredKey(string $client_id): bool {
+    protected function isExpiredKey(string $client_id): bool
+    {
         return $this->public_key_dtos[$client_id][JWKConstant::JWK_EXPIRATION_AT_KEY] < new DateTime();
     }
 
@@ -165,9 +151,9 @@ class JwkHandler
         }
 
         # TODO: 아래 변수를 그냥 string 에 박는 방법은 없는지 알아내서 간단하게 변경하자.
-        $jwk_experation_min= $this->experation_sec;
+        $jwk_expiration_min = JWKConstant::JWK_EXPIRATION_SEC;
         $now_date = new DateTime();
-        $key_dtos[JWKConstant::JWK_EXPIRATION_AT_KEY] = $now_date->modify("+${jwk_experation_min} minutes");
+        $key_dtos[JWKConstant::JWK_EXPIRATION_AT_KEY] = $now_date->modify("+${jwk_expiration_min} seconds");
         $this->public_key_dtos[$client_id] = $key_dtos;
     }
 

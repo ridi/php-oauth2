@@ -97,10 +97,6 @@ class OAuth2ServiceProvider
         $jwk_handler = new JwkHandler($jwk_url);
         $jwt_token_validator = JwtTokenValidator::createWithJWKHandler($jwk_handler);
 
-        if (isset($this->configs['jwt_expiration_sec'])) {
-            $jwt_token_validator->setKeyHandlerExpirationMin($this->configs['jwt_expiration_sec']);
-        }
-
         $this->authorizer = new Authorizer($jwt_token_validator, $this->configs['client_default_scope']);
     }
 

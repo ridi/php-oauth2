@@ -157,18 +157,6 @@ class JwtTokenValidator
     }
 
     /**
-     * @param int $expiration_sec
-     * @return $this
-     * @throws ExpiredConstantException
-     */
-    public function setKeyHandlerExpirationMin(int $expiration_sec)
-    {
-        $this->jwkHandler->setExperationSec($expiration_sec);
-
-        return $this;
-    }
-
-    /**
      * @param string|null $access_token
      * @return JwtToken
      * @throws AuthorizationException

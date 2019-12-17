@@ -25,12 +25,14 @@ composer require ridibooks/oauth2
 
 ```php
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
+use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
 
 $access_token = '...';
 
 try {
-   $validator = JwtTokenValidator::create()
-      ->setExpireTerm(60 * 5 /* default */);
+   $jwk_url = $this->configs['jwk_url'];
+   $jwk_handler = new JwkHandler($jwk_url);
+   $validator = JwtTokenValidator::createWithJWKHandler($jwk_handler);
     
     $validator->validateToken($access_token);
 } catch (AuthorizationException $e) {
@@ -84,7 +86,7 @@ use Example\UserProvder;
 $app->register(new OAuth2ServiceProvider(), [
 	KeyConstant::CLIENT_ID => 'example-client-id',
 	KeyConstant::CLIENT_SECRET => 'example-client-secret',
-	KeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->...
+	KeyConstant::JWT_VALIDATOR => JwtTokenValidator::createWithJWKHandler(new JwkHandler($this->jwk_url))->...
 ]);
 
 // 미들웨어 등록
@@ -116,7 +118,7 @@ use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 $app->register(new OAuth2ServiceProvider(), [
 	KeyConstant::CLIENT_ID => 'example-client-id',
 	KeyConstant::CLIENT_SECRET => 'example-client-secret',
-	KeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->...
+	KeyConstant::JWT_VALIDATOR => JwtTokenValidator::createWithJWKHandler(new JwkHandler($this->jwk_url))->...
 ]);
 
 ...
@@ -175,7 +177,6 @@ return [
 - optional
   - client_default_scope
   - client_default_redirect_uri
-  - jwt_expiration_sec (int) : default `60 * 5` = 5분
   - default_user_provider
 
 ```yaml
