@@ -5,7 +5,7 @@ namespace Ridibooks\Test\OAuth2\Authorization;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Authorizer;
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
-use Ridibooks\OAuth2\Authorization\Key\JwkHandler;
+use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2\Silex\Constant\OAuth2ProviderKeyConstant;

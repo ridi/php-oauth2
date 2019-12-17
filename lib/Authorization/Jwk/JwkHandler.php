@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Ridibooks\OAuth2\Authorization\Key;
+namespace Ridibooks\OAuth2\Authorization\Jwk;
 
 use Ridibooks\OAuth2\Authorization\Exception\AccountServerException;
 use Ridibooks\OAuth2\Authorization\Exception\ClientRequestException;

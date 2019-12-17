@@ -6,7 +6,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use PHPUnit\Framework\TestCase;
-use Ridibooks\OAuth2\Authorization\Key\JwkHandler;
+use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2\Grant\Granter;

@@ -11,7 +11,7 @@ use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
 use Ridibooks\OAuth2\Grant\Granter;
 use Ridibooks\OAuth2\Symfony\Subscriber\OAuth2Middleware;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Ridibooks\OAuth2\Authorization\Key\JwkHandler;
+use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
 
 class OAuth2ServiceProvider
 {

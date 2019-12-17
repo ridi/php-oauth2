@@ -10,7 +10,7 @@ use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
-use Ridibooks\OAuth2\Authorization\Key\JwkHandler;
+use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Algorithm\RS256;
