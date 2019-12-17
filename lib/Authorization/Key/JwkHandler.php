@@ -13,13 +13,23 @@ use Ridibooks\OAuth2\Authorization\Exception\RetryFailyException;
 use Ridibooks\OAuth2\Constant\JWKConstant;
 use Jose\Component\Core\JWK;
 use Jose\Component\Core\JWKSet;
+use Ridibooks\OAuth2\Authorization\Api\JwkApi;
 use DateTime;
 
-class KeyHandler
+class JwkHandler
 {
     /** @var int */
-    private $experation_min = JWKConstant::JWK_EXPIRATION_MIN;
+    private $experation_sec = JWKConstant::JWK_EXPIRATION_SEC;
+
+    /** @var array */
     private $public_key_dtos = [];
+
+    /** @var string */
+    private $jwk_url;
+
+    public function __construct(string $jwk_url) {
+        $this->jwk_url = $jwk_url;
+    }
 
     /**
      * @param string $client_id
@@ -47,13 +57,13 @@ class KeyHandler
     }
 
     /**
-     * @param int $experation_min
+     * @param int $experation_sec
      * @return void
      * @throws ExpiredConstantException
      */
-    public function setExperationMin(int $experation_min): void {
-        if (is_numeric($experation_min)) {
-            $this->experation_min = $experation_min;
+    public function setExperationSec(int $experation_sec): void {
+        if (is_numeric($experation_sec)) {
+            $this->experation_sec = $experation_sec;
         } else {
             throw new ExpiredConstantException();
         }
@@ -155,7 +165,7 @@ class KeyHandler
         }
 
         # TODO: 아래 변수를 그냥 string 에 박는 방법은 없는지 알아내서 간단하게 변경하자.
-        $jwk_experation_min= $this->experation_min;
+        $jwk_experation_min= $this->experation_sec;
         $now_date = new DateTime();
         $key_dtos[JWKConstant::JWK_EXPIRATION_AT_KEY] = $now_date->modify("+${jwk_experation_min} minutes");
         $this->public_key_dtos[$client_id] = $key_dtos;
@@ -171,7 +181,7 @@ class KeyHandler
         string $client_id
     ): JWKSet
     {
-        $public_key_array = KeyRequestor::requestPublicKey($client_id);
+        $public_key_array = JwkApi::requestPublicKey($this->jwk_url, $client_id);
 
         return JWKSet::createFromKeyData($public_key_array);
     }

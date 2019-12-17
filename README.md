@@ -168,14 +168,14 @@ return [
   - client_secret
   - authorize_url
   - token_url
-  - key_url
+  - jwk_url
   - user_info_url
   - token_cookie_domain
   - default_exception_handler
 - optional
   - client_default_scope
   - client_default_redirect_uri
-  - jwt_expiration_min (int) : default `60 * 5` = 5분
+  - jwt_expiration_sec (int) : default `60 * 5` = 5분
   - default_user_provider
 
 ```yaml
@@ -186,7 +186,7 @@ o_auth2_service_provider:
   client_secret: '%env(CLIENT_SECRET)%'
   authorize_url: https://account.dev.ridi.io/ridi/authorize/
   token_url: https://account.dev.ridi.io/oauth2/token/
-  key_url: https://account.dev.ridi.io/oauth2/keys/public
+  jwk_url: https://account.dev.ridi.io/oauth2/keys/public
   user_info_url: https://account.dev.ridi.io/accounts/me/
   token_cookie_domain: .ridi.io
   

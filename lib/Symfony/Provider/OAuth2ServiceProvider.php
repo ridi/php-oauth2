@@ -5,13 +5,13 @@ namespace Ridibooks\OAuth2\Symfony\Provider;
 
 use Doctrine\Common\Annotations\CachedReader;
 use Ridibooks\OAuth2\Authorization\Authorizer;
-use Ridibooks\OAuth2\Authorization\Key\KeyHandler;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
 use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
 use Ridibooks\OAuth2\Grant\Granter;
 use Ridibooks\OAuth2\Symfony\Subscriber\OAuth2Middleware;
 use Symfony\Component\EventDispatcher\EventDispatcher;
+use Ridibooks\OAuth2\Authorization\Key\JwkHandler;
 
 class OAuth2ServiceProvider
 {
@@ -93,10 +93,12 @@ class OAuth2ServiceProvider
 
     private function setAuthorizer(): void
     {
-        $jwt_token_validator = JwtTokenValidator::create();
+        $jwk_url = $this->configs['jwk_url'];
+        $jwk_handler = new JwkHandler($jwk_url);
+        $jwt_token_validator = JwtTokenValidator::createWithJWKHandler($jwk_handler);
 
-        if (isset($this->configs['jwt_expiration_min'])) {
-            $jwt_token_validator->setKeyHandlerExpirationMin($this->configs['jwt_expiration_min']);
+        if (isset($this->configs['jwt_expiration_sec'])) {
+            $jwt_token_validator->setKeyHandlerExpirationMin($this->configs['jwt_expiration_sec']);
         }
 
         $this->authorizer = new Authorizer($jwt_token_validator, $this->configs['client_default_scope']);

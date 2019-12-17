@@ -6,43 +6,41 @@ namespace Ridibooks\Test\OAuth2\Authorization;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
+use Ridibooks\OAuth2\Authorization\Key\JwkHandler;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\Test\OAuth2\Common\TokenConstant;
-use Mockery;
+use Ridibooks\Test\OAuth2\Api\MockJwkApi;
 
 final class TokenValidatorTest extends TestCase
 {
+    private $jwk_url = 'https://account.dev.ridi.io/oauth2/keys/public';
+
     protected function setUp()
     {
-        $mock_data = <<<EOT
-        {"keys":[
-        {"kid": "RS999", "alg": "RS256", "kty": "RSA", "use": "sig", "n": "1rL5PCEv2PaAASaGldzfnlo0MiMCglC-eFxYHgUfa6a7qJhjo0QX8LeAelBlQpMCAMVGX33jUJ2FCCP_QDk3NIu74AgP7F3Z7IdmVvOfkt2myF1n3ZDyCHKdyi7MnOBtHIQCqQRGZ4XH2Ss5bmg_FuplBFT82e14UVmZx4kP-HwDjaSpvYHoTr3b5j20Ebx7aIy_SVrWeY0wxeAdFf-EOuEBQ-QIIe5Npd49gzq4CGHeNJlPQjs0EjMZFtPutCrIRSoEaLwccKQEIHcMSbsBLCJIJ5OuTmtK2WaSh7VYCrJsCbPh5tYKF6akN7TSOtDwGQVKwJjjOsxkPdYXNoAnIQ==", "e": "AQAB"},
-        {"kid": "kid1", "alg": "RS256", "kty": "RSA", "use": "sig", "n": "1rL5PCEv2PaAASaGldzfnlo0MiMCglC-eFxYHgUfa6a7qJhjo0QX8LeAelBlQpMCAMVGX33jUJ2FCCP_QDk3NIu74AgP7F3Z7IdmVvOfkt2myF1n3ZDyCHKdyi7MnOBtHIQCqQRGZ4XH2Ss5bmg_FuplBFT82e14UVmZx4kP-HwDjaSpvYHoTr3b5j20Ebx7aIy_SVrWeY0wxeAdFf-EOuEBQ-QIIe5Npd49gzq4CGHeNJlPQjs0EjMZFtPutCrIRSoEaLwccKQEIHcMSbsBLCJIJ5OuTmtK2WaSh7VYCrJsCbPh5tYKF6akN7TSOtDwGQVKwJjjOsxkPdYXNoAnIQ==", "e": "AQAB"}
-        ]}
-EOT;
-        Mockery::mock('alias:Ridibooks\OAuth2\Authorization\Key\KeyRequestor', [
-            "requestPublicKey" => json_decode($mock_data, true),
-        ]);
+        MockJwkApi::setUp();
     }
 
     protected function tearDown()
     {
-        Mockery::close();
+        MockJwkApi::tearDown();
     }
 
     private function validate($access_token)
     {
-        return JwtTokenValidator::create()
+        $jwk_handler = new JwkHandler($this->jwk_url);
+
+        return JwtTokenValidator::createWithJWKHandler($jwk_handler)
             ->validateToken($access_token);
     }
 
     private function validateWithKid($access_token)
     {
-        return JwtTokenValidator::create()
+        $jwk_handler = new JwkHandler($this->jwk_url);
+
+        return JwtTokenValidator::createWithJWKHandler($jwk_handler)
             ->validateToken($access_token);
     }
 

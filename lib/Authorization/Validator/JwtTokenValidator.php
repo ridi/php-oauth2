@@ -10,7 +10,7 @@ use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
-use Ridibooks\OAuth2\Authorization\Key\KeyHandler;
+use Ridibooks\OAuth2\Authorization\Key\JwkHandler;
 use Jose\Component\Signature\Serializer\JWSSerializerManager;
 use Jose\Component\Signature\Serializer\CompactSerializer;
 use Jose\Component\Signature\Algorithm\RS256;
@@ -31,8 +31,8 @@ use InvalidArgumentException;
 
 class JwtTokenValidator
 {
-    /** @var KeyHandler */
-    private $keyHandler;
+    /** @var JwkHandler */
+    private $jwkHandler;
 
     /** @var JWSSerializerManager */
     private $serializerManager;
@@ -53,14 +53,14 @@ class JwtTokenValidator
     /**
      * @return JwtTokenValidator
      */
-    static public function create(): JwtTokenValidator
+    static public function createWithJWKHandler(JwkHandler $jwk_handler): JwtTokenValidator
     {
-        return new JwtTokenValidator();
+        return new JwtTokenValidator($jwk_handler);
     }
 
-    protected function __construct()
+    protected function __construct(JwkHandler $jwk_handler)
     {
-        $this->keyHandler = new KeyHandler();
+        $this->jwkHandler = $jwk_handler;
         $this->serializerManager = new JWSSerializerManager([
             new CompactSerializer(),
         ]);
@@ -159,13 +159,13 @@ class JwtTokenValidator
     }
 
     /**
-     * @param int $expiration_min
+     * @param int $expiration_sec
      * @return $this
      * @throws ExpiredConstantException
      */
-    public function setKeyHandlerExpirationMin(int $expiration_min)
+    public function setKeyHandlerExpirationMin(int $expiration_sec)
     {
-        $this->keyHandler->setExperationMin($expiration_min);
+        $this->jwkHandler->setExperationSec($expiration_sec);
 
         return $this;
     }
@@ -187,7 +187,7 @@ class JwtTokenValidator
         $header = $this->checkAndGetHeader($jws);
         $claims = $this->checkAndGetClaims($jws);
 
-        $jwk = $this->keyHandler->getPublicKeyByKid($claims['client_id'], $header['kid']);
+        $jwk = $this->jwkHandler->getPublicKeyByKid($claims['client_id'], $header['kid']);
         $this->verifyJwsWithJwk($jws, $jwk);
 
         return JwtToken::createFrom($claims);

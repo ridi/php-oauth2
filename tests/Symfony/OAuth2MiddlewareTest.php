@@ -5,7 +5,6 @@ namespace Ridibooks\Test\OAuth2\Symfony;
 
 use AspectMock\Test as Test;
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
-//use Ridibooks\OAuth2\Authorization\Key\KeyHandler;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2\Symfony\Provider\DefaultUserProvider;
 use Ridibooks\OAuth2\Symfony\Provider\User;
@@ -14,29 +13,18 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Client;
-use Mockery;
+use Ridibooks\Test\OAuth2\Api\MockJwkApi;
 
 class OAuth2MiddlewareTest extends WebTestCase
 {
     protected function setUp()
     {
-        $mock_data = <<<EOT
-        {"keys":[
-        {"kid": "RS999", "alg": "RS256", "kty": "RSA", "use": "sig", "n": "1rL5PCEv2PaAASaGldzfnlo0MiMCglC-eFxYHgUfa6a7qJhjo0QX8LeAelBlQpMCAMVGX33jUJ2FCCP_QDk3NIu74AgP7F3Z7IdmVvOfkt2myF1n3ZDyCHKdyi7MnOBtHIQCqQRGZ4XH2Ss5bmg_FuplBFT82e14UVmZx4kP-HwDjaSpvYHoTr3b5j20Ebx7aIy_SVrWeY0wxeAdFf-EOuEBQ-QIIe5Npd49gzq4CGHeNJlPQjs0EjMZFtPutCrIRSoEaLwccKQEIHcMSbsBLCJIJ5OuTmtK2WaSh7VYCrJsCbPh5tYKF6akN7TSOtDwGQVKwJjjOsxkPdYXNoAnIQ==", "e": "AQAB"},
-        {"kid": "kid1", "alg": "RS256", "kty": "RSA", "use": "sig", "n": "1rL5PCEv2PaAASaGldzfnlo0MiMCglC-eFxYHgUfa6a7qJhjo0QX8LeAelBlQpMCAMVGX33jUJ2FCCP_QDk3NIu74AgP7F3Z7IdmVvOfkt2myF1n3ZDyCHKdyi7MnOBtHIQCqQRGZ4XH2Ss5bmg_FuplBFT82e14UVmZx4kP-HwDjaSpvYHoTr3b5j20Ebx7aIy_SVrWeY0wxeAdFf-EOuEBQ-QIIe5Npd49gzq4CGHeNJlPQjs0EjMZFtPutCrIRSoEaLwccKQEIHcMSbsBLCJIJ5OuTmtK2WaSh7VYCrJsCbPh5tYKF6akN7TSOtDwGQVKwJjjOsxkPdYXNoAnIQ==", "e": "AQAB"}
-        ]}
-EOT;
-        Mockery::mock('alias:Ridibooks\OAuth2\Authorization\Key\KeyRequestor', [
-            "requestPublicKey" => json_decode($mock_data, true),
-        ]);
+        MockJwkApi::setUp();
     }
 
     protected function tearDown()
     {
-        Mockery::close();
+        MockJwkApi::tearDown();
     }
 
     /**

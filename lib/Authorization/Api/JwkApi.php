@@ -1,12 +1,12 @@
 <?php declare(strict_types=1);
 
-namespace Ridibooks\OAuth2\Authorization\Key;
+namespace Ridibooks\OAuth2\Authorization\Api;
 
 use GuzzleHttp\Client;
 use Ridibooks\OAuth2\Authorization\Exception\AccountServerException;
 use Ridibooks\OAuth2\Authorization\Exception\ClientRequestException;
 
-class KeyRequestor
+class JwkApi
 {
     /**
      * @param string $client_id
@@ -15,14 +15,14 @@ class KeyRequestor
      * @throws ClientRequestException
      */
     public static function requestPublicKey(
+        string $jwk_url,
         string $client_id
     ): array
     {
         $client = new Client();
-        $response = $client->request('GET',
-            'https://account.dev.ridi.io/oauth2/keys/public', [
-                'query' => ['client_id' => $client_id]
-            ]);
+        $response = $client->request('GET', $jwk_url, [
+            'query' => ['client_id' => $client_id]
+        ]);
 
         return self::processResponse($response);
     }
