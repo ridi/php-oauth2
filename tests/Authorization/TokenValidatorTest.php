@@ -29,17 +29,13 @@ final class TokenValidatorTest extends TestCase
 
     private function validate($access_token)
     {
-        $jwk_handler = new JwkHandler($this->jwk_url);
-
-        return JwtTokenValidator::createWithJWKHandler($jwk_handler)
+        return JwtTokenValidator::createWithJwkUrl($this->jwk_url)
             ->validateToken($access_token);
     }
 
     private function validateWithKid($access_token)
     {
-        $jwk_handler = new JwkHandler($this->jwk_url);
-
-        return JwtTokenValidator::createWithJWKHandler($jwk_handler)
+        return JwtTokenValidator::createWithJwkUrl($this->jwk_url)
             ->validateToken($access_token);
     }
 

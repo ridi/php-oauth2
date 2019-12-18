@@ -3,7 +3,6 @@
 namespace Ridibooks\OAuth2\Authorization\Validator;
 
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
-use Ridibooks\OAuth2\Authorization\Exception\ExpiredConstantException;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
@@ -30,40 +29,44 @@ use InvalidArgumentException;
 
 class JwtTokenValidator
 {
+    /** @var string */
+    private $jwk_url;
+
     /** @var JwkHandler */
-    private $jwkHandler;
+    private $jwk_handler;
 
     /** @var JWSSerializerManager */
-    private $serializerManager;
+    private $serializer_manager;
 
     /** @var HeaderCheckerManager */
-    private $headerCheckerManager;
+    private $header_checker_manager;
 
     /** @var ClaimCheckerManager */
-    private $claimCheckerManager;
+    private $claim_checker_manager;
 
     /** @var AlgorithmManager */
-    private $algorithmManager;
+    private $algorithm_manager;
 
     /** @var JWSVerifier */
-    private $jwsVerifier;
+    private $jws_verifier;
 
 
     /**
+     * @param string $jwk_url
      * @return JwtTokenValidator
      */
-    static public function createWithJWKHandler(JwkHandler $jwk_handler): JwtTokenValidator
+    static public function createWithJwkUrl(string $jwk_url): JwtTokenValidator
     {
-        return new JwtTokenValidator($jwk_handler);
+        return new JwtTokenValidator($jwk_url);
     }
 
-    protected function __construct(JwkHandler $jwk_handler)
+    protected function __construct(string $jwk_url)
     {
-        $this->jwkHandler = $jwk_handler;
-        $this->serializerManager = new JWSSerializerManager([
+        $this->jwk_url = $jwk_url;
+        $this->serializer_manager = new JWSSerializerManager([
             new CompactSerializer(),
         ]);
-        $this->headerCheckerManager = new HeaderCheckerManager(
+        $this->header_checker_manager = new HeaderCheckerManager(
             [
                 new AlgorithmChecker(['RS256', 'ES256']),
             ],
@@ -71,17 +74,17 @@ class JwtTokenValidator
                 new JWSTokenSupport(),
             ]
         );
-        $this->claimCheckerManager = new ClaimCheckerManager(
+        $this->claim_checker_manager = new ClaimCheckerManager(
             [
                 new Checker\ExpirationTimeChecker(),
             ]
         );
-        $this->algorithmManager = new AlgorithmManager([
+        $this->algorithm_manager = new AlgorithmManager([
             new RS256(),
             new ES256(),
         ]);
-        $this->jwsVerifier = new JWSVerifier(
-            $this->algorithmManager
+        $this->jws_verifier = new JWSVerifier(
+            $this->algorithm_manager
         );
     }
 
@@ -93,7 +96,7 @@ class JwtTokenValidator
     private function getJws(string $access_token): JWS
     {
         try {
-            return $this->serializerManager->unserialize($access_token);
+            return $this->serializer_manager->unserialize($access_token);
         } catch (InvalidArgumentException $e) {
             throw new InvalidJwtException($e->getMessage());
         }
@@ -108,7 +111,7 @@ class JwtTokenValidator
     private function checkAndGetHeader(JWS $jws): array
     {
         try {
-            $this->headerCheckerManager->check($jws, 0, ['alg', 'typ', 'kid']);
+            $this->header_checker_manager->check($jws, 0, ['alg', 'typ', 'kid']);
         } catch (MissingMandatoryHeaderParameterException $e) {
             throw new InvalidJwtException($e->getMessage());
         }
@@ -126,7 +129,7 @@ class JwtTokenValidator
     {
         $claims = json_decode($jws->getPayload(), true);
         try {
-            $this->claimCheckerManager->check($claims, ['sub', 'u_idx', 'exp', 'client_id']);
+            $this->claim_checker_manager->check($claims, ['sub', 'u_idx', 'exp', 'client_id']);
         } catch (InvalidClaimException $e) {
             throw new ExpiredTokenException($e->getMessage());
         } catch (MissingMandatoryClaimException $e) {
@@ -146,7 +149,7 @@ class JwtTokenValidator
     private function verifyJwsWithJwk(JWS $jws, JWK $jwk): void
     {
         try {
-            $isVerified = $this->jwsVerifier->verifyWithKey($jws, $jwk, 0);
+            $isVerified = $this->jws_verifier->verifyWithKey($jws, $jwk, 0);
         } catch (InvalidArgumentException $e) {
             throw new InvalidJwtException($e->getMessage());
         }
@@ -173,7 +176,7 @@ class JwtTokenValidator
         $header = $this->checkAndGetHeader($jws);
         $claims = $this->checkAndGetClaims($jws);
 
-        $jwk = $this->jwkHandler->getPublicKeyByKid($claims['client_id'], $header['kid']);
+        $jwk = JwkHandler::getPublicKeyByKid($this->jwk_url, $claims['client_id'], $header['kid']);
         $this->verifyJwsWithJwk($jws, $jwk);
 
         return JwtToken::createFrom($claims);

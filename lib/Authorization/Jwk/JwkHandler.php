@@ -16,20 +16,13 @@ use Jose\Component\Core\JWKSet;
 use Ridibooks\OAuth2\Authorization\Api\JwkApi;
 use DateTime;
 
+const JWKS_CACHE_FILENAME = './jwksCache.php';
+const JWKS_VAL_NAME = 'cached_jwks';
+
 class JwkHandler
 {
-    /** @var array */
-    private $public_key_dtos = [];
-
-    /** @var string */
-    private $jwk_url;
-
-    public function __construct(string $jwk_url)
-    {
-        $this->jwk_url = $jwk_url;
-    }
-
     /**
+     * @param string $jwk_url
      * @param string $client_id
      * @param string $kid
      * @return JWK
@@ -38,20 +31,53 @@ class JwkHandler
      * @throws NotExistedKeyException
      * @throws InvalidPublicKeyException
      */
-    public function getPublicKeyByKid(
+    public static function getPublicKeyByKid(
+        string $jwk_url,
         string $client_id,
         string $kid
     ): JWK
     {
-        $public_key_dto = $this->getMemorizedKeyDto($client_id, $kid);
+        $cached_jwks = self::getCachedJwks(JWKS_CACHE_FILENAME);
+        $public_key_dto = self::getMemorizedKeyDto($cached_jwks, $client_id, $kid);
         if (!$public_key_dto) {
-            $public_key_dto = $this->resetKeyDtos($client_id, $kid);
+            $public_key_dto = self::resetKeyDtos($cached_jwks, $jwk_url, $client_id, $kid);
         }
 
 
-        $this->assertValidKey($public_key_dto);
+        self::assertValidKey($public_key_dto);
 
         return $public_key_dto;
+    }
+
+    public static function setCacheJwks($fileName, $target)
+    {
+        // Serializing Targeted Data
+        $target = str_replace('"', '\"', serialize($target));
+
+        // Writing to Cache File
+        $fp = fopen($fileName, 'w+');
+
+        while (!flock($fp, LOCK_EX)) { # waiting if locked.
+            var_dump("Waiting!!!");
+            usleep(1000);
+        }
+
+        fwrite($fp, '<?php ');
+        fwrite($fp, '$' . JWKS_VAL_NAME . ' = unserialize("' . $target . '");');
+        fwrite($fp, ' ?>');
+        fclose($fp); //  the lock is released also by fclose() (which is also called automatically when script finished).
+    }
+
+    public static function getCachedJwks($fileName, $ttl = 600): ?array
+    {
+        if(!file_exists($fileName) || filemtime($fileName) + $ttl < time())
+        {
+            return null;
+        }
+
+        include($fileName);
+        $valName = JWKS_VAL_NAME;
+        return $$valName;
     }
 
     /**
@@ -60,31 +86,36 @@ class JwkHandler
      * @throws \OutOfBoundsException
      */
     # TODO: 위에 왜 warning 주는지?
-    protected function isExpiredKey(string $client_id): bool
+    protected static function isExpiredKey(array $public_key_dtos, string $client_id): bool
     {
-        return $this->public_key_dtos[$client_id][JWKConstant::JWK_EXPIRATION_AT_KEY] < new DateTime();
+
+        return $public_key_dtos[$client_id][JWKConstant::JWK_EXPIRATION_AT_KEY] < new DateTime();
     }
 
 
     /**
+     * @param array|null &$cached_jwks
      * @param string $client_id
      * @param string $kid
      * @return JWK|null
      * @throws InvalidJwtException
      */
-    protected function getMemorizedKeyDto(
+    protected static function getMemorizedKeyDto(
+        ?array &$cached_jwks,
         string $client_id,
         string $kid
     ): ?JWK
     {
-        if (!array_key_exists($client_id, $this->public_key_dtos) || $this->isExpiredKey($client_id)) {
+        if ($cached_jwks == null) {
             return null;
         }
-        if (!array_key_exists($kid, $this->public_key_dtos[$client_id])) {
+        if (!array_key_exists($client_id, $cached_jwks) || self::isExpiredKey($cached_jwks, $client_id)) {
+            return null;
+        }
+        if (!array_key_exists($kid, $cached_jwks[$client_id])) {
             throw new InvalidJwtException("No matched JWK in registered JWKSet");
         }
-
-        return $this->public_key_dtos[$client_id][$kid];
+        return $cached_jwks[$client_id][$kid];
     }
 
     /**
@@ -93,7 +124,7 @@ class JwkHandler
      * @throws NotExistedKeyException
      * @throws InvalidPublicKeyException
      */
-    protected function assertValidKey(
+    protected static function assertValidKey(
         JWK $key
     ): void
     {
@@ -106,42 +137,52 @@ class JwkHandler
     }
 
     /**
-     * @param JWK $client_id
-     * @param JWK $kid
+     * @param array|null &$cached_jwks
+     * @param string $jwk_url
+     * @param string $client_id
+     * @param string $kid
      * @return JWK
      * @throws FailToLoadPublicKeyException
      * @throws InvalidJwtException
      */
-    protected function resetKeyDtos(
+    protected static function resetKeyDtos(
+        ?array &$cached_jwks,
+        string $jwk_url,
         string $client_id,
         string $kid
     ): JWK
     {
         try {
-            $keys = $this->getValidPublicKeysByClientId($client_id);
+            $keys = self::getValidPublicKeysByClientId($jwk_url, $client_id);
         } catch (RetryFailyException $e) {
             throw new FailToLoadPublicKeyException();
         }
 
-        $this->memorizeKeyDtos($client_id, $keys);
+        self::memorizeKeyDtos($cached_jwks, $client_id, $keys);
 
-        return $this->getMemorizedKeyDto($client_id, $kid);
+        return self::getMemorizedKeyDto($cached_jwks, $client_id, $kid);
     }
 
     /**
+     * @param array|null &$cached_jwks
      * @param string $client_id
      * @param JWKSet $jwkset
      * @return void
      * @throws \OutOfBoundsException
      */
     # TODO: 위에 왜 warning 주는지?
-    protected function memorizeKeyDtos(
+    protected static function memorizeKeyDtos(
+        ?array &$cached_jwks,
         string $client_id,
         JWKSet $jwkset
     ): void
     {
-        if (array_key_exists($client_id, $this->public_key_dtos)) {
-            $key_dtos = $this->public_key_dtos[$client_id];
+        if ($cached_jwks == null) {
+            $cached_jwks = [];
+        }
+
+        if (array_key_exists($client_id, $cached_jwks)) {
+            $key_dtos = $cached_jwks[$client_id];
         } else {
             $key_dtos = [];
         }
@@ -154,7 +195,9 @@ class JwkHandler
         $jwk_expiration_min = JWKConstant::JWK_EXPIRATION_SEC;
         $now_date = new DateTime();
         $key_dtos[JWKConstant::JWK_EXPIRATION_AT_KEY] = $now_date->modify("+${jwk_expiration_min} seconds");
-        $this->public_key_dtos[$client_id] = $key_dtos;
+        $cached_jwks[$client_id] = $key_dtos;
+
+        self::setCacheJwks(JWKS_CACHE_FILENAME, $cached_jwks);
     }
 
     /**
@@ -163,11 +206,12 @@ class JwkHandler
      * @throws AccountServerException
      * @throws ClientRequestException
      */
-    protected function getValidPublicKeysByClientId(
+    protected static function getValidPublicKeysByClientId(
+        string $jwk_url,
         string $client_id
     ): JWKSet
     {
-        $public_key_array = JwkApi::requestPublicKey($this->jwk_url, $client_id);
+        $public_key_array = JwkApi::requestPublicKey($jwk_url, $client_id);
 
         return JWKSet::createFromKeyData($public_key_array);
     }

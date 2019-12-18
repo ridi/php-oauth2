@@ -94,8 +94,7 @@ class OAuth2ServiceProvider
     private function setAuthorizer(): void
     {
         $jwk_url = $this->configs['jwk_url'];
-        $jwk_handler = new JwkHandler($jwk_url);
-        $jwt_token_validator = JwtTokenValidator::createWithJWKHandler($jwk_handler);
+        $jwt_token_validator = JwtTokenValidator::createWithJwkUrl($jwk_url);
 
         $this->authorizer = new Authorizer($jwt_token_validator, $this->configs['client_default_scope']);
     }
