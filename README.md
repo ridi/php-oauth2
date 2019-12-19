@@ -178,6 +178,7 @@ return [
   - client_default_scope
   - client_default_redirect_uri
   - default_user_provider
+  - jwk_cache_file_path (if not exist, not caching)
 
 ```yaml
 # example: <project_root>/config/packages/o_auth2_service_provider.yml
@@ -192,6 +193,7 @@ o_auth2_service_provider:
   token_cookie_domain: .ridi.io
   
   default_exception_handler: Ridibooks\OAuth2\Example\DefaultExceptionHandler
+  jwk_cache_file_path: 'jwk_cache_file_testtthththth.php'
 ```
 
 ```yaml

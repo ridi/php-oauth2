@@ -3,10 +3,13 @@ declare(strict_types=1);
 
 namespace Ridibooks\Test\OAuth2\Authorization;
 
+use Doctrine\Common\Cache\Cache;
+use Jose\Component\Core\JWK;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
+use Ridibooks\OAuth2\Authorization\Cache\CacheManager;
 use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
@@ -43,20 +46,20 @@ EOT;
     }
 
     private function setCacheFile() {
-        JwkHandler::setCacheJwks($this->jwk_cache_filename, $this->jwks);
+        CacheManager::setCache($this->jwk_cache_filename, $this->jwks);
     }
 
     public function testCacheWorking()
     {
         self::setCacheFile();
-        $cacheData = JwkHandler::getCachedJwks($this->jwk_cache_filename);
+        $cacheData = CacheManager::getCache($this->jwk_cache_filename);
         $this->assertEquals($this->jwks, $cacheData);
         $this->assertFileExists($this->jwk_cache_filename);
     }
 
     public function testReturnNullWhenFileNotExist()
     {
-        $cacheData = JwkHandler::getCachedJwks($this->jwk_cache_filename);
+        $cacheData = CacheManager::getCache($this->jwk_cache_filename);
 
         $this->assertNull($cacheData);
     }
@@ -65,16 +68,30 @@ EOT;
     {
         self::setCacheFile();
         sleep(1);
-        $cache_data = JwkHandler::getCachedJwks($this->jwk_cache_filename, 0.1);
+        $cache_data = CacheManager::getCache($this->jwk_cache_filename, 0.1);
 
         $this->assertNull($cache_data);
     }
 
-    public function testCacheWorkingWithJwk()
+    public function testGetPublicKeyByKidWithoutCaching()
     {
-        JwkHandler::getPublicKeyByKid($this->jwk_url, $this->client_id, 'RS999');
-        $cached_jwks = JwkHandler::getCachedJwks($this->jwk_cache_filename);
-        $this->assertArrayHasKey($this->client_id, $cached_jwks);
+        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, 'RS999');
+        $this->assertFileNotExists($this->jwk_cache_filename);
+        $this->assertInstanceOf(JWK::class, $JWK);
+    }
+
+    public function testGetPublicKeyByKidWithCaching()
+    {
+        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, 'RS999', $this->jwk_cache_filename);
         $this->assertFileExists($this->jwk_cache_filename);
+        $this->assertInstanceOf(JWK::class, $JWK);
+    }
+
+    public function testGetPublicKeyByKidWithAlreadyCached()
+    {
+        $this->setCacheFile();
+        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, 'RS999', $this->jwk_cache_filename);
+        $this->assertFileExists($this->jwk_cache_filename);
+        $this->assertInstanceOf(JWK::class, $JWK);
     }
 }
