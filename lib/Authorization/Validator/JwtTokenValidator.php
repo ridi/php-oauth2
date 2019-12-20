@@ -16,15 +16,9 @@ use Jose\Component\Signature\Algorithm\ES256;
 use Jose\Component\Signature\JWSVerifier;
 use Jose\Component\Signature\JWSTokenSupport;
 use Jose\Component\Signature\JWS;
-use Jose\Component\Checker\HeaderCheckerManager;
-use Jose\Component\Checker\AlgorithmChecker;
-use Jose\Component\Checker\ClaimCheckerManager;
-use Jose\Component\Checker;
 use Jose\Component\Core\AlgorithmManager;
-use Jose\Component\Checker\InvalidClaimException;
-use Jose\Component\Checker\MissingMandatoryHeaderParameterException;
-use Jose\Component\Checker\MissingMandatoryClaimException;
 use Jose\Component\Core\JWK;
+use Jose\Component\Checker;
 use InvalidArgumentException;
 
 const SIGNATURE_INDEX = 0;
@@ -65,15 +59,15 @@ class JwtTokenValidator
         $this->serializer_manager = new JWSSerializerManager([
             new CompactSerializer(),
         ]);
-        $this->header_checker_manager = new HeaderCheckerManager(
+        $this->header_checker_manager = new Checker\HeaderCheckerManager(
             [
-                new AlgorithmChecker(['RS256', 'ES256']),
+                new Checker\AlgorithmChecker(['RS256', 'ES256']),
             ],
             [
                 new JWSTokenSupport(),
             ]
         );
-        $this->claim_checker_manager = new ClaimCheckerManager(
+        $this->claim_checker_manager = new Checker\ClaimCheckerManager(
             [
                 new Checker\ExpirationTimeChecker(),
             ]
@@ -111,7 +105,7 @@ class JwtTokenValidator
     {
         try {
             $this->header_checker_manager->check($jws, SIGNATURE_INDEX, ['alg', 'typ', 'kid']);
-        } catch (MissingMandatoryHeaderParameterException $e) {
+        } catch (Checker\MissingMandatoryHeaderParameterException $e) {
             throw new InvalidJwtException($e->getMessage());
         }
 
@@ -129,9 +123,9 @@ class JwtTokenValidator
         $claims = json_decode($jws->getPayload(), true);
         try {
             $this->claim_checker_manager->check($claims, ['sub', 'u_idx', 'exp', 'client_id']);
-        } catch (InvalidClaimException $e) {
+        } catch (Checker\InvalidClaimException $e) {
             throw new ExpiredTokenException($e->getMessage());
-        } catch (MissingMandatoryClaimException $e) {
+        } catch (Checker\MissingMandatoryClaimException $e) {
             throw new InvalidJwtException($e->getMessage());
         }
 
