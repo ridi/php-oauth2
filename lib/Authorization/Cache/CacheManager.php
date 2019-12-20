@@ -17,22 +17,47 @@ class CacheManager
      */
     public static function setCache(string $file_name, array $target): void
     {
-        if (empty($file_name)) {
-            throw new CacheFileIOException("setCache filename is empty");
-        }
+        self::assertIfCacheFileIOException(!empty($file_name), "setCache filename is empty");
+        self::makeDirIfNotExist($file_name);
+
         $target = str_replace('"', '\"', serialize($target));
         $fp = fopen($file_name, 'w+');
-        if (false === $fp) {
-            throw new CacheFileIOException("setCache filename is empty");
-        }
+        self::assertIfCacheFileIOException($fp, "File Open fail");
+
         while (!flock($fp, LOCK_EX)) {
             usleep(1000);
         }
 
-        if (false === fwrite($fp, '<?php ')) throw new CacheFileIOException("Failed to write to file");
-        if (false === fwrite($fp, '$' . CACHE_VARIABLE_NAME . ' = unserialize("' . $target . '");')) throw new CacheFileIOException("Failed to write to file");
-        if (false === fwrite($fp, ' ?>')) throw new CacheFileIOException("Failed to write to file");
-        if (false === fclose($fp)) throw new CacheFileIOException("Failed to write to file");
+        self::assertIfCacheFileIOException(fwrite($fp, '<?php '), "Failed to write to file");
+        self::assertIfCacheFileIOException(fwrite($fp, '$' . CACHE_VARIABLE_NAME . ' = unserialize("' . $target . '");'), "Failed to write to file");
+        self::assertIfCacheFileIOException(fwrite($fp, ' ?>'), "Failed to write to file");
+        self::assertIfCacheFileIOException(fclose($fp), "Failed to write to file");
+    }
+
+    /**
+     * @param string $file_name
+     * @return void
+     * @throws CacheFileIOException
+     */
+    private static function makeDirIfNotExist(string $file_name): void {
+        $dirname = dirname($file_name);
+        if (is_dir($dirname)) {
+            return;
+        }
+
+        self::assertIfCacheFileIOException(mkdir($dirname, 0755, true), "Failed to make dir");
+    }
+
+    /**
+     * @param bool|resource $function_result
+     * @param string $message
+     * @return void
+     * @throws CacheFileIOException
+     */
+    private static function assertIfCacheFileIOException($function_result, string $message) {
+        if ($function_result === false) {
+            throw new CacheFileIOException($message);
+        }
     }
 
     /**
@@ -40,7 +65,7 @@ class CacheManager
      * @param int|null $ttl
      * @return array|null
      */
-    public static function getCache(string $file_name, ?int $ttl = DEFAULT_TTL): ?array
+    public static function getCacheIfExist(string $file_name, ?int $ttl = DEFAULT_TTL): ?array
     {
         if (!$file_name
             || !file_exists($file_name)

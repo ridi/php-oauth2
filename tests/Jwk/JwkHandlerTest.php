@@ -14,8 +14,11 @@ final class JwkHandlerTest extends TestCase
 {
     private $jwk_url = 'https://account.dev.ridi.io/oauth2/keys/public';
     private $jwks;
-    private $jwk_cache_filename = './testJwksCache.php';
+    private $jwk_cache_folder_path = './test_jwk_cache_folder';
+    private $jwk_cache_file_path = './test_jwk_cache_folder/test_client_id.php';
+    private $jwk_cache_file_path_2 = './test_jwk_cache_folder/test_client_id_2.php';
     private $client_id = 'test_client_id';
+    private $client_id_2 = 'test_client_id_2';
     private $kid = 'RS999';
 
     protected function setUp()
@@ -31,26 +34,30 @@ final class JwkHandlerTest extends TestCase
     }
 
     private function setCacheFile() {
-        CacheManager::setCache($this->jwk_cache_filename, $this->jwks);
+        CacheManager::setCache($this->jwk_cache_file_path, $this->jwks);
     }
 
     private function removeCacheFile() {
-        if (file_exists($this->jwk_cache_filename)) {
-            unlink($this->jwk_cache_filename);
+        if (file_exists($this->jwk_cache_file_path)) {
+            unlink($this->jwk_cache_file_path);
+        }
+
+        if (file_exists($this->jwk_cache_file_path_2)) {
+            unlink($this->jwk_cache_file_path_2);
         }
     }
 
     public function testCacheWorking()
     {
         self::setCacheFile();
-        $cacheData = CacheManager::getCache($this->jwk_cache_filename);
+        $cacheData = CacheManager::getCacheIfExist($this->jwk_cache_file_path);
         $this->assertEquals($this->jwks, $cacheData);
-        $this->assertFileExists($this->jwk_cache_filename);
+        $this->assertFileExists($this->jwk_cache_file_path);
     }
 
     public function testReturnNullWhenFileNotExist()
     {
-        $cacheData = CacheManager::getCache($this->jwk_cache_filename);
+        $cacheData = CacheManager::getCacheIfExist($this->jwk_cache_file_path);
 
         $this->assertNull($cacheData);
     }
@@ -59,30 +66,42 @@ final class JwkHandlerTest extends TestCase
     {
         self::setCacheFile();
         sleep(2);
-        $cache_data = CacheManager::getCache($this->jwk_cache_filename, 1);
+        $cache_data = CacheManager::getCacheIfExist($this->jwk_cache_file_path, 1);
 
         $this->assertNull($cache_data);
     }
 
-    public function testGetPublicKeyByKidWithoutCaching()
+    public function testGetJwkWithoutCaching()
     {
         $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, $this->kid);
-        $this->assertFileNotExists($this->jwk_cache_filename);
+        $this->assertFileNotExists($this->jwk_cache_file_path);
         $this->assertInstanceOf(JWK::class, $JWK);
     }
 
-    public function testGetPublicKeyByKidWithCaching()
+    public function testGetJwkWithCaching()
     {
-        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, $this->kid, $this->jwk_cache_filename);
-        $this->assertFileExists($this->jwk_cache_filename);
+        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, $this->kid, $this->jwk_cache_folder_path);
+        $this->assertFileExists($this->jwk_cache_file_path);
         $this->assertInstanceOf(JWK::class, $JWK);
     }
 
-    public function testGetPublicKeyByKidWithAlreadyCached()
+    public function testGetJwkWithAlreadyCached()
     {
         $this->setCacheFile();
-        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, $this->kid, $this->jwk_cache_filename);
-        $this->assertFileExists($this->jwk_cache_filename);
+        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, $this->kid, $this->jwk_cache_folder_path);
+        $this->assertFileExists($this->jwk_cache_file_path);
         $this->assertInstanceOf(JWK::class, $JWK);
+    }
+
+    public function testMultiJwkCacheFileCreated()
+    {
+        $this->setCacheFile();
+        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, $this->kid, $this->jwk_cache_folder_path);
+        $JWK2 = JwkHandler::getJwk($this->jwk_url, $this->client_id_2, $this->kid, $this->jwk_cache_folder_path);
+
+        $this->assertFileExists($this->jwk_cache_file_path);
+        $this->assertFileExists($this->jwk_cache_file_path_2);
+        $this->assertInstanceOf(JWK::class, $JWK);
+        $this->assertInstanceOf(JWK::class, $JWK2);
     }
 }

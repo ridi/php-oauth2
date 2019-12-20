@@ -33,7 +33,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('client_default_redirect_uri')
                     ->defaultNull()
                 ->end()
-                ->scalarNode('jwk_cache_file_path')
+                ->scalarNode('jwk_cache_folder_path')
                     ->defaultNull()
                 ->end()
                 ->scalarNode('authorize_url')

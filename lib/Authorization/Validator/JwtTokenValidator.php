@@ -29,7 +29,7 @@ class JwtTokenValidator
     private $jwk_url;
 
     /** @var string */
-    private $jwk_cache_file_path;
+    private $jwk_cache_folder_path;
 
     /** @var JWSSerializerManager */
     private $serializer_manager;
@@ -48,13 +48,13 @@ class JwtTokenValidator
 
     /**
      * @param string $jwk_url
-     * @param string|null $jwk_cache_file_path
+     * @param string|null $jwk_cache_folder_path
      * @return void
      */
-    public function __construct(string $jwk_url, ?string $jwk_cache_file_path = null)
+    public function __construct(string $jwk_url, ?string $jwk_cache_folder_path = null)
     {
         $this->jwk_url = $jwk_url;
-        $this->jwk_cache_file_path = $jwk_cache_file_path;
+        $this->jwk_cache_folder_path = $jwk_cache_folder_path;
 
         $this->serializer_manager = new JWSSerializerManager([
             new CompactSerializer(),
@@ -169,7 +169,7 @@ class JwtTokenValidator
         $header = $this->checkAndGetHeader($jws);
         $claims = $this->checkAndGetClaims($jws);
 
-        $jwk = JwkHandler::getJwk($this->jwk_url, $claims['client_id'], $header['kid'], $this->jwk_cache_file_path);
+        $jwk = JwkHandler::getJwk($this->jwk_url, $claims['client_id'], $header['kid'], $this->jwk_cache_folder_path);
         $this->verifyJwsWithJwk($jws, $jwk);
 
         return JwtToken::createFrom($claims);

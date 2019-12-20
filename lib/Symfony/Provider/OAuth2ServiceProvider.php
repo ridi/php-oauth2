@@ -94,8 +94,8 @@ class OAuth2ServiceProvider
     private function setAuthorizer(): void
     {
         $jwk_url = $this->configs['jwk_url'];
-        $jwk_cache_file_path = array_key_exists('jwk_cache_file_path', $this->configs) ? $this->configs['jwk_cache_file_path'] : null;
-        $jwt_token_validator = new JwtTokenValidator($jwk_url, $jwk_cache_file_path);
+        $jwk_cache_folder_path = array_key_exists('jwk_cache_folder_path', $this->configs) ? $this->configs['jwk_cache_folder_path'] : null;
+        $jwt_token_validator = new JwtTokenValidator($jwk_url, $jwk_cache_folder_path);
 
         $this->authorizer = new Authorizer($jwt_token_validator, $this->configs['client_default_scope']);
     }
