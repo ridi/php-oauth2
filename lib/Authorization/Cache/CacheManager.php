@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Ridibooks\OAuth2\Authorization\Cache;
 
 use Ridibooks\OAuth2\Authorization\Exception\CacheFileIOException;
@@ -28,10 +29,10 @@ class CacheManager
             usleep(1000);
         }
 
-        if(false === fwrite($fp, '<?php ')) throw new CacheFileIOException("Failed to write to file");
-        if(false === fwrite($fp, '$' . CACHE_VARIABLE_NAME . ' = unserialize("' . $target . '");')) throw new CacheFileIOException("Failed to write to file");
-        if(false === fwrite($fp, ' ?>')) throw new CacheFileIOException("Failed to write to file");
-        if(false === fclose($fp)) throw new CacheFileIOException("Failed to write to file");
+        if (false === fwrite($fp, '<?php ')) throw new CacheFileIOException("Failed to write to file");
+        if (false === fwrite($fp, '$' . CACHE_VARIABLE_NAME . ' = unserialize("' . $target . '");')) throw new CacheFileIOException("Failed to write to file");
+        if (false === fwrite($fp, ' ?>')) throw new CacheFileIOException("Failed to write to file");
+        if (false === fclose($fp)) throw new CacheFileIOException("Failed to write to file");
     }
 
     /**
@@ -41,8 +42,9 @@ class CacheManager
      */
     public static function getCache(string $file_name, ?int $ttl = DEFAULT_TTL): ?array
     {
-        if(!$file_name || !file_exists($file_name) || filemtime($file_name) + $ttl < time())
-        {
+        if (!$file_name
+            || !file_exists($file_name)
+            || (filemtime($file_name) + $ttl) < time()) {
             return null;
         }
         include($file_name);
