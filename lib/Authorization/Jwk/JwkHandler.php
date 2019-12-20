@@ -53,6 +53,7 @@ class JwkHandler
      * @param string|null $jwk_cache_folder_path
      * @return JWK|null
      * @throws InvalidJwtException
+     * @throws CacheFileIOException
      */
     protected static function getJwkFromCacheFile(string $kid, string $client_id, ?string $jwk_cache_folder_path = null): ?JWK
     {
@@ -149,6 +150,7 @@ class JwkHandler
      * @param array $jwk_array
      * @param string|null $jwk_cache_folder_path
      * @return array
+     * @throws CacheFileIOException
      */
     protected static function getJwksFromJwkArray(
         string $client_id,
@@ -203,6 +205,6 @@ class JwkHandler
         string $jwk_cache_folder_path
     ): string
     {
-        return "{$jwk_cache_folder_path}/{$client_id}.php";
+        return "{$jwk_cache_folder_path}/{$client_id}.json";
     }
 }

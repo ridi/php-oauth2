@@ -14,8 +14,8 @@ final class JwkHandlerTest extends TestCase
 {
     private $jwk_url = 'https://account.dev.ridi.io/oauth2/keys/public';
     private $jwk_cache_folder_path = './test_jwk_cache_folder';
-    private $jwk_cache_file_path = './test_jwk_cache_folder/test_client_id.php';
-    private $jwk_cache_file_path_2 = './test_jwk_cache_folder/test_client_id_2.php';
+    private $jwk_cache_file_path = './test_jwk_cache_folder/test_client_id.json';
+    private $jwk_cache_file_path_2 = './test_jwk_cache_folder/test_client_id_2.json';
     private $client_id = 'test_client_id';
     private $client_id_2 = 'test_client_id_2';
     private $kid = 'RS999';

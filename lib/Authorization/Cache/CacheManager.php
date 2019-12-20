@@ -4,34 +4,28 @@ namespace Ridibooks\OAuth2\Authorization\Cache;
 
 use Ridibooks\OAuth2\Authorization\Exception\CacheFileIOException;
 
-const CACHE_VARIABLE_NAME = 'cache_variable_name';
 const DEFAULT_TTL = 600;
 
 class CacheManager
 {
     /**
-     * @param string $file_name
+     * @param string $file_path
      * @param array $target
      * @return void
      * @throws CacheFileIOException
      */
-    public static function setCache(string $file_name, array $target): void
+    public static function setCache(string $file_path, array $target): void
     {
-        self::assertIfCacheFileIOException(!empty($file_name), "setCache filename is empty");
-        self::makeDirIfNotExist($file_name);
+        self::assertIfCacheFileIOException(!empty($file_path), "setCache filename is empty");
+        self::makeDirIfNotExist($file_path);
 
-        $target = str_replace('"', '\"', serialize($target));
-        $fp = fopen($file_name, 'w+');
+        $fp = fopen($file_path, 'w+');
         self::assertIfCacheFileIOException($fp, "File Open fail");
-
         while (!flock($fp, LOCK_EX)) {
             usleep(1000);
         }
 
-        self::assertIfCacheFileIOException(fwrite($fp, '<?php '), "Failed to write to file");
-        self::assertIfCacheFileIOException(fwrite($fp, '$' . CACHE_VARIABLE_NAME . ' = unserialize("' . $target . '");'), "Failed to write to file");
-        self::assertIfCacheFileIOException(fwrite($fp, ' ?>'), "Failed to write to file");
-        self::assertIfCacheFileIOException(fclose($fp), "Failed to write to file");
+        self::assertIfCacheFileIOException(fwrite($fp, json_encode($target)), "Failed to write to file");
     }
 
     /**
@@ -61,21 +55,21 @@ class CacheManager
     }
 
     /**
-     * @param string $file_name
+     * @param string $file_path
      * @param int|null $ttl
      * @return array|null
+     * @throws CacheFileIOException
      */
-    public static function getCacheIfExist(string $file_name, ?int $ttl = DEFAULT_TTL): ?array
+    public static function getCacheIfExist(string $file_path, ?int $ttl = DEFAULT_TTL): ?array
     {
-        if (!$file_name
-            || !file_exists($file_name)
-            || (filemtime($file_name) + $ttl) < time()) {
+        if (!$file_path
+            || !file_exists($file_path)
+            || (filemtime($file_path) + $ttl) < time()) {
             return null;
         }
-        include($file_name);
+        $file = file_get_contents($file_path);
+        self::assertIfCacheFileIOException($file, "File Load fail");
 
-        $valName = CACHE_VARIABLE_NAME;
-
-        return $$valName;
+        return json_decode($file, true);;
     }
 }
