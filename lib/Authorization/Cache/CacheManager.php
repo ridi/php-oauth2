@@ -2,8 +2,6 @@
 
 namespace Ridibooks\OAuth2\Authorization\Cache;
 
-use Ridibooks\OAuth2\Authorization\Exception\AccountServerException;
-use Ridibooks\OAuth2\Authorization\Exception\ClientRequestException;
 const CACHE_VARIABLE_NAME = 'cache_variable_name';
 
 class CacheManager

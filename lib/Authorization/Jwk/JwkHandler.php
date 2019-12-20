@@ -4,8 +4,6 @@ namespace Ridibooks\OAuth2\Authorization\Jwk;
 
 use Ridibooks\OAuth2\Authorization\Exception\AccountServerException;
 use Ridibooks\OAuth2\Authorization\Exception\ClientRequestException;
-use Ridibooks\OAuth2\Authorization\Exception\ExpiredConstantException;
-use Ridibooks\OAuth2\Authorization\Exception\FailToLoadPublicKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidPublicKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\NotExistedKeyException;
@@ -15,10 +13,7 @@ use Jose\Component\Core\JWK;
 use Jose\Component\Core\JWKSet;
 use Ridibooks\OAuth2\Authorization\Api\JwkApi;
 use Ridibooks\OAuth2\Authorization\Cache\CacheManager;
-use DateTime;
 
-const JWKS_CACHE_FILENAME = './jwksCache.php';
-const JWKS_VAL_NAME = 'cached_jwks';
 
 class JwkHandler
 {
@@ -29,9 +24,10 @@ class JwkHandler
      * @param string|null $jwk_cache_file_path
      * @return JWK
      * @throws InvalidJwtException
-     * @throws FailToLoadPublicKeyException
      * @throws NotExistedKeyException
      * @throws InvalidPublicKeyException
+     * @throws AccountServerException
+     * @throws ClientRequestException
      */
     public static function getJwk(
         string $jwk_url,
@@ -106,8 +102,10 @@ class JwkHandler
      * @param string $jwk_url
      * @param string $client_id
      * @param string $kid
+     * @param string|null $jwk_cache_file_path
      * @return JWK
-     * @throws FailToLoadPublicKeyException
+     * @throws AccountServerException
+     * @throws ClientRequestException
      * @throws InvalidJwtException
      */
     protected static function getJwkFromApiAndMemorizeJwks(
@@ -125,6 +123,46 @@ class JwkHandler
     }
 
     /**
+     * @param string $jwk_url
+     * @param string $client_id
+     * @return JWKSet
+     * @throws AccountServerException
+     * @throws ClientRequestException
+     */
+    protected static function getJwkSetFromJwkApi(
+        string $jwk_url,
+        string $client_id
+    ): JWKSet
+    {
+        $public_key_array = JwkApi::requestPublicKey($jwk_url, $client_id);
+
+        return JWKSet::createFromKeyData($public_key_array);
+    }
+
+    /**
+     * @param string $client_id
+     * @param JWKSet $jwkSet
+     * @param string|null $jwk_cache_file_path
+     * @return array
+     */
+    protected static function getJwksFromJwkSet(
+        string $client_id,
+        JWKSet $jwkSet,
+        ?string $jwk_cache_file_path = null
+    ): array
+    {
+        $cached_jwks = CacheManager::getCache($jwk_cache_file_path, JWKConstant::JWK_EXPIRATION_SEC);
+        $jwks = $cached_jwks ? $cached_jwks : [];
+        $client_jwks = array_key_exists($client_id, $jwks) ? jwks[$client_id] : [];
+        foreach ($jwkSet->all() as $kid => $jwk) {
+            $client_jwks[$kid] = $jwk;
+        }
+        $jwks[$client_id] = $client_jwks;
+
+        return $jwks;
+    }
+
+    /**
      * @param array $jwks
      * @param string|null $jwk_cache_file_path
      * @return void
@@ -137,51 +175,5 @@ class JwkHandler
         if ($jwk_cache_file_path) {
             CacheManager::setCache($jwk_cache_file_path, $jwks);
         }
-    }
-        /**
-     * @param string $client_id
-     * @param JWKSet $jwkSet
-     * @param string|null $jwk_cache_file_path
-     * @return array
-     * @throws \OutOfBoundsException
-     */
-    # TODO: 위에 왜 warning 주는지?
-    protected static function getJwksFromJwkSet(
-        string $client_id,
-        JWKSet $jwkSet,
-        ?string $jwk_cache_file_path = null
-    ): array
-    {
-        $cached_jwks = CacheManager::getCache($jwk_cache_file_path, JWKConstant::JWK_EXPIRATION_SEC);
-        $jwks = $cached_jwks ? $cached_jwks : [];
-        $client_jwks = array_key_exists($client_id, $jwks) ? jwks[$client_id] : [];
-        foreach ($jwkSet->all() as $kid => $jwk) {
-            $client_jwks[$kid] = $jwk;
-
-        }
-        $jwks[$client_id] = $client_jwks;
-
-        return $jwks;
-    }
-
-    /**
-     * @param string $jwk_url
-     * @param string $client_id
-     * @return JWKSet
-     * @throws AccountServerException
-     * @throws ClientRequestException
-     */
-    protected static function getJwkSetFromJwkApi(
-        string $jwk_url,
-        string $client_id
-    ): JWKSet
-    {
-        try {
-            $public_key_array = JwkApi::requestPublicKey($jwk_url, $client_id);
-        } catch (RetryFailyException $e) {
-            throw new FailToLoadPublicKeyException();
-        }
-
-        return JWKSet::createFromKeyData($public_key_array);
     }
 }

@@ -9,6 +9,7 @@ use Ridibooks\OAuth2\Authorization\Exception\ClientRequestException;
 class JwkApi
 {
     /**
+     * @param string $jwk_url
      * @param string $client_id
      * @return array
      * @throws AccountServerException
@@ -28,7 +29,7 @@ class JwkApi
     }
 
     /**
-     * @param string $response
+     * @param Response $response
      * @return array
      * @throws AccountServerException
      * @throws ClientRequestException
