@@ -37,7 +37,7 @@ class JwkHandler
     ): JWK
     {
         $jwk = $jwk_cache_file_path ? self::getJwkFromCacheFile($kid, $client_id, $jwk_cache_file_path) : null;
-        if (!$jwk) {
+        if (is_null($jwk)) {
             $jwk = self::getJwkFromApiAndMemorizeJwks($jwk_url, $client_id, $kid, $jwk_cache_file_path);
         }
 
@@ -53,8 +53,9 @@ class JwkHandler
      * @return JWK|null
      * @throws InvalidJwtException
      */
-    protected static function getJwkFromCacheFile($kid, $client_id, ?string $jwk_cache_file_path = null): ?JWK {
-        if (!$jwk_cache_file_path) {
+    protected static function getJwkFromCacheFile(string $kid, string $client_id, ?string $jwk_cache_file_path = null): ?JWK
+    {
+        if (empty($jwk_cache_file_path)) {
             return null;
         }
         $cached_jwks = CacheManager::getCache($jwk_cache_file_path, JwkConstant::JWK_EXPIRATION_SEC);
@@ -74,7 +75,7 @@ class JwkHandler
         string $kid
     ): ?JWK
     {
-        if ($jwks == null) {
+        if (is_null($jwks)) {
             return null;
         }
         if (!array_key_exists($client_id, $jwks)) {
@@ -158,13 +159,10 @@ class JwkHandler
         ?string $jwk_cache_file_path = null
     ): array
     {
-        $cached_jwks = CacheManager::getCache($jwk_cache_file_path, JwkConstant::JWK_EXPIRATION_SEC);
+        $cached_jwks = $jwk_cache_file_path ? CacheManager::getCache($jwk_cache_file_path, JwkConstant::JWK_EXPIRATION_SEC) : null;
         $jwks = $cached_jwks ? $cached_jwks : [];
         $client_jwks = array_key_exists($client_id, $jwks) ? jwks[$client_id] : [];
-        foreach ($jwkSet->all() as $kid => $jwk) {
-            $client_jwks[$kid] = $jwk;
-        }
-        $jwks[$client_id] = $client_jwks;
+        $jwks[$client_id] = array_merge_recursive($client_jwks, $jwkSet->all());
 
         return $jwks;
     }

@@ -58,8 +58,8 @@ final class JwkHandlerTest extends TestCase
     public function testReturnNullAfterTTL()
     {
         self::setCacheFile();
-        sleep(1);
-        $cache_data = CacheManager::getCache($this->jwk_cache_filename, 0.1);
+        sleep(2);
+        $cache_data = CacheManager::getCache($this->jwk_cache_filename, 1);
 
         $this->assertNull($cache_data);
     }
