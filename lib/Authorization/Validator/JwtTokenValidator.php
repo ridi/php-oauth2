@@ -50,27 +50,13 @@ class JwtTokenValidator
     /** @var JWSVerifier */
     private $jws_verifier;
 
-
-    /**
-     * @param string $jwk_url
-     * @param string|null $jwk_cache_file_path
-     * @return JwtTokenValidator
-     */
-    static public function createWithJwkUrl(string $jwk_url, ?string $jwk_cache_file_path = null): JwtTokenValidator
-    {
-        return new JwtTokenValidator($jwk_url, $jwk_cache_file_path);
-    }
-
     /**
      * @param string $jwk_url
      * @param string|null $jwk_cache_file_path
      * @return void
      */
-    protected function __construct(string $jwk_url, ?string $jwk_cache_file_path)
+    public function __construct(string $jwk_url, ?string $jwk_cache_file_path = null)
     {
-//        $this->jwk_handler = new JwkHandler($jwk_url, $jwk_cache_file_path);
-
-
         $this->jwk_url = $jwk_url;
         $this->jwk_cache_file_path = $jwk_cache_file_path;
 

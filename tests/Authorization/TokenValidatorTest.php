@@ -29,14 +29,14 @@ final class TokenValidatorTest extends TestCase
 
     private function validate($access_token)
     {
-        return JwtTokenValidator::createWithJwkUrl($this->jwk_url)
-            ->validateToken($access_token);
+        $jwtTokenValidator = new JwtTokenValidator($this->jwk_url);
+        return $jwtTokenValidator->validateToken($access_token);
     }
 
     private function validateWithKid($access_token)
     {
-        return JwtTokenValidator::createWithJwkUrl($this->jwk_url)
-            ->validateToken($access_token);
+        $jwtTokenValidator = new JwtTokenValidator($this->jwk_url);
+        return $jwtTokenValidator->validateToken($access_token);
     }
 
     public function testCanIntrospect()

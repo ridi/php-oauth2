@@ -30,10 +30,9 @@ use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
 $access_token = '...';
 
 try {
-   $jwk_url = $this->configs['jwk_url'];
-   $jwk_handler = new JwkHandler($jwk_url);
-   $validator = JwtTokenValidator::createWithJWKHandler($jwk_handler);
-    
+    $jwk_url = $this->configs['jwk_url'];
+    $jwk_cache_file_path = array_key_exists('jwk_cache_file_path', $this->configs) ? $this->configs['jwk_cache_file_path'] : null;
+    $validator = new JwtTokenValidator($jwk_url, $jwk_cache_file_path);
     $validator->validateToken($access_token);
 } catch (AuthorizationException $e) {
 	// handle exception
@@ -86,7 +85,7 @@ use Example\UserProvder;
 $app->register(new OAuth2ServiceProvider(), [
 	KeyConstant::CLIENT_ID => 'example-client-id',
 	KeyConstant::CLIENT_SECRET => 'example-client-secret',
-	KeyConstant::JWT_VALIDATOR => JwtTokenValidator::createWithJWKHandler(new JwkHandler($this->jwk_url))->...
+	KeyConstant::JWT_VALIDATOR => new JwtTokenValidator($jwk_url, $jwk_cache_file_path)
 ]);
 
 // 미들웨어 등록
@@ -118,7 +117,7 @@ use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 $app->register(new OAuth2ServiceProvider(), [
 	KeyConstant::CLIENT_ID => 'example-client-id',
 	KeyConstant::CLIENT_SECRET => 'example-client-secret',
-	KeyConstant::JWT_VALIDATOR => JwtTokenValidator::createWithJWKHandler(new JwkHandler($this->jwk_url))->...
+	KeyConstant::JWT_VALIDATOR => new JwtTokenValidator($jwk_url, $jwk_cache_file_path)
 ]);
 
 ...
@@ -193,7 +192,7 @@ o_auth2_service_provider:
   token_cookie_domain: .ridi.io
   
   default_exception_handler: Ridibooks\OAuth2\Example\DefaultExceptionHandler
-  jwk_cache_file_path: 'jwk_cache_file_testtthththth.php'
+  jwk_cache_file_path: 'jwk_cache_file.php'
 ```
 
 ```yaml
