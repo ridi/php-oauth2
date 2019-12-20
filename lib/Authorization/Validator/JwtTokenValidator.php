@@ -138,7 +138,7 @@ class JwtTokenValidator
 
     /**
      * @param JWS $jws
-     * @param JWK $JWK
+     * @param JWK $jwk
      * @return void
      * @throws InvalidJwtException
      * @throws InvalidJwtSignatureException

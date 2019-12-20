@@ -8,7 +8,7 @@ use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidPublicKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\NotExistedKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\RetryFailyException;
-use Ridibooks\OAuth2\Constant\JWKConstant;
+use Ridibooks\OAuth2\Constant\JwkConstant;
 use Jose\Component\Core\JWK;
 use Jose\Component\Core\JWKSet;
 use Ridibooks\OAuth2\Authorization\Api\JwkApi;
@@ -46,11 +46,18 @@ class JwkHandler
         return $jwk;
     }
 
-    protected static function getJwkFromCacheFile($kid, $client_id, ?string $jwk_cache_file_path = null) {
+    /**
+     * @param string $kid
+     * @param string $client_id
+     * @param string|null $jwk_cache_file_path
+     * @return JWK|null
+     * @throws InvalidJwtException
+     */
+    protected static function getJwkFromCacheFile($kid, $client_id, ?string $jwk_cache_file_path = null): ?JWK {
         if (!$jwk_cache_file_path) {
             return null;
         }
-        $cached_jwks = CacheManager::getCache($jwk_cache_file_path, JWKConstant::JWK_EXPIRATION_SEC);
+        $cached_jwks = CacheManager::getCache($jwk_cache_file_path, JwkConstant::JWK_EXPIRATION_SEC);
         return self::getJwkFromJwks($cached_jwks, $client_id, $kid);
     }
 
@@ -93,7 +100,7 @@ class JwkHandler
         if (!$jwk) {
             throw new NotExistedKeyException();
         }
-        if ($jwk->get('kty') != JWKConstant::RSA || $jwk->get('use') != JWKConstant::SIG) {
+        if ($jwk->get('kty') != JwkConstant::RSA || $jwk->get('use') != JwkConstant::SIG) {
             throw new InvalidPublicKeyException();
         }
     }
@@ -151,7 +158,7 @@ class JwkHandler
         ?string $jwk_cache_file_path = null
     ): array
     {
-        $cached_jwks = CacheManager::getCache($jwk_cache_file_path, JWKConstant::JWK_EXPIRATION_SEC);
+        $cached_jwks = CacheManager::getCache($jwk_cache_file_path, JwkConstant::JWK_EXPIRATION_SEC);
         $jwks = $cached_jwks ? $cached_jwks : [];
         $client_jwks = array_key_exists($client_id, $jwks) ? jwks[$client_id] : [];
         foreach ($jwkSet->all() as $kid => $jwk) {
