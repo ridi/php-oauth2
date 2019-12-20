@@ -27,6 +27,8 @@ use Jose\Component\Checker\MissingMandatoryClaimException;
 use Jose\Component\Core\JWK;
 use InvalidArgumentException;
 
+const SIGNATURE_INDEX = 0;
+
 class JwtTokenValidator
 {
     /** @var string */
@@ -108,12 +110,12 @@ class JwtTokenValidator
     private function checkAndGetHeader(JWS $jws): array
     {
         try {
-            $this->header_checker_manager->check($jws, 0, ['alg', 'typ', 'kid']);
+            $this->header_checker_manager->check($jws, SIGNATURE_INDEX, ['alg', 'typ', 'kid']);
         } catch (MissingMandatoryHeaderParameterException $e) {
             throw new InvalidJwtException($e->getMessage());
         }
 
-        return $jws->getSignature(0)->getProtectedHeader();
+        return $jws->getSignature(SIGNATURE_INDEX)->getProtectedHeader();
     }
 
     /**
@@ -146,7 +148,7 @@ class JwtTokenValidator
     private function verifyJwsWithJwk(JWS $jws, JWK $jwk): void
     {
         try {
-            $isVerified = $this->jws_verifier->verifyWithKey($jws, $jwk, 0);
+            $isVerified = $this->jws_verifier->verifyWithKey($jws, $jwk, SIGNATURE_INDEX);
         } catch (InvalidArgumentException $e) {
             throw new InvalidJwtException($e->getMessage());
         }

@@ -16,6 +16,7 @@ final class JwkHandlerTest extends TestCase
     private $jwks;
     private $jwk_cache_filename = './testJwksCache.php';
     private $client_id = 'test_client_id';
+    private $kid = 'RS999';
 
     protected function setUp()
     {
@@ -54,7 +55,7 @@ final class JwkHandlerTest extends TestCase
         $this->assertNull($cacheData);
     }
 
-    public function testReturnNullShortTTL()
+    public function testReturnNullAfterTTL()
     {
         self::setCacheFile();
         sleep(1);
@@ -65,14 +66,14 @@ final class JwkHandlerTest extends TestCase
 
     public function testGetPublicKeyByKidWithoutCaching()
     {
-        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, 'RS999');
+        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, $this->kid);
         $this->assertFileNotExists($this->jwk_cache_filename);
         $this->assertInstanceOf(JWK::class, $JWK);
     }
 
     public function testGetPublicKeyByKidWithCaching()
     {
-        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, 'RS999', $this->jwk_cache_filename);
+        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, $this->kid, $this->jwk_cache_filename);
         $this->assertFileExists($this->jwk_cache_filename);
         $this->assertInstanceOf(JWK::class, $JWK);
     }
@@ -80,7 +81,7 @@ final class JwkHandlerTest extends TestCase
     public function testGetPublicKeyByKidWithAlreadyCached()
     {
         $this->setCacheFile();
-        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, 'RS999', $this->jwk_cache_filename);
+        $JWK = JwkHandler::getJwk($this->jwk_url, $this->client_id, $this->kid, $this->jwk_cache_filename);
         $this->assertFileExists($this->jwk_cache_filename);
         $this->assertInstanceOf(JWK::class, $JWK);
     }

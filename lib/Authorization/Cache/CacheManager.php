@@ -16,21 +16,17 @@ class CacheManager
         if (!$file_name) {
             return;
         }
-        // Serializing Targeted Data
         $target = str_replace('"', '\"', serialize($target));
 
-        // Writing to Cache File
         $fp = fopen($file_name, 'w+');
-
-        while (!flock($fp, LOCK_EX)) { # waiting if locked.
-            var_dump("Waiting!!!");
+        while (!flock($fp, LOCK_EX)) {
             usleep(1000);
         }
 
         fwrite($fp, '<?php ');
         fwrite($fp, '$' . CACHE_VARIABLE_NAME . ' = unserialize("' . $target . '");');
         fwrite($fp, ' ?>');
-        fclose($fp); //  the lock is released also by fclose() (which is also called automatically when script finished).
+        fclose($fp);
     }
 
     /**
@@ -44,9 +40,10 @@ class CacheManager
         {
             return null;
         }
-
         include($file_name);
+
         $valName = CACHE_VARIABLE_NAME;
+
         return $$valName;
     }
 }

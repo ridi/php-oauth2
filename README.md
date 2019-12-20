@@ -313,3 +313,7 @@ class ExampleController extends Controller
     }
 }
 ```
+
+#### 유의할 점
+- [Jwk Multi signatures](https://stackoverflow.com/questions/50031985/what-is-a-use-case-for-having-multiple-signatures-in-a-jws-that-uses-jws-json-se) 를 지원하지 않습니다. 오직 첫 번째 인덱스의 시그니쳐를 가져와서 decode 합니다.
+- Jwk Cache File 의 TTL(Time To Live)는 5분 입니다.
