@@ -11,7 +11,7 @@ use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
 use Ridibooks\OAuth2\Grant\Granter;
 use Ridibooks\OAuth2\Symfony\Subscriber\OAuth2Middleware;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 class OAuth2ServiceProvider
 {
@@ -94,8 +94,8 @@ class OAuth2ServiceProvider
     private function setAuthorizer(): void
     {
         $jwk_url = $this->configs['jwk_url'];
-        $jwk_cache_folder_path = array_key_exists('jwk_cache_folder_path', $this->configs) ? $this->configs['jwk_cache_folder_path'] : null;
-        $jwt_token_validator = new JwtTokenValidator($jwk_url, $jwk_cache_folder_path);
+        $cache_item_pool = new FilesystemAdapter();
+        $jwt_token_validator = new JwtTokenValidator($jwk_url, $cache_item_pool);
 
         $this->authorizer = new Authorizer($jwt_token_validator, $this->configs['client_default_scope']);
     }

@@ -5,10 +5,11 @@
 ## 소개
 - OAuth2 클라이언트와 리소스 서버를 구축하기 위한 PHP 라이브러리입니다.
 - Ridi 스타일 가이드([내부 서비스간의 SSO](https://github.com/ridi/style-guide/blob/master/API.md#%EB%82%B4%EB%B6%80-%EC%84%9C%EB%B9%84%EC%8A%A4%EA%B0%84%EC%9D%98-sso))에 따라 작성 되었습니다.
+- JWK Caching 를 선택적으로 지원합니다. [psr-6](https://www.php-fig.org/psr/psr-6/)의 구현체를 JwtTokenValidator에 주입하면 캐싱 기능을 사용할 수 있습니다. 
 
 ## Requirements
 
-- `PHP 7.1` or higher
+- `PHP 7.2` or higher
 - `silex/silex v1.3.x` (optional)
 - `symfony/symfony v4.x.x` (optional)
 - `guzzlehttp/guzzle` (optional)
@@ -21,18 +22,33 @@ composer require ridibooks/oauth2
 
 ## Usage
 
-### `JwtTokenValidator`
+### `JwtTokenValidator Without Caching`
 
 ```php
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
-use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
 
 $access_token = '...';
 
 try {
     $jwk_url = $this->configs['jwk_url'];
-    $jwk_cache_folder_path = array_key_exists('jwk_cache_folder_path', $this->configs) ? $this->configs['jwk_cache_folder_path'] : null;
-    $validator = new JwtTokenValidator($jwk_url, $jwk_cache_folder_path);
+    $validator = new JwtTokenValidator($jwk_url);
+    $validator->validateToken($access_token);
+} catch (AuthorizationException $e) {
+	// handle exception
+}
+```
+
+### `JwtTokenValidator With Caching`
+
+```php
+use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
+
+$access_token = '...';
+
+try {
+    $jwk_url = $this->configs['jwk_url'];
+    $cache_item_pool = new FilesystemAdapter(); // [psr-6](https://www.php-fig.org/psr/psr-6/) Implementation Adaptor
+    $validator = new JwtTokenValidator($jwk_url, $cache_item_pool);
     $validator->validateToken($access_token);
 } catch (AuthorizationException $e) {
 	// handle exception
@@ -85,7 +101,7 @@ use Example\UserProvder;
 $app->register(new OAuth2ServiceProvider(), [
 	KeyConstant::CLIENT_ID => 'example-client-id',
 	KeyConstant::CLIENT_SECRET => 'example-client-secret',
-	KeyConstant::JWT_VALIDATOR => new JwtTokenValidator($jwk_url, $jwk_cache_folder_path)
+	KeyConstant::JWT_VALIDATOR => new JwtTokenValidator($jwk_url)
 ]);
 
 // 미들웨어 등록
@@ -117,7 +133,7 @@ use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 $app->register(new OAuth2ServiceProvider(), [
 	KeyConstant::CLIENT_ID => 'example-client-id',
 	KeyConstant::CLIENT_SECRET => 'example-client-secret',
-	KeyConstant::JWT_VALIDATOR => new JwtTokenValidator($jwk_url, $jwk_cache_folder_path)
+    KeyConstant::JWT_VALIDATOR => new JwtTokenValidator($jwk_url)
 ]);
 
 ...
@@ -177,7 +193,6 @@ return [
   - client_default_scope
   - client_default_redirect_uri
   - default_user_provider
-  - jwk_cache_folder_path (if not exist, not caching)
 
 ```yaml
 # example: <project_root>/config/packages/o_auth2_service_provider.yml
@@ -192,7 +207,6 @@ o_auth2_service_provider:
   token_cookie_domain: .ridi.io
   
   default_exception_handler: Ridibooks\OAuth2\Example\DefaultExceptionHandler
-  jwk_cache_folder_path: '/jwk_cache_folder_path'
 ```
 
 ```yaml

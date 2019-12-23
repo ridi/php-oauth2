@@ -12,37 +12,50 @@ use Ridibooks\OAuth2\Authorization\Exception\RetryFailyException;
 use Ridibooks\OAuth2\Constant\JwkConstant;
 use Jose\Component\Core\JWK;
 use Ridibooks\OAuth2\Authorization\Api\JwkApi;
-use Ridibooks\OAuth2\Authorization\Cache\CacheManager;
-
+use Psr\Cache\CacheItemPoolInterface;
+use Psr\Cache\CacheException;
 
 class JwkHandler
 {
+    /** @var CacheItemPoolInterface */
+    private $cache_item_pool;
+
+    /** @var string */
+    private $jwk_url;
+
     /**
      * @param string $jwk_url
+     * @param CacheItemPoolInterface|null $cache_item_pool
+     * @return void
+     */
+    public function __construct(string $jwk_url, ?CacheItemPoolInterface $cache_item_pool = null)
+    {
+        $this->jwk_url = $jwk_url;
+        $this->cache_item_pool = $cache_item_pool;
+    }
+
+    /**
      * @param string $client_id
      * @param string $kid
-     * @param string|null $jwk_cache_folder_path
      * @return JWK
      * @throws InvalidJwtException
      * @throws NotExistedKeyException
      * @throws InvalidPublicKeyException
      * @throws AccountServerException
      * @throws ClientRequestException
-     * @throws CacheFileIOException
+     * @throws CacheException
      */
-    public static function getJwk(
-        string $jwk_url,
+    public function getJwk(
         string $client_id,
-        string $kid,
-        ?string $jwk_cache_folder_path = null
+        string $kid
     ): JWK
     {
-        $jwk = $jwk_cache_folder_path ? self::getJwkFromCacheFile($kid, $client_id, $jwk_cache_folder_path) : null;
+        $jwk = $this->cache_item_pool ? $this->getJwkFromCacheFile($kid, $client_id) : null;
         if (is_null($jwk)) {
-            $jwk = self::getJwkFromApiAndMemorizeJwks($jwk_url, $client_id, $kid, $jwk_cache_folder_path);
+            $jwk = $this->getJwkFromApiAndMemorizeJwks($client_id, $kid);
         }
 
-        self::assertValidKey($jwk);
+        $this->assertValidKey($jwk);
 
         return $jwk;
     }
@@ -50,31 +63,28 @@ class JwkHandler
     /**
      * @param string $kid
      * @param string $client_id
-     * @param string|null $jwk_cache_folder_path
      * @return JWK|null
      * @throws InvalidJwtException
-     * @throws CacheFileIOException
+     * @throws CacheException
      */
-    protected static function getJwkFromCacheFile(string $kid, string $client_id, ?string $jwk_cache_folder_path = null): ?JWK
+    protected function getJwkFromCacheFile(string $kid, string $client_id): ?JWK
     {
-        if (empty($jwk_cache_folder_path)) {
+        if (empty($this->cache_item_pool)) {
             return null;
         }
-        $cached_jwks = CacheManager::getCacheIfExist(
-            self::getJwksCacheFilePath($client_id, $jwk_cache_folder_path),
-            JwkConstant::JWK_EXPIRATION_SEC
-        );
-        return self::getJwkFromJwks($cached_jwks, $kid);
+        $cached_jwks = $this->cache_item_pool->getItem($client_id);
+
+        return $this->getJwkFromJwks($cached_jwks->get(), $kid);
     }
 
     /**
-     * @param array|null &$jwks
+     * @param array|null $jwks
      * @param string $kid
      * @return JWK|null
      * @throws InvalidJwtException
      */
-    protected static function getJwkFromJwks(
-        ?array &$jwks,
+    protected function getJwkFromJwks(
+        ?array $jwks,
         string $kid
     ): ?JWK
     {
@@ -93,7 +103,7 @@ class JwkHandler
      * @throws NotExistedKeyException
      * @throws InvalidPublicKeyException
      */
-    protected static function assertValidKey(
+    protected function assertValidKey(
         JWK $jwk
     ): void
     {
@@ -106,64 +116,52 @@ class JwkHandler
     }
 
     /**
-     * @param string $jwk_url
      * @param string $client_id
      * @param string $kid
-     * @param string|null $jwk_cache_folder_path
      * @return JWK
      * @throws AccountServerException
      * @throws ClientRequestException
      * @throws InvalidJwtException
-     * @throws CacheFileIOException
+     * @throws CacheException
      */
-    protected static function getJwkFromApiAndMemorizeJwks(
-        string $jwk_url,
+    protected function getJwkFromApiAndMemorizeJwks(
         string $client_id,
-        string $kid,
-        ?string $jwk_cache_folder_path = null
+        string $kid
     ): JWK
     {
-        $jwk_array = self::getJwkArrayFromJwkApi($jwk_url, $client_id);
-        $jwks = self::getJwksFromJwkArray($client_id, $jwk_array, $jwk_cache_folder_path);
-
-        self::setJwksToCacheFile($client_id, $jwks, $jwk_cache_folder_path);
-        return self::getJwkFromJwks($jwks, $kid);
+        $jwk_array = $this->getJwkArrayFromJwkApi($client_id);
+        $jwks = $this->getJwksFromJwkArray($client_id, $jwk_array);
+        $this->setJwksToCacheFile($client_id, $jwks);
+        return $this->getJwkFromJwks($jwks, $kid);
     }
 
     /**
-     * @param string $jwk_url
      * @param string $client_id
      * @return array
      * @throws AccountServerException
      * @throws ClientRequestException
      */
-    protected static function getJwkArrayFromJwkApi(
-        string $jwk_url,
+    protected function getJwkArrayFromJwkApi(
         string $client_id
     ): array
     {
-        return JwkApi::requestPublicKey($jwk_url, $client_id)[JwkConstant::KEYS];
+        return JwkApi::requestPublicKey($this->jwk_url, $client_id)[JwkConstant::KEYS];
     }
 
     /**
      * @param string $client_id
      * @param array $jwk_array
-     * @param string|null $jwk_cache_folder_path
      * @return array
-     * @throws CacheFileIOException
+     * @throws CacheException
      */
-    protected static function getJwksFromJwkArray(
+    protected function getJwksFromJwkArray(
         string $client_id,
-        array $jwk_array,
-        ?string $jwk_cache_folder_path = null
+        array $jwk_array
     ): array
     {
         $jwks = [];
-        if (!empty($jwk_cache_folder_path)) {
-            $cached_jwks = CacheManager::getCacheIfExist(
-                self::getJwksCacheFilePath($client_id, $jwk_cache_folder_path),
-                JwkConstant::JWK_EXPIRATION_SEC
-            );
+        if (!empty($this->cache_item_pool)) {
+            $cached_jwks = $this->cache_item_pool->getItem($client_id)->get();
             $jwks = !is_null($cached_jwks) ? $cached_jwks : [];
         }
 
@@ -177,34 +175,19 @@ class JwkHandler
     /**
      * @param string $client_id
      * @param array $jwks
-     * @param string|null $jwk_cache_folder_path
      * @return void
-     * @throws CacheFileIOException
+     * @throws CacheException
      */
-    protected static function setJwksToCacheFile(
+    protected function setJwksToCacheFile(
         string $client_id,
-        array $jwks,
-        ?string $jwk_cache_folder_path = null
+        array $jwks
     ): void
     {
-        if (!empty($jwk_cache_folder_path)) {
-            CacheManager::setCache(
-                self::getJwksCacheFilePath($client_id, $jwk_cache_folder_path),
-                $jwks
-            );
+        if (!empty($this->cache_item_pool)) {
+            $cache_item = $this->cache_item_pool->getItem($client_id);
+            $cache_item->set($jwks);
+            $cache_item->expiresAfter(JwkConstant::JWK_EXPIRATION_SEC);
+            $this->cache_item_pool->save($cache_item);
         }
-    }
-
-    /**
-     * @param string $client_id
-     * @param string $jwk_cache_folder_path
-     * @return string
-     */
-    protected static function getJwksCacheFilePath(
-        string $client_id,
-        string $jwk_cache_folder_path
-    ): string
-    {
-        return "{$jwk_cache_folder_path}/{$client_id}.json";
     }
 }

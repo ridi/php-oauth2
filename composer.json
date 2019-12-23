@@ -19,7 +19,8 @@
         "web-token/jwt-signature": "^2.1",
         "web-token/jwt-signature-algorithm-rsa": "^2.1",
         "web-token/jwt-checker": "^2.1",
-        "web-token/jwt-signature-algorithm-ecdsa": "^2.1"
+        "web-token/jwt-signature-algorithm-ecdsa": "^2.1",
+        "symfony/cache": "^4.4"
     },
     "require-dev": {
         "phpunit/phpunit": "^7",

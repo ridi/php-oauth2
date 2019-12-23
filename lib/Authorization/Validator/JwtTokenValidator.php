@@ -20,16 +20,14 @@ use Jose\Component\Core\AlgorithmManager;
 use Jose\Component\Core\JWK;
 use Jose\Component\Checker;
 use InvalidArgumentException;
+use Psr\Cache\CacheItemPoolInterface;
 
 const SIGNATURE_INDEX = 0;
 
 class JwtTokenValidator
 {
-    /** @var string */
-    private $jwk_url;
-
-    /** @var string */
-    private $jwk_cache_folder_path;
+    /** @var JwkHandler */
+    private $jwk_handler;
 
     /** @var JWSSerializerManager */
     private $serializer_manager;
@@ -48,14 +46,12 @@ class JwtTokenValidator
 
     /**
      * @param string $jwk_url
-     * @param string|null $jwk_cache_folder_path
+     * @param CacheItemPoolInterface|null $cache_item_pool
      * @return void
      */
-    public function __construct(string $jwk_url, ?string $jwk_cache_folder_path = null)
+    public function __construct(string $jwk_url, ?CacheItemPoolInterface $cache_item_pool = null)
     {
-        $this->jwk_url = $jwk_url;
-        $this->jwk_cache_folder_path = $jwk_cache_folder_path;
-
+        $this->jwk_handler = new JwkHandler($jwk_url, $cache_item_pool);
         $this->serializer_manager = new JWSSerializerManager([
             new CompactSerializer(),
         ]);
@@ -169,7 +165,7 @@ class JwtTokenValidator
         $header = $this->checkAndGetHeader($jws);
         $claims = $this->checkAndGetClaims($jws);
 
-        $jwk = JwkHandler::getJwk($this->jwk_url, $claims['client_id'], $header['kid'], $this->jwk_cache_folder_path);
+        $jwk = $this->jwk_handler->getJwk($claims['client_id'], $header['kid']);
         $this->verifyJwsWithJwk($jws, $jwk);
 
         return JwtToken::createFrom($claims);
