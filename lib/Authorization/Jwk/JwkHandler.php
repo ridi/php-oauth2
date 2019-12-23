@@ -50,7 +50,7 @@ class JwkHandler
         string $kid
     ): JWK
     {
-        $jwk = $this->cache_item_pool ? $this->getJwkFromCacheFile($kid, $client_id) : null;
+        $jwk = !is_null($this->cache_item_pool) ? $this->getJwkFromCacheFile($kid, $client_id) : null;
         if (is_null($jwk)) {
             $jwk = $this->getJwkFromApiAndMemorizeJwks($client_id, $kid);
         }
@@ -69,9 +69,6 @@ class JwkHandler
      */
     protected function getJwkFromCacheFile(string $kid, string $client_id): ?JWK
     {
-        if (empty($this->cache_item_pool)) {
-            return null;
-        }
         $cached_jwks = $this->cache_item_pool->getItem($client_id);
 
         return $this->getJwkFromJwks($cached_jwks->get(), $kid);

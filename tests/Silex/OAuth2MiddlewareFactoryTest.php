@@ -47,7 +47,6 @@ class OAuth2MiddlewareFactoryTest extends TestCase
             OAuth2ProviderKeyConstant::CLIENT_SECRET => TokenConstant::CLIENT_SECRET,
             OAuth2ProviderKeyConstant::AUTHORIZE_URL => $this->authorization_url,
             OAuth2ProviderKeyConstant::TOKEN_URL => $this->token_url,
-            OAuth2ProviderKeyConstant::TOKEN_URL => $this->token_url,
             OAuth2ProviderKeyConstant::JWT_VALIDATOR => new JwtTokenValidator($this->jwk_url),
             OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER => new TestUserProvider(),
             OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER => new LoginRequiredExceptionHandler(),
