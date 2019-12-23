@@ -193,6 +193,7 @@ return [
   - client_default_scope
   - client_default_redirect_uri
   - default_user_provider
+  - cache_item_pool # [psr-6](https://www.php-fig.org/psr/psr-6/)의 구현체를 주입하면 Jwk 요청 시 캐싱 기능을 사용할 수 있습니다. 
 
 ```yaml
 # example: <project_root>/config/packages/o_auth2_service_provider.yml
@@ -207,6 +208,7 @@ o_auth2_service_provider:
   token_cookie_domain: .ridi.io
   
   default_exception_handler: Ridibooks\OAuth2\Example\DefaultExceptionHandler
+  cache_item_pool: Symfony\Component\Cache\Adapter\FilesystemAdapter
 ```
 
 ```yaml
@@ -328,6 +330,9 @@ class ExampleController extends Controller
 }
 ```
 
+#### Cache Item Pool 설정
+- Cache Item Pool 은 Jwk 를 캐싱하는 역할을 담당합니다.
+         
 #### 유의할 점
 - [Jwk Multi signatures](https://stackoverflow.com/questions/50031985/what-is-a-use-case-for-having-multiple-signatures-in-a-jws-that-uses-jws-json-se) 를 지원하지 않습니다. 오직 첫 번째 인덱스의 시그니쳐를 가져와서 decode 합니다.
 - Jwk Cache File 의 TTL(Time To Live)는 5분 입니다.

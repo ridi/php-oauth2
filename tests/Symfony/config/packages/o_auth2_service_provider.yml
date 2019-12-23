@@ -7,3 +7,4 @@ o_auth2_service_provider:
   user_info_url: https://account.dev.ridi.io/accounts/me/
   token_cookie_domain: .ridi.io
   default_exception_handler: Ridibooks\Test\OAuth2\Symfony\TestExceptionHandler
+  cache_item_pool: Symfony\Component\Cache\Adapter\FilesystemAdapter

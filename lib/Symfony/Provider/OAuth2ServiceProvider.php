@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Ridibooks\OAuth2\Symfony\Provider;
 
 use Doctrine\Common\Annotations\CachedReader;
+use Psr\Cache\CacheItemPoolInterface;
 use Ridibooks\OAuth2\Authorization\Authorizer;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Grant\DataTransferObject\AuthorizationServerInfo;
@@ -11,7 +12,6 @@ use Ridibooks\OAuth2\Grant\DataTransferObject\ClientInfo;
 use Ridibooks\OAuth2\Grant\Granter;
 use Ridibooks\OAuth2\Symfony\Subscriber\OAuth2Middleware;
 use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 class OAuth2ServiceProvider
 {
@@ -94,10 +94,35 @@ class OAuth2ServiceProvider
     private function setAuthorizer(): void
     {
         $jwk_url = $this->configs['jwk_url'];
-        $cache_item_pool = new FilesystemAdapter();
-        $jwt_token_validator = new JwtTokenValidator($jwk_url, $cache_item_pool);
+        $jwt_token_validator = new JwtTokenValidator($jwk_url, $this->getCacheItemPool());
 
         $this->authorizer = new Authorizer($jwt_token_validator, $this->configs['client_default_scope']);
+    }
+
+    /**
+     * @return CacheItemPoolInterface|null
+     */
+    private function getCacheItemPool(): ?CacheItemPoolInterface
+    {
+        if (!array_key_exists('cache_item_pool', $this->configs)) {
+            return null;
+        }
+
+        $cache_item_pool = $this->configs['cache_item_pool'];
+        try {
+            $cache_item_pool_class = new \ReflectionClass($cache_item_pool);
+        } catch (\Exception $e) {
+            throw new \InvalidArgumentException('The user_provider is invalid.');
+        }
+
+        $cache_item_pool_interface_class = CacheItemPoolInterface::class;
+        if (!in_array($cache_item_pool_interface_class, $cache_item_pool_class->getInterfaceNames())) {
+            throw new \InvalidArgumentException(
+                "The user_provider must implement {$cache_item_pool_interface_class}."
+            );
+        }
+
+        return new $cache_item_pool();
     }
 
     private function setMiddleware()
