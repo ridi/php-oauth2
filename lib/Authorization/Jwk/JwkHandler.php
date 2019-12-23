@@ -3,12 +3,10 @@
 namespace Ridibooks\OAuth2\Authorization\Jwk;
 
 use Ridibooks\OAuth2\Authorization\Exception\AccountServerException;
-use Ridibooks\OAuth2\Authorization\Exception\CacheFileIOException;
 use Ridibooks\OAuth2\Authorization\Exception\ClientRequestException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidPublicKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\NotExistedKeyException;
-use Ridibooks\OAuth2\Authorization\Exception\RetryFailyException;
 use Ridibooks\OAuth2\Constant\JwkConstant;
 use Jose\Component\Core\JWK;
 use Ridibooks\OAuth2\Authorization\Api\JwkApi;
@@ -50,7 +48,7 @@ class JwkHandler
         string $kid
     ): JWK
     {
-        $jwk = !is_null($this->cache_item_pool) ? $this->getJwkFromCacheFile($kid, $client_id) : null;
+        $jwk = !is_null($this->cache_item_pool) ? $this->getJwkFromCachePool($kid, $client_id) : null;
         if (is_null($jwk)) {
             $jwk = $this->getJwkFromApiAndMemorizeJwks($client_id, $kid);
         }
@@ -67,7 +65,7 @@ class JwkHandler
      * @throws InvalidJwtException
      * @throws CacheException
      */
-    protected function getJwkFromCacheFile(string $kid, string $client_id): ?JWK
+    protected function getJwkFromCachePool(string $kid, string $client_id): ?JWK
     {
         $cached_jwks = $this->cache_item_pool->getItem($client_id);
 
@@ -128,7 +126,7 @@ class JwkHandler
     {
         $jwk_array = $this->getJwkArrayFromJwkApi($client_id);
         $jwks = $this->getJwksFromJwkArray($client_id, $jwk_array);
-        $this->setJwksToCacheFile($client_id, $jwks);
+        $this->setJwksToCachePool($client_id, $jwks);
         return $this->getJwkFromJwks($jwks, $kid);
     }
 
@@ -175,7 +173,7 @@ class JwkHandler
      * @return void
      * @throws CacheException
      */
-    protected function setJwksToCacheFile(
+    protected function setJwksToCachePool(
         string $client_id,
         array $jwks
     ): void
