@@ -105,7 +105,7 @@ class JwkHandler
         if (!$jwk) {
             throw new NotExistedKeyException();
         }
-        if ($jwk->get('kty') != JwkConstant::RSA || $jwk->get('use') != JwkConstant::SIG) {
+        if ($jwk->get('use') != JwkConstant::SIG) {
             throw new InvalidPublicKeyException();
         }
     }
