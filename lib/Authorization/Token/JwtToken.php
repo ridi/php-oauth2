@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Ridibooks\OAuth2\Authorization\Token;
 
 use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
@@ -47,7 +48,8 @@ class JwtToken
         int $u_idx,
         string $client_id,
         array $scopes
-    ) {
+    )
+    {
         $this->subject = $subject;
         $this->expire_timestamp = $expire_timestamp;
         $this->expire_date = (new \DateTime())->setTimestamp($expire_timestamp);

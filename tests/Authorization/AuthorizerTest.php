@@ -32,7 +32,7 @@ class AuthorizerTest extends TestCase
 
     private $authorization_url = 'https://account.ridibooks.com/oauth2/authorize/';
     private $token_url = 'https://account.ridibooks.com/oauth2/token/';
-    private $jwk_url= 'https://account.ridibooks.com/oauth2/keys/public';
+    private $jwk_url = 'https://account.ridibooks.com/oauth2/keys/public';
 
     private function registerProvider($options = [])
     {

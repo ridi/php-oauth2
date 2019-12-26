@@ -34,9 +34,6 @@ class OAuth2MiddlewareTest extends WebTestCase
      * @param int $http_status_code
      * @throws AuthorizationException
      */
-
-
-
     public function testMiddleware(string $token, int $http_status_code)
     {
         if ($http_status_code === Response::HTTP_OK) {
