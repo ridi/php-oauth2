@@ -6,30 +6,36 @@ namespace Ridibooks\Test\OAuth2\Authorization;
 use PHPUnit\Framework\TestCase;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
-use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
-use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\Test\OAuth2\Common\TokenConstant;
+use Ridibooks\Test\OAuth2\Api\MockJwkApi;
 
 final class TokenValidatorTest extends TestCase
 {
+    private $jwk_url = 'https://account.dev.ridi.io/oauth2/keys/public';
+
+    protected function setUp()
+    {
+        MockJwkApi::setUp();
+    }
+
+    protected function tearDown()
+    {
+        MockJwkApi::tearDown();
+    }
+
     private function validate($access_token)
     {
-        return JwtTokenValidator::create()
-            ->addKey('key1', TokenConstant::SECRET, 'HS256')
-            ->setExpireTerm(300)
-            ->validateToken($access_token);
+        $jwtTokenValidator = new JwtTokenValidator($this->jwk_url);
+        return $jwtTokenValidator->validateToken($access_token);
     }
 
     private function validateWithKid($access_token)
     {
-        return JwtTokenValidator::create()
-            ->addKey('kid0', TokenConstant::SECRET, 'HS256')
-            ->addKeyFromFile('kid1', TokenConstant::KEY_FILE, 'RS256')
-            ->setExpireTerm(300)
-            ->validateToken($access_token);
+        $jwtTokenValidator = new JwtTokenValidator($this->jwk_url);
+        return $jwtTokenValidator->validateToken($access_token);
     }
 
     public function testCanIntrospect()
@@ -51,7 +57,7 @@ final class TokenValidatorTest extends TestCase
 
     public function testCannotIntrospectWrongFormatToken()
     {
-        $this->expectException(InvalidTokenException::class);
+        $this->expectException(InvalidJwtException::class);
 
         $access_token = TokenConstant::TOKEN_INVALID_PAYLOAD;
         $this->validate($access_token);
@@ -80,29 +86,30 @@ final class TokenValidatorTest extends TestCase
         $this->validate($access_token);
     }
 
-    public function testCanIntrospectWithKid()
+    public function testCanIntrospectWithES256Token()
     {
-        $access_token = TokenConstant::KID_TOKEN_VALID;
-        $token= $this->validateWithKid($access_token);
-
-        $this->assertNotNull($token);
-        $this->assertInstanceOf(JwtToken::class, $token);
-    }
-
-    public function testCanIntrospectEmptyKid()
-    {
-        // for backwards compatibility
-        $access_token = TokenConstant::KID_TOKEN_WITHOUT_KID;
+        $access_token = TokenConstant::ES256_TOKEN_VALID;
         $token = $this->validateWithKid($access_token);
 
         $this->assertNotNull($token);
         $this->assertInstanceOf(JwtToken::class, $token);
     }
 
-    public function testCannotIntrospectWithInvalidKid()
+    public function testCanIntrospectWithES256TokenEmptyKid()
     {
         $this->expectException(InvalidJwtException::class);
-        $access_token = TokenConstant::KID_TOKEN_INVALID_KID;
+
+        $access_token = TokenConstant::ES256_TOKEN_WITHOUT_KID;
+        $token = $this->validateWithKid($access_token);
+
+        $this->assertNotNull($token);
+        $this->assertInstanceOf(JwtToken::class, $token);
+    }
+
+    public function testCannotIntrospectWithES256TokenInvalidKid()
+    {
+        $this->expectException(InvalidJwtException::class);
+        $access_token = TokenConstant::ES256_TOKEN_INVALID_KID;
         $this->validateWithKid($access_token);
     }
 }

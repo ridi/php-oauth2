@@ -11,9 +11,6 @@
             "Ridibooks\\Test\\OAuth2\\": "../../tests"
         }
     },
-    "require": {
-        "firebase/php-jwt": "^4.0 || ^5.0"
-    },
     "require-dev": {
         "guzzlehttp/guzzle": "^6.3",
         "silex/silex": "^1.3",

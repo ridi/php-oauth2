@@ -6,6 +6,7 @@ use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response as GuzzleResponse;
 use PHPUnit\Framework\TestCase;
+use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 use Ridibooks\OAuth2\Constant\AccessTokenConstant;
 use Ridibooks\OAuth2\Grant\Granter;
@@ -20,11 +21,23 @@ use Ridibooks\Test\OAuth2\Common\TokenConstant;
 use Silex\Application;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Ridibooks\Test\OAuth2\Api\MockJwkApi;
 
 class OAuth2MiddlewareFactoryTest extends TestCase
 {
+    protected function setUp()
+    {
+        MockJwkApi::setUp();
+    }
+
+    protected function tearDown()
+    {
+        MockJwkApi::tearDown();
+    }
+
     private $authorization_url = 'https://account.ridibooks.com/oauth2/authorize/';
     private $token_url = 'https://account.ridibooks.com/oauth2/token/';
+    private $jwk_url= 'https://account.ridibooks.com/oauth2/keys/public';
 
     private function registerProvider($options = [])
     {
@@ -34,7 +47,7 @@ class OAuth2MiddlewareFactoryTest extends TestCase
             OAuth2ProviderKeyConstant::CLIENT_SECRET => TokenConstant::CLIENT_SECRET,
             OAuth2ProviderKeyConstant::AUTHORIZE_URL => $this->authorization_url,
             OAuth2ProviderKeyConstant::TOKEN_URL => $this->token_url,
-            OAuth2ProviderKeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->addKey('key001', TokenConstant::SECRET, 'HS256'),
+            OAuth2ProviderKeyConstant::JWT_VALIDATOR => new JwtTokenValidator($this->jwk_url),
             OAuth2ProviderKeyConstant::DEFAULT_USER_PROVIDER => new TestUserProvider(),
             OAuth2ProviderKeyConstant::DEFAULT_EXCEPTION_HANDLER => new LoginRequiredExceptionHandler(),
         ], $options);

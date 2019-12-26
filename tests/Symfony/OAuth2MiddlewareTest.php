@@ -13,9 +13,20 @@ use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\BrowserKit\Cookie;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Ridibooks\Test\OAuth2\Api\MockJwkApi;
 
 class OAuth2MiddlewareTest extends WebTestCase
 {
+    protected function setUp()
+    {
+        MockJwkApi::setUp();
+    }
+
+    protected function tearDown()
+    {
+        MockJwkApi::tearDown();
+    }
+
     /**
      * @dataProvider tokenProvider
      *
@@ -48,7 +59,6 @@ class OAuth2MiddlewareTest extends WebTestCase
             Request::METHOD_GET,
             $token === TokenConstant::TOKEN_HAS_NO_SCOPE ? '/oauth2-scope-test' : '/oauth2'
         );
-
         $response_status_code = $client->getResponse()->getStatusCode();
         $this->assertSame($http_status_code, $response_status_code);
 
@@ -79,3 +89,4 @@ class OAuth2MiddlewareTest extends WebTestCase
         return new TestKernel('test', false);
     }
 }
+

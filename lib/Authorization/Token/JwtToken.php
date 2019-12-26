@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+
 namespace Ridibooks\OAuth2\Authorization\Token;
 
 use Ridibooks\OAuth2\Authorization\Exception\InvalidTokenException;
@@ -47,7 +48,8 @@ class JwtToken
         int $u_idx,
         string $client_id,
         array $scopes
-    ) {
+    )
+    {
         $this->subject = $subject;
         $this->expire_timestamp = $expire_timestamp;
         $this->expire_date = (new \DateTime())->setTimestamp($expire_timestamp);
@@ -57,21 +59,21 @@ class JwtToken
     }
 
     /**
-     * @param \stdClass $token
+     * @param array $token
      * @return JwtToken
      * @throws InvalidTokenException
      */
-    public static function createFrom(\stdClass $token): JwtToken
+    public static function createFrom(array $token): JwtToken
     {
-        if (!isset($token->sub, $token->exp, $token->u_idx, $token->client_id, $token->scope)) {
+        if (!isset($token['sub'], $token['exp'], $token['u_idx'], $token['client_id'], $token['scope'])) {
             throw new InvalidTokenException();
         }
         return new self(
-            $token->sub,
-            $token->exp,
-            $token->u_idx,
-            $token->client_id,
-            explode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $token->scope)
+            $token['sub'],
+            $token['exp'],
+            $token['u_idx'],
+            $token['client_id'],
+            explode(ScopeConstant::DEFAULT_SCOPE_DELIMITER, $token['scope'])
         );
     }
 

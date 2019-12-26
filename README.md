@@ -5,10 +5,11 @@
 ## 소개
 - OAuth2 클라이언트와 리소스 서버를 구축하기 위한 PHP 라이브러리입니다.
 - Ridi 스타일 가이드([내부 서비스간의 SSO](https://github.com/ridi/style-guide/blob/master/API.md#%EB%82%B4%EB%B6%80-%EC%84%9C%EB%B9%84%EC%8A%A4%EA%B0%84%EC%9D%98-sso))에 따라 작성 되었습니다.
+- JWK Caching 를 선택적으로 지원합니다. [psr-6](https://www.php-fig.org/psr/psr-6/)의 구현체를 JwtTokenValidator에 주입하면 캐싱 기능을 사용할 수 있습니다. 
 
 ## Requirements
 
-- `PHP 7.1` or higher
+- `PHP 7.2` or higher
 - `silex/silex v1.3.x` (optional)
 - `symfony/symfony v4.x.x` (optional)
 - `guzzlehttp/guzzle` (optional)
@@ -21,7 +22,7 @@ composer require ridibooks/oauth2
 
 ## Usage
 
-### `JwtTokenValidator`
+### `JwtTokenValidator Without Caching`
 
 ```php
 use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
@@ -29,11 +30,25 @@ use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 $access_token = '...';
 
 try {
-   $validator = JwtTokenValidator::create()
-      ->addKey('key000', 'example_secret_string_1', 'HS256') // add key with HS256 secret
-      ->addKeyFromFile('key001', 'path/to/file', 'RS256')    // add key with RS256 public key file
-      ->setExpireTerm(60 * 5 /* default */);
-    
+    $jwk_url = $this->configs['jwk_url'];
+    $validator = new JwtTokenValidator($jwk_url);
+    $validator->validateToken($access_token);
+} catch (AuthorizationException $e) {
+	// handle exception
+}
+```
+
+### `JwtTokenValidator With Caching`
+
+```php
+use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
+
+$access_token = '...';
+
+try {
+    $jwk_url = $this->configs['jwk_url'];
+    $cache_item_pool = new FilesystemAdapter(); // [psr-6](https://www.php-fig.org/psr/psr-6/) Implementation Adaptor
+    $validator = new JwtTokenValidator($jwk_url, $cache_item_pool);
     $validator->validateToken($access_token);
 } catch (AuthorizationException $e) {
 	// handle exception
@@ -86,7 +101,7 @@ use Example\UserProvder;
 $app->register(new OAuth2ServiceProvider(), [
 	KeyConstant::CLIENT_ID => 'example-client-id',
 	KeyConstant::CLIENT_SECRET => 'example-client-secret',
-	KeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->...
+	KeyConstant::JWT_VALIDATOR => new JwtTokenValidator($jwk_url)
 ]);
 
 // 미들웨어 등록
@@ -118,7 +133,7 @@ use Ridibooks\OAuth2\Authorization\Validator\JwtTokenValidator;
 $app->register(new OAuth2ServiceProvider(), [
 	KeyConstant::CLIENT_ID => 'example-client-id',
 	KeyConstant::CLIENT_SECRET => 'example-client-secret',
-	KeyConstant::JWT_VALIDATOR => JwtTokenValidator::create()->...
+    KeyConstant::JWT_VALIDATOR => new JwtTokenValidator($jwk_url)
 ]);
 
 ...
@@ -170,15 +185,15 @@ return [
   - client_secret
   - authorize_url
   - token_url
+  - jwk_url
   - user_info_url
   - token_cookie_domain
-  - jwt_keys (array)
   - default_exception_handler
 - optional
   - client_default_scope
   - client_default_redirect_uri
-  - jwt_expire_term (int) : default `60 * 5` = 5분
   - default_user_provider
+  - cache_item_pool # [psr-6](https://www.php-fig.org/psr/psr-6/)의 구현체를 주입하면 Jwk 요청 시 캐싱 기능을 사용할 수 있습니다. 
 
 ```yaml
 # example: <project_root>/config/packages/o_auth2_service_provider.yml
@@ -188,16 +203,12 @@ o_auth2_service_provider:
   client_secret: '%env(CLIENT_SECRET)%'
   authorize_url: https://account.dev.ridi.io/ridi/authorize/
   token_url: https://account.dev.ridi.io/oauth2/token/
+  jwk_url: https://account.dev.ridi.io/oauth2/keys/public
   user_info_url: https://account.dev.ridi.io/accounts/me/
   token_cookie_domain: .ridi.io
-  jwt_keys:
-    - kid: 'key001'                       # add key with RS267 public key file
-      file_path: 'path/to/file'
-      algorithm: RS256
-    - kid: 'key002'                       # add key with HS256 secret 
-      secret: 'example_secret'
-      algorithm: HS256
+  
   default_exception_handler: Ridibooks\OAuth2\Example\DefaultExceptionHandler
+  cache_item_pool: Symfony\Component\Cache\Adapter\FilesystemAdapter
 ```
 
 ```yaml
@@ -318,3 +329,10 @@ class ExampleController extends Controller
     }
 }
 ```
+
+#### Cache Item Pool 설정
+- Cache Item Pool 은 Jwk 를 캐싱하는 역할을 담당합니다.
+         
+#### 유의할 점
+- [Jwk Multi signatures](https://stackoverflow.com/questions/50031985/what-is-a-use-case-for-having-multiple-signatures-in-a-jws-that-uses-jws-json-se) 를 지원하지 않습니다. 오직 첫 번째 인덱스의 시그니쳐를 가져와서 decode 합니다.
+- Jwk Cache File 의 TTL(Time To Live)는 5분 입니다.

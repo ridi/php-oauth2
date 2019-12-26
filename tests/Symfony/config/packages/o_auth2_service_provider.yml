@@ -3,10 +3,8 @@ o_auth2_service_provider:
   client_secret: vk31iDFzVM1EKQySvkp46TUNjWn9Bvc1wv7CLSwEWzAUDz5GA3iN0QjGktVXi53KCHxIcfq3V62q9aSQkWzB1zx8Um6OWYO4nEqtJYj4uPHnhjDKW7tV4zGeW9yygvZx
   authorize_url: https://account.dev.ridi.io/ridi/authorize/
   token_url: https://account.dev.ridi.io/oauth2/token/
+  jwk_url: https://account.dev.ridi.io/oauth2/keys/public
   user_info_url: https://account.dev.ridi.io/accounts/me/
   token_cookie_domain: .ridi.io
-  jwt_keys:
-    - kid: key01
-      secret: secret
-      algorithm: HS256
   default_exception_handler: Ridibooks\Test\OAuth2\Symfony\TestExceptionHandler
+  cache_item_pool: Symfony\Component\Cache\Adapter\FilesystemAdapter
