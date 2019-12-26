@@ -2,10 +2,15 @@
 
 namespace Ridibooks\OAuth2\Authorization\Validator;
 
+use Psr\Cache\CacheException;
+use Ridibooks\OAuth2\Authorization\Exception\AccountServerException;
 use Ridibooks\OAuth2\Authorization\Exception\AuthorizationException;
+use Ridibooks\OAuth2\Authorization\Exception\ClientRequestException;
 use Ridibooks\OAuth2\Authorization\Exception\ExpiredTokenException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtException;
 use Ridibooks\OAuth2\Authorization\Exception\InvalidJwtSignatureException;
+use Ridibooks\OAuth2\Authorization\Exception\InvalidPublicKeyException;
+use Ridibooks\OAuth2\Authorization\Exception\NotExistedKeyException;
 use Ridibooks\OAuth2\Authorization\Exception\TokenNotFoundException;
 use Ridibooks\OAuth2\Authorization\Token\JwtToken;
 use Ridibooks\OAuth2\Authorization\Jwk\JwkHandler;
@@ -89,7 +94,6 @@ class JwtTokenValidator
         } catch (InvalidArgumentException $e) {
             throw new InvalidJwtException($e->getMessage());
         }
-
     }
 
     /**
@@ -153,6 +157,12 @@ class JwtTokenValidator
      * @return JwtToken
      * @throws AuthorizationException
      * @throws TokenNotFoundException
+     * @throws InvalidJwtException
+     * @throws NotExistedKeyException
+     * @throws InvalidPublicKeyException
+     * @throws AccountServerException
+     * @throws ClientRequestException
+     * @throws CacheException
      */
     public function validateToken($access_token): JwtToken
     {

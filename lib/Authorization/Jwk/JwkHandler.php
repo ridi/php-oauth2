@@ -178,11 +178,12 @@ class JwkHandler
         array $jwks
     ): void
     {
-        if (!empty($this->cache_item_pool)) {
-            $cache_item = $this->cache_item_pool->getItem($client_id);
-            $cache_item->set($jwks);
-            $cache_item->expiresAfter(JwkConstant::JWK_EXPIRATION_SEC);
-            $this->cache_item_pool->save($cache_item);
+        if (empty($this->cache_item_pool)) {
+            return;
         }
+        $cache_item = $this->cache_item_pool->getItem($client_id);
+        $cache_item->set($jwks);
+        $cache_item->expiresAfter(JwkConstant::JWK_EXPIRATION_SEC);
+        $this->cache_item_pool->save($cache_item);
     }
 }
