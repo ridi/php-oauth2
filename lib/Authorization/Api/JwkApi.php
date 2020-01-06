@@ -3,6 +3,7 @@
 namespace Ridibooks\OAuth2\Authorization\Api;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Response;
 use Ridibooks\OAuth2\Authorization\Exception\AccountServerException;
 use Ridibooks\OAuth2\Authorization\Exception\ClientRequestException;
 
