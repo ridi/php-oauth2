@@ -104,7 +104,7 @@ class OAuth2ServiceProvider
      */
     private function getCacheItemPool(): ?CacheItemPoolInterface
     {
-        if (!array_key_exists('cache_item_pool', $this->configs)) {
+        if (!array_key_exists('cache_item_pool', $this->configs) || is_null($this->configs['cache_item_pool'])) {
             return null;
         }
 
