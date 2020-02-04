@@ -10,9 +10,12 @@
 ## Requirements
 
 - `PHP 7.2` or higher
+- `php7.2-gmp` web-token decryption 모듈을 위해서는 php7.2-gmp 를 os 내에 설치해줘야 합니다. 
+따라서 이 라이브러리 클라이언트들의 OS 혹은 도커 이미지 내에 꼭 설치해주시길 바랍니다. [참고 PR](https://github.com/ridibooks-docker/viewer-php/pull/1)
 - `silex/silex v1.3.x` (optional)
 - `symfony/symfony v4.x.x` (optional)
 - `guzzlehttp/guzzle` (optional)
+
 
 ## Installation
 
